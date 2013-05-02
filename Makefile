@@ -1,17 +1,19 @@
 #CC=gcc -O2
 CC=gcc -ggdb
 #objects = src/query.o src/testing.o
-objects = src/hve1.o src/testing_hve.o
+#objects = src/hve1.o src/testing_hve.o
+objects = src/testing.o src/schemas/ksw_predicate.o
 
-hve : $(objects)
-	$(CC) -o hve -lgmp -lpbc $(objects)
+testit : $(objects)
+	$(CC) -o testit -lgmp -lpbc $(objects)
 
-hve1.o : hve1.h
-testing_hve.o : hve1.h
+src/schema/ksw_predicate.o : src/schemas/ksw_predicate.h
+
+src/testing.o : src/schemas/ksw_predicate.h
 
 .PHONY: clean run
 clean : 
-	rm -f hve1 $(objects)
+	rm -f ./testit $(objects)
 
-run: hve1
-	./hve1
+run: testit
+	./testit
