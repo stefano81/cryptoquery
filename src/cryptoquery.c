@@ -9,7 +9,10 @@ void usage() {
   fprintf(stderr, "Usage:");
 }
 
-void read_config(config)
+void read_config(const char *config_file_path) {
+  FILE fd = fopen(config_file_path, "r");
+  
+}
 
 int parse_options(int argc, char *argv[]) {
   char * opts = "f:";
@@ -35,14 +38,6 @@ unsigned int get_command() {
   return CQ_QUIT;
 }
 
-void add_query() {
-
-}
-
-void select_query() {
-
-}
-
 void quit() {
   close_database();
   printf("Bye!\n");
@@ -59,10 +54,10 @@ int main(int argc, char *argv[]) {
     command = get_command();
     switch (command) {
     case CQ_ADD:
-      add_query();
+      //add_query();
       break;
     case CQ_SELECT:
-      select_query();
+      //select_query();
       break;
     case CQ_QUIT:
       quit();
