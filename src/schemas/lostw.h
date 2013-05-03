@@ -10,12 +10,12 @@ typedef struct {
 } lostw_general_params;
 
 typedef struct {
-  element_t * B;
+  element_t ** B;
   element_t sigma;
 } lostw_mpk;
 
 typedef struct {
-  element_t *Bstar;
+  element_t ** BStar;
 } lostw_msk;
 
 typedef struct {
@@ -24,8 +24,12 @@ typedef struct {
   lostw_msk * secret;
 } lostw_setup_param;
 
-lostw_setup_param * lostw_setup(unsigned int n);
+typedef struct {
+  element_t * kstar;
+} lostw_key;
 
+lostw_setup_param * lostw_setup(unsigned int n);
+lostw_key * lostw_keygen(lostw_general_params * params, lostw_msk * secret, element_t *y);
 
 
 #endif
