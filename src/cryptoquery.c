@@ -10,7 +10,7 @@ void usage() {
 }
 
 void read_config(const char *config_file_path) {
-  FILE fd = fopen(config_file_path, "r");
+  FILE * fd = fopen(config_file_path, "r");
   
 }
 
@@ -21,7 +21,7 @@ int parse_options(int argc, char *argv[]) {
   while (-1 != ((ch = getopt(argc, argv, opts)))) {
     switch (ch) {
     case 'f': // configuration file
-      read_configuration(optarg);
+      read_config(optarg);
     case '?':
     case 'h':
     default:

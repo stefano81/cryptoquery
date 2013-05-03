@@ -50,8 +50,7 @@ typedef struct {
   element_t omega;
   element_t C0;
   unsigned int n;
-  element_t * C1;
-  element_t * C2;
+  couple_ciphertext ct[];
 } ciphertext;
 
 typedef struct {
