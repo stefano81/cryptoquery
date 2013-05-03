@@ -16,4 +16,12 @@
 #define LOSTW 0x00
 #define HVE   0x01
 
+typedef struct {
+  int db_type;
+  char * db_path;
+  int senc;
+  int aenc;
+  char **encparams;
+} configuration;
+
 #endif

@@ -2,21 +2,23 @@
 #include <unistd.h>
 
 unsigned int verbose;
-unsigned int dbtype;
+
+char * config_file_path;
 
 void usage() {
   fprintf(stderr, "Usage:");
 }
 
-unsigned int parse_options(int argc, char *argv[]) {
-  char * opts = "e:vh";
+void read_config(config)
+
+int parse_options(int argc, char *argv[]) {
+  char * opts = "f:";
   unsigned int ret = CQ_OK;
   int ch;
   while (-1 != ((ch = getopt(argc, argv, opts)))) {
     switch (ch) {
-    case 'e':
-      set_encryption_type(optarg);
-      break;
+    case 'f': // configuration file
+      read_configuration(optarg);
     case '?':
     case 'h':
     default:
@@ -25,7 +27,6 @@ unsigned int parse_options(int argc, char *argv[]) {
       break;
     }
   }
-  
 
   return ret;
 }
