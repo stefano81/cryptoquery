@@ -7,5 +7,6 @@
 
 void set_db_type(int dbtype);
 int open_database(const char *dblocation);
+int close_database();
 
 #endif

@@ -62,7 +62,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_cryptoquery_OBJECTS = cryptoquery.$(OBJEXT)
+am_cryptoquery_OBJECTS = cryptoquery.$(OBJEXT) database.$(OBJEXT) \
+	encryption.$(OBJEXT) hve.$(OBJEXT) lostw.$(OBJEXT)
 cryptoquery_OBJECTS = $(am_cryptoquery_OBJECTS)
 cryptoquery_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
@@ -81,6 +82,10 @@ DEFAULT_INCLUDES = -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+AM_V_lt = $(am__v_lt_$(V))
+am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_$(V))
@@ -151,7 +156,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lsqlite3 -lm 
+LIBS = -lsqlite3 -lpbc -lgmp -lm 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing makeinfo
 MKDIR_P = .././install-sh -c -d
@@ -210,7 +215,7 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-cryptoquery_SOURCES = cryptoquery.c cryptoquery.h
+cryptoquery_SOURCES = common.h config.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -314,6 +319,10 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/cryptoquery.Po
+include ./$(DEPDIR)/database.Po
+include ./$(DEPDIR)/encryption.Po
+include ./$(DEPDIR)/hve.Po
+include ./$(DEPDIR)/lostw.Po
 
 .c.o:
 	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -328,6 +337,34 @@ include ./$(DEPDIR)/cryptoquery.Po
 #	$(AM_V_CC)source='$<' object='$@' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+hve.o: schemas/hve.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.o -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/hve.Tpo $(DEPDIR)/hve.Po
+#	$(AM_V_CC)source='schemas/hve.c' object='hve.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c
+
+hve.obj: schemas/hve.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.obj -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/hve.Tpo $(DEPDIR)/hve.Po
+#	$(AM_V_CC)source='schemas/hve.c' object='hve.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
+
+lostw.o: schemas/lostw.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.o -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/lostw.Tpo $(DEPDIR)/lostw.Po
+#	$(AM_V_CC)source='schemas/lostw.c' object='lostw.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
+
+lostw.obj: schemas/lostw.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.obj -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/lostw.Tpo $(DEPDIR)/lostw.Po
+#	$(AM_V_CC)source='schemas/lostw.c' object='lostw.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

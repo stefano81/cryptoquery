@@ -1,8 +1,8 @@
-#ifndef HVE1_H
-#define HVE1_H
+#ifndef HVE_H
+#define HVE_H
 
-#include <pbc.h>
-#include <stdio.h>
+#include "../common.h"
+#include <pbc/pbc.h>
 
 typedef struct {
   pairing_t pairing;
@@ -50,15 +50,16 @@ typedef struct {
   element_t omega;
   element_t C0;
   unsigned int n;
-  ciphertext_couple C[];
+  element_t * C1;
+  element_t * C2;
 } ciphertext;
 
 typedef struct {
-  
+  element_t something;
 } key;
 
-setup_output * hve1_setup(const unsigned int k, const unsigned int n, char path_name[]);
-ciphertext * hve1_enc(const master_public_key *pk, const int x, element_t *m);
-key * hve1_keygen(const master_private_key *msk, const int y);
+setup_output * hve_setup(const unsigned int k, const unsigned int n, char path_name[]);
+ciphertext * hve_enc(const master_public_key *pk, const int x, element_t *m);
+key * hve_keygen(const master_private_key *msk, const int y);
 
 #endif

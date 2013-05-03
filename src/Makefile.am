@@ -5,4 +5,4 @@ LDFLAGS =
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
 bin_PROGRAMS = cryptoquery
-cryptoquery_SOURCES = cryptoquery.c cryptoquery.h
+cryptoquery_SOURCES = common.h config.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h
