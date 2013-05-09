@@ -272,14 +272,17 @@ lostw_key * lostw_keygen(lostw_general_params * params, lostw_msk * secret, elem
     for (j = 0; j < n; j++) {
       element_mul(t[j], v[i], secret->BStar[i][j]);
       element_mul(t[j], sigma, t[j]);
-      element_add(kstar[j], kstar[j], t[j]);
+      element_add(kstar[i], kstar[i], t[j]);
     }
   }
   element_init_same_as(ts, t[0]);
   for (i = 0; i < n; i++) {
+    //element_add(kstar[i], kstar[i], secret->BStar[n][i]);
+    //element_mul(ts, eta, secret->BStar[n + 1][i]);
+    //element_add(kstar[i], kstar[i], ts);
     element_add(kstar[i], kstar[i], secret->BStar[n][i]);
-    element_mul(ts, eta, secret->BStar[n + 1][i]);
-    element_add(kstar[i], kstar[i], ts);
+    element_add(kstar[i], kstar[i], secret->BStar[n + 1][i]);
+    element_pow_zn(kstar[i], kstar[i], eta);
   }
 
   for (i = 0; i < n; i++) {
@@ -290,4 +293,46 @@ lostw_key * lostw_keygen(lostw_general_params * params, lostw_msk * secret, elem
   free(t);
   
   return key;
+}
+
+lost_ct * lostw_enc(lostw_general_params * params, lost_mpk * public, element_t * x, element_t * m) {
+  element_t delta1, delta2;
+  lost_ct * ct = malloc(sizeof(lost_ct));
+  element_t * c1;
+  element_t t;
+  int i, j;
+
+  element_init_zn(delta1, params->pairing);
+  elmenet_init_zn(delta2, params->pairing);
+
+  element_random(delta1);
+  element_random(delta2);
+  
+  ct->c1 = malloc(sizeof(element_t) * params->n);
+
+  element_init_same_as(t, ct->c1[j]);
+
+  for (j = 0; j < params->n; j++) {
+    c1 = ct->c1 + j;
+    element_init_same_as(*c1, public->[0][j]);
+
+    element__pow_zn(*c1, public->B[0], x[0]);
+
+    for (i = 1; i < params->n; i++) {
+      element_pow_zn(t, public->B[i], x[i]);
+      element_add(*c1, *c1, t);
+    }
+  }
+
+  for (i = 0; i < params->n; i++) {
+    element_mul(ct->c1[i], ct->c1[i], delta1);
+    element_pow_zn(t, pulic->B[n + 1], delta2);
+    element_add(ct->c1[i], ct->c1[i], t);
+  }
+
+  element_clear(delta1);
+  element_clear(delta2);
+  element_clear(t);
+
+  return ct;
 }

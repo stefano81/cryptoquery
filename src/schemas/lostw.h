@@ -28,8 +28,12 @@ typedef struct {
   element_t * kstar;
 } lostw_key;
 
-lostw_setup_param * lostw_setup(unsigned int n);
-lostw_key * lostw_keygen(lostw_general_params * params, lostw_msk * secret, element_t *y);
+typedef struct {
+  element_t *c1;
+} lostw_ct;
 
+lostw_setup_param * lostw_setup(unsigned int n);
+lostw_key * lostw_keygen(lostw_general_params * params, lostw_msk * secret, element_t * y);
+lostw_ct * lostw_enc(lostw_general_params * params, lost_mpk * private, element_t * x, element_t * m);
 
 #endif

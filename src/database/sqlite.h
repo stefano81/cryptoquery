@@ -3,4 +3,6 @@
 
 #include <sqlite3.h>
 
+void add_tuple(char *data);
+
 #endif
