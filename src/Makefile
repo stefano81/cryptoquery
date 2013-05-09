@@ -133,12 +133,12 @@ AUTOCONF = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing autoconf
 AUTOHEADER = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing autoheader
 AUTOMAKE = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing automake-1.13
 AWK = gawk
-CC = gcc
+CC = gcc -std=gnu99
 CCDEPMODE = depmode=gcc3
 
 # what flags you want to pass to the C compiler & linker
 CFLAGS = --pedantic -Wall -std=c99 -O2 -ggdb
-CPP = gcc -E
+CPP = gcc -std=gnu99 -E
 CPPFLAGS = 
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H

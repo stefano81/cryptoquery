@@ -42,7 +42,7 @@ esac
 
 
 # Checks for programs.
-AC_PROG_CC
+AC_PROG_CC_C99
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [cos])
