@@ -11,7 +11,6 @@ typedef struct {
 
 typedef struct {
   element_t ** B;
-  element_t sigma;
 } lostw_mpk;
 
 typedef struct {
