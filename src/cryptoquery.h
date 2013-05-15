@@ -10,11 +10,12 @@
 // schemas
 // - symmetric
 #define NONE 0x00
-#define AES 0x01
+#define AES  0x01
 
 // - asymmetric
 #define LOSTW 0x00
 #define HVE   0x01
+#define BPT   0x02
 
 typedef struct {
   int db_type;

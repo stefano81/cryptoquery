@@ -6,10 +6,6 @@ AC_INIT([cryptoquery], [0.0.1], [stefano.braghin@gmail.com])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([src/config.h])
 
-#CFLAGS="$CFLAGS -I/opt/local/include"
-#CXXFLAGS="$CXXFLAGS -I/opt/local/include"
-#LDFLAGS="$LDFLAGS -L/opt/local/lib"
-
 default_macports_path=/opt/local
 default_fink_path=/sw
 case $host_os in
@@ -19,7 +15,7 @@ case $host_os in
      	      #AC_MSG_NOTICE([Adding -fnested-functions to CFLAGS])
 	          #CFLAGS="-fnested-functions"
 
-		 dnl fink or macports installation
+#dnl fink or macports installation
      	      AC_MSG_CHECKING([for a fink or macports installation at $default_fink_path and $default_macports_path])
      	      if test -d $default_fink_path; then 
 	      	 AC_MSG_RESULT([found fink!])
