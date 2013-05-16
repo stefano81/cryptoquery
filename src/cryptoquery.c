@@ -1,27 +1,28 @@
 #include "cryptoquery.h"
 #include <unistd.h>
+#include <string.h>
 
 unsigned int verbose;
 
-char * config_file_path;
+char * ec_param;
 
 void usage() {
   fprintf(stderr, "Usage:");
 }
 
-void read_config(const char *config_file_path) {
-  FILE * fd = fopen(config_file_path, "r");
-  
-}
-
 int parse_options(int argc, char *argv[]) {
-  char * opts = "f:";
+  char * opts = "f:p:";
   unsigned int ret = CQ_OK;
   int ch;
   while (-1 != ((ch = getopt(argc, argv, opts)))) {
     switch (ch) {
-    case 'f': // configuration file
-      read_config(optarg);
+    case 'p': // EC configuration
+      ec_param = malloc(sizeof(strlen(optarg) + 1));
+      strncpy(ec_param, optarg, strlen(optarg) + 1);
+      break;
+    case 'v': // verbose
+      verbose = 1;
+      break;
     case '?':
     case 'h':
     default:
@@ -44,8 +45,6 @@ void quit() {
 }
 
 int main(int argc, char *argv[]) {
-  verbose = 0;
-  
   if (CQ_OK != parse_options(argc, argv))
     return 1;
 
