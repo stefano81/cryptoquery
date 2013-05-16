@@ -47,12 +47,15 @@ AC_CHECK_LIB(gmp, __gmpz_mul_si, ,
 AC_CHECK_LIB( [pbc], [pbc_set_msg_to_stderr], [], [AC_MSG_ERROR([PBC is required!])])
 
 AC_CHECK_LIB([sqlite3], [sqlite3_open], [], [AC_MSG_ERROR([SQLite is required!])])
+AC_CHECK_LIB([readline], [readline], [], [AC_MSG_ERROR([readline is required!])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdio.h])
 AC_CHECK_HEADERS([stdlib.h])
 AC_CHECK_HEADERS([string.h])
 AC_CHECK_HEADERS([unistd.h])
+AC_CHECK_HEADERS([readline/readline.h])
+AC_CHECK_HEADERS([readline/history.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
@@ -67,19 +70,19 @@ AC_CONFIG_FILES([Makefile
 
 AC_OUTPUT
 
-# Print configuration to the user.
-echo -ne "\n"
-echo "global build variables"
-echo "-----------------------------------------"
-echo `date`
-echo "host info:        $host"
-echo "optimized build:  $with_enable_optimized"
-echo "LDFLAGS:          $LDFLAGS"
-echo "CPPFLAGS:         $CPPFLAGS"
-echo "CFLAGS:           $CFLAGS"
-echo "ABI:              $ABI"
-#echo "CC:               $CC"
-#echo "CXX:              $CXX"
-echo "-----------------------------------------"
-echo -ne "\n"
+dnl # Print configuration to the user.
+dnl echo -ne "\n"
+dnl echo "global build variables"
+dnl echo "-----------------------------------------"
+dnl echo `date`
+dnl echo "host info:        $host"
+dnl echo "optimized build:  $with_enable_optimized"
+dnl echo "LDFLAGS:          $LDFLAGS"
+dnl echo "CPPFLAGS:         $CPPFLAGS"
+dnl echo "CFLAGS:           $CFLAGS"
+dnl echo "ABI:              $ABI"
+dnl #echo "CC:               $CC"
+dnl #echo "CXX:              $CXX"
+dnl echo "-----------------------------------------"
+dnl echo -ne "\n"
 

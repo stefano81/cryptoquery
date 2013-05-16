@@ -6,12 +6,12 @@ void set_db_type(int dbtype) {
   exit(1);
 }
 
-int open_database(const char *dblocation) {
+unsigned int open_database(const char *dblocation) {
   fprintf(stderr, "Function no yet implemented!\n");
   exit(1);
 }
 
-int close_database() {
+unsigned int close_database() {
   fprintf(stderr, "Function no yet implemented!\n");
   exit(1);
 }

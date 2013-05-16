@@ -13,6 +13,9 @@
 /* Define to 1 if you have the `pbc' library (-lpbc). */
 #define HAVE_LIBPBC 1
 
+/* Define to 1 if you have the `readline' library (-lreadline). */
+#define HAVE_LIBREADLINE 1
+
 /* Define to 1 if you have the `sqlite3' library (-lsqlite3). */
 #define HAVE_LIBSQLITE3 1
 
@@ -22,6 +25,12 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
+
+/* Define to 1 if you have the <readline/history.h> header file. */
+#define HAVE_READLINE_HISTORY_H 1
+
+/* Define to 1 if you have the <readline/readline.h> header file. */
+#define HAVE_READLINE_READLINE_H 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1

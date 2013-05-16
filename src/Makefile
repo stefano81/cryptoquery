@@ -48,7 +48,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = cryptoquery$(EXEEXT)
+bin_PROGRAMS = cryptoquery$(EXEEXT) benchmarkhve$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/depcomp
@@ -62,8 +62,12 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_cryptoquery_OBJECTS = cryptoquery.$(OBJEXT) database.$(OBJEXT) \
-	encryption.$(OBJEXT) hve.$(OBJEXT) lostw.$(OBJEXT)
+am_benchmarkhve_OBJECTS = hve.$(OBJEXT) benchmark_hve.$(OBJEXT)
+benchmarkhve_OBJECTS = $(am_benchmarkhve_OBJECTS)
+benchmarkhve_LDADD = $(LDADD)
+am_cryptoquery_OBJECTS = configuration.$(OBJEXT) cryptoquery.$(OBJEXT) \
+	database.$(OBJEXT) encryption.$(OBJEXT) hve.$(OBJEXT) \
+	lostw.$(OBJEXT)
 cryptoquery_OBJECTS = $(am_cryptoquery_OBJECTS)
 cryptoquery_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
@@ -98,8 +102,8 @@ AM_V_CCLD = $(am__v_CCLD_$(V))
 am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(cryptoquery_SOURCES)
-DIST_SOURCES = $(cryptoquery_SOURCES)
+SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES)
+DIST_SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -156,7 +160,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lsqlite3 -lpbc -lgmp -lm 
+LIBS = -lreadline -lsqlite3 -lpbc -lgmp -lm 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing makeinfo
 MKDIR_P = .././install-sh -c -d
@@ -215,7 +219,8 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-cryptoquery_SOURCES = common.h config.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h
+cryptoquery_SOURCES = common.h config.h configuration.c configuration.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h
+benchmarkhve_SOURCES = schemas/hve.h schemas/hve.c test/benchmark_hve.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -308,6 +313,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+benchmarkhve$(EXEEXT): $(benchmarkhve_OBJECTS) $(benchmarkhve_DEPENDENCIES) $(EXTRA_benchmarkhve_DEPENDENCIES) 
+	@rm -f benchmarkhve$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(benchmarkhve_OBJECTS) $(benchmarkhve_LDADD) $(LIBS)
 cryptoquery$(EXEEXT): $(cryptoquery_OBJECTS) $(cryptoquery_DEPENDENCIES) $(EXTRA_cryptoquery_DEPENDENCIES) 
 	@rm -f cryptoquery$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cryptoquery_OBJECTS) $(cryptoquery_LDADD) $(LIBS)
@@ -318,6 +326,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/benchmark_hve.Po
+include ./$(DEPDIR)/configuration.Po
 include ./$(DEPDIR)/cryptoquery.Po
 include ./$(DEPDIR)/database.Po
 include ./$(DEPDIR)/encryption.Po
@@ -351,6 +361,20 @@ hve.obj: schemas/hve.c
 #	$(AM_V_CC)source='schemas/hve.c' object='hve.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
+
+benchmark_hve.o: test/benchmark_hve.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT benchmark_hve.o -MD -MP -MF $(DEPDIR)/benchmark_hve.Tpo -c -o benchmark_hve.o `test -f 'test/benchmark_hve.c' || echo '$(srcdir)/'`test/benchmark_hve.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/benchmark_hve.Tpo $(DEPDIR)/benchmark_hve.Po
+#	$(AM_V_CC)source='test/benchmark_hve.c' object='benchmark_hve.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o benchmark_hve.o `test -f 'test/benchmark_hve.c' || echo '$(srcdir)/'`test/benchmark_hve.c
+
+benchmark_hve.obj: test/benchmark_hve.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT benchmark_hve.obj -MD -MP -MF $(DEPDIR)/benchmark_hve.Tpo -c -o benchmark_hve.obj `if test -f 'test/benchmark_hve.c'; then $(CYGPATH_W) 'test/benchmark_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/benchmark_hve.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/benchmark_hve.Tpo $(DEPDIR)/benchmark_hve.Po
+#	$(AM_V_CC)source='test/benchmark_hve.c' object='benchmark_hve.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o benchmark_hve.obj `if test -f 'test/benchmark_hve.c'; then $(CYGPATH_W) 'test/benchmark_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/benchmark_hve.c'; fi`
 
 lostw.o: schemas/lostw.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.o -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
@@ -570,7 +594,6 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
-#testlostw = common.h schemas/lostw.c schemas/lostw.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
