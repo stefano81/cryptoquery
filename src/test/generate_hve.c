@@ -3,9 +3,9 @@
 #include <sqlite3.h>
 #include <math.h>
 
-#include "../schemas/hve.h"
+#include "../schemas/hve_ip.h"
 
-// usage: database_file, param_file, column_number, data_row_number
+// usage: generatehve database_file, param_file, column_number, data_row_number
 // assumes column numerical
 // generates random data
 // creates 5 table: plain text, ciphertex_AES, key_HVE, key_store, params
@@ -89,7 +89,11 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   
-  setup_output * setup = hve_setup(10, ncolumn, argv[2]);
+  // init pairing
+  pairing_t * pairing = load_pairing(argv[2]);
+
+  // init HVE
+  
 
   unsigned int * vals = malloc(sizeof(unsigned int) * ncolumn);
   for (int i = 0, p = 0; i < ncolumn; ++i) {
