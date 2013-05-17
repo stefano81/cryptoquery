@@ -43,8 +43,8 @@ int main(int argc, char *argv[]) {
   int nchar = (int) ceil(log10(ncolumn)) + (0 == ncolumn % 10 ? 1 : 0);
   fprintf(stderr, "%d %d\n", ncolumn, nchar);
 
-  char * create_query = malloc(sizeof("CREATE TABLE plain (id integer") + (ncolumn * (sizeof(", column integer") + (nchar * sizeof(char)))) + sizeof(")") + 1);
-  int p = sprintf(create_query, "CREATE TABLE plain (id integer");
+  char * create_query = malloc(sizeof("CREATE TABLE IF NOT EXISTS plain (id integer") + (ncolumn * (sizeof(", column integer") + (nchar * sizeof(char)))) + sizeof(")") + 1);
+  int p = sprintf(create_query, "CREATE TABLE IF NOT EXISTS plain (id integer");
 
   char buff[1024];
   int p2 = 0;
