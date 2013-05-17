@@ -1,14 +1,24 @@
 #include "lostw.h"
-
+/*
 void init_pairing_params(pairing_t * pairing) {
   pbc_param_t ec_params;
   unsigned int rbits = 180, qbits = 603;
 
   pbc_param_init_a_gen(ec_params, rbits, qbits);
-
   pairing_init_pbc_param(*pairing, ec_params);
-
   pbc_param_clear(ec_params);
+}
+ */
+
+void init_pairing_params(pairing_t * pairing, const char *path) {
+  char param[1024];
+  FILE * file = fopen(path, "r");
+  size_t count = fread(param, 1, 1024, file);
+  fclose(file);
+
+  if (!count) pbc_die("Error reading from file");
+  
+  pairing_init_set_buf(*pairing, param, count);
 }
 
 element_t ** sample_uniform_linear_transformation_Zr(pairing_t pairing, unsigned int n) {
@@ -174,13 +184,14 @@ element_t *** sample_dual_orthonormal_bases(lostw_general_params * params, unsig
   return bases;
 }
 
-lostw_setup_param * lostw_setup(unsigned int n) {
+lostw_setup_param * lostw_setup(unsigned int n, const char * path) {
   lostw_setup_param * setup_params = malloc(sizeof(lostw_setup_param));
   lostw_general_params * params = setup_params-> params = malloc(sizeof(lostw_general_params));
   lostw_mpk * public = setup_params->public = malloc(sizeof(lostw_mpk));
   lostw_msk * secret = setup_params->secret = malloc(sizeof(lostw_msk));
 
-  init_pairing_params(&(params->pairing));
+  //init_pairing_params(&(params->pairing));
+  init_pairing_params(&params->pairing, path);
   params->n = n;
   element_init_G1(params->g, params->pairing);
   element_random(params->g);

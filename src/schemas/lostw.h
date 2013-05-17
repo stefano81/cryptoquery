@@ -31,7 +31,7 @@ typedef struct {
   element_t *c1;
 } lostw_ct;
 
-lostw_setup_param * lostw_setup(unsigned int n);
+lostw_setup_param * lostw_setup(unsigned int n, const char * path);
 lostw_key * lostw_keygen(lostw_general_params * params, lostw_msk * secret, element_t * y);
 lostw_ct * lostw_enc(lostw_general_params * params, lostw_mpk * private, element_t * x, element_t * m);
 

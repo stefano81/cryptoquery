@@ -48,7 +48,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = cryptoquery$(EXEEXT) benchmarkhve$(EXEEXT)
+bin_PROGRAMS = cryptoquery$(EXEEXT) benchmarkhve$(EXEEXT) \
+	generatehve$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/depcomp
@@ -70,6 +71,9 @@ am_cryptoquery_OBJECTS = configuration.$(OBJEXT) cryptoquery.$(OBJEXT) \
 	lostw.$(OBJEXT)
 cryptoquery_OBJECTS = $(am_cryptoquery_OBJECTS)
 cryptoquery_LDADD = $(LDADD)
+am_generatehve_OBJECTS = hve.$(OBJEXT) generate_hve.$(OBJEXT)
+generatehve_OBJECTS = $(am_generatehve_OBJECTS)
+generatehve_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -102,8 +106,10 @@ AM_V_CCLD = $(am__v_CCLD_$(V))
 am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES)
-DIST_SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES)
+SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES) \
+	$(generatehve_SOURCES)
+DIST_SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES) \
+	$(generatehve_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -221,6 +227,7 @@ top_builddir = ..
 top_srcdir = ..
 cryptoquery_SOURCES = common.h config.h configuration.c configuration.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h
 benchmarkhve_SOURCES = schemas/hve.h schemas/hve.c test/benchmark_hve.c
+generatehve_SOURCES = schemas/hve.h schemas/hve.c test/generate_hve.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -319,6 +326,9 @@ benchmarkhve$(EXEEXT): $(benchmarkhve_OBJECTS) $(benchmarkhve_DEPENDENCIES) $(EX
 cryptoquery$(EXEEXT): $(cryptoquery_OBJECTS) $(cryptoquery_DEPENDENCIES) $(EXTRA_cryptoquery_DEPENDENCIES) 
 	@rm -f cryptoquery$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cryptoquery_OBJECTS) $(cryptoquery_LDADD) $(LIBS)
+generatehve$(EXEEXT): $(generatehve_OBJECTS) $(generatehve_DEPENDENCIES) $(EXTRA_generatehve_DEPENDENCIES) 
+	@rm -f generatehve$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(generatehve_OBJECTS) $(generatehve_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -331,6 +341,7 @@ include ./$(DEPDIR)/configuration.Po
 include ./$(DEPDIR)/cryptoquery.Po
 include ./$(DEPDIR)/database.Po
 include ./$(DEPDIR)/encryption.Po
+include ./$(DEPDIR)/generate_hve.Po
 include ./$(DEPDIR)/hve.Po
 include ./$(DEPDIR)/lostw.Po
 
@@ -389,6 +400,20 @@ lostw.obj: schemas/lostw.c
 #	$(AM_V_CC)source='schemas/lostw.c' object='lostw.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
+
+generate_hve.o: test/generate_hve.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT generate_hve.o -MD -MP -MF $(DEPDIR)/generate_hve.Tpo -c -o generate_hve.o `test -f 'test/generate_hve.c' || echo '$(srcdir)/'`test/generate_hve.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/generate_hve.Tpo $(DEPDIR)/generate_hve.Po
+#	$(AM_V_CC)source='test/generate_hve.c' object='generate_hve.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o generate_hve.o `test -f 'test/generate_hve.c' || echo '$(srcdir)/'`test/generate_hve.c
+
+generate_hve.obj: test/generate_hve.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT generate_hve.obj -MD -MP -MF $(DEPDIR)/generate_hve.Tpo -c -o generate_hve.obj `if test -f 'test/generate_hve.c'; then $(CYGPATH_W) 'test/generate_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/generate_hve.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/generate_hve.Tpo $(DEPDIR)/generate_hve.Po
+#	$(AM_V_CC)source='test/generate_hve.c' object='generate_hve.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o generate_hve.obj `if test -f 'test/generate_hve.c'; then $(CYGPATH_W) 'test/generate_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/generate_hve.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

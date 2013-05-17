@@ -61,4 +61,9 @@ setup_output * hve_setup(const unsigned int k, const unsigned int n, char path_n
 ciphertext * hve_enc(const master_public_key *pk, const int x, element_t *m);
 key * hve_keygen(const master_private_key *msk, const int y);
 
+unsigned char * serialize_group(const group * G);
+unsigned char * serialize_mpk(const master_public_key * mpk);
+unsigned char * serialize_msk(const master_private_key * msk);
+unsigned char * serialize_ct(const ciphertext *ct);
+
 #endif
