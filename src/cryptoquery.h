@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "database.h"
-#include "encryption.h"
-
 // schemas
 // - symmetric
 #define NONE 0x00
