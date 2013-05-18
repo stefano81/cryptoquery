@@ -17,6 +17,7 @@ typedef struct {
 typedef struct {
   mpk_t public;
   msk_t private;
+  element_t g;
 }* setup_t;
 
 typedef struct {
@@ -28,10 +29,10 @@ typedef struct {
   element_t *k;
 }* key_t;
 
-pairing_t* load_pairing(const char *params_path);
-setup_t setup(const pairing_t* pairing, const int l);
-ciphertext_t encrypt(const pairing_t* pairing, const mpk_t public, const int x[], element_t *m);
-key_t keygen(const pairing_t* pairing, const msk_t private, const int y[]);
-element_t * decript(const pairing_t* pairing, const ciphertext_t ct, const key_t key);
+pairing_t* load_pairing(char *params_path);
+setup_t setup(pairing_t* pairing, int l);
+ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m);
+key_t keygen(pairing_t* pairing, msk_t private, int y[]);
+element_t * decript(pairing_t* pairing, ciphertext_t ct, key_t key);
 
 #endif

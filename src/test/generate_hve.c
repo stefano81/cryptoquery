@@ -73,17 +73,17 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE ciphertext (id integer, cipher blob)", NULL, NULL, NULL)) {
+  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS ciphertext (id integer, cipher blob)", NULL, NULL, NULL)) {
     fprintf(stderr, "Error creating table ciphertext\n");
 
     return 1;
   }
-  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE key (id integer, key blob)", NULL, NULL, NULL)) {
+  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS key (id integer, key blob)", NULL, NULL, NULL)) {
     fprintf(stderr, "Error creating table key\n");
 
     return 1;
   }
-  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE param (key integer, val blob)", NULL, NULL, NULL)) {
+  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS param (key integer, val blob)", NULL, NULL, NULL)) {
     fprintf(stderr, "Error creating table param\n");
 
     return 1;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
   pairing_t * pairing = load_pairing(argv[2]);
 
   // init HVE
-  
+  setup_t mks = setup(pairing, ncolumn);
 
   unsigned int * vals = malloc(sizeof(unsigned int) * ncolumn);
   for (int i = 0, p = 0; i < ncolumn; ++i) {
