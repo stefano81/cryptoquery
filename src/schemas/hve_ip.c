@@ -28,6 +28,7 @@ static element_t ** create_identity_matrix(pairing_t *pairing, int n) {
 	element_set1(I[i][j]);
       else
 	element_set0(I[i][j]);
+      printf("%d %d -> %s\n", i, j, (element_is0(I[i][j]) ? "true" : "false"));
     }
   }
 
@@ -68,32 +69,76 @@ static element_t ** transpose(element_t **m, int n) {
 static copy(element_t **dst, element_t **src, int sizeY, int sizeX, int x, int y) {
   for (int i = y; i < sizeY; ++i) {
     for (int j = x; j < sizeX; ++j) {
-      element_set(dst[i - y][j -x], src[i][j]);
+      element_set(dst[i - y][j - x], src[i][j]);
     }
   }
 }
 
-static element_t ** invert(element_t **m, int n) {
-  element_t **tm = malloc(sizeof(element_t*) * n);
+static invert2(element_t **m, int n) {
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      if (i == j)
+	element_set1(m[i][j + n]);
+      else
+	element_set0(m[i][j + n]);
+    }
+  }
+
+  element_t alpha, beta, t;
+  element_init_same_as(alpha, m[0][0]);
+  element_init_same_as(beta, alpha);
+  element_init_same_as(t, beta);
 
   for (int i = 0; i < n; ++i) {
+    element_set(alpha, m[i][i]);
+
+    if (element_is0(alpha))
+      pbc_die("Singular matric, cannot invert");
+    else {
+      for (int j = 0; j < n * 2; ++j) {
+	element_div(m[i][j], m[i][j], alpha);
+      }
+
+      for (int k = 0; k < n; ++k) {
+	if (0 != k - i) {
+	  element_set(beta, m[k][i]);
+	  for (int j = 0; j < n * 2; ++j) {
+	    element_mul(t, beta, m[i][j]);
+	    element_sub(m[k][j], m[k][j], t);
+	  }
+	}
+      }
+    }
+  }
+
+  element_clear(alpha);
+  element_clear(beta);
+  element_clear(t);
+
+  return m;
+}
+
+static element_t ** invert(element_t **m, int n) {
+  element_t **tm = malloc(sizeof(element_t*) * n);
+  
+  for (int i = 0; i < n; ++i) {
     tm[i] = malloc(sizeof(element_t)*  2 * n);
-    for (int j = 0; j < n; ++j) {
-      element_init(tm[i][j], m[0][0]);
+    for (int j = 0; j < n * 2; ++j) {
+      element_init_same_as(tm[i][j], m[0][0]);
     }
   }
 
   copy(tm, m, n, n, 0, 0);
-  //invert2(tm, n);
-  copy(m, tm, n, 2*n, 0, n);
-
+  invert2(tm, n);
+  copy(m, tm, n, 2 * n, 0, n);
+  
   for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
+    for (int j = 0; j < n * 2; ++j) {
       element_clear(tm[i][j]);
     }
     free(tm[i]);
   }
-
+  
   free(tm);
 
   return m;
@@ -103,6 +148,15 @@ setup_t setup(pairing_t* pairing, int l) {
   element_t ** cbase = create_identity_matrix(pairing, 3);
   element_t psi;
   ++l;
+
+  printf("Identity:\n");
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j)
+      printf(" %c", element_is0(cbase[i][j]) ? '0': element_is1(cbase[i][j]) ? '1' : 'x');
+    printf("\n");
+  }
+  printf(" -----\n");
+
 
   element_init_G1(psi, *pairing);
   element_random(psi);
@@ -160,15 +214,34 @@ setup_t setup(pairing_t* pairing, int l) {
 	}
       }
 
+      // check if \psi-orthonormal using lt as a support
+      for (int i = 0; i < 3; ++i) {
+	for (int j = 0; j < 3; ++j) {
+	  element_set0(lt[i][j]);
+	  for (int r = 0; r < 3; ++r) {
+	    element_mul(t, B[i][r], C[r][j]);
+	    element_add(lt[i][j], lt[i][j], t);
+	  }
+	}
+      }
+
+      for (int i = 0; i < 3; ++i) {
+	for (int j = 0; j < 3; ++j)
+	  printf(" %c", element_is0(lt[i][j]) ? '0': element_is1(lt[i][j]) ? '1' : 'x');
+	for (int j = 0; j < 3; ++j)
+	  printf(" %c", element_is0(B[i][j]) ? '0': element_is1(C[i][j]) ? '1' : 'x');
+	for (int j = 0; j < 3; ++j)
+	  printf(" %c", element_is0(C[i][j]) ? '0': element_is1(C[i][j]) ? '1' : 'x');
+	printf("\n");
+      }
+      printf(" ----- ----- -----\n");
+
       for (int i = 0; i < 3; ++i) {
 	for (int j = 0; j < 3; ++j)
 	  element_clear(lt[i][j]);
 	free(lt[i]);
       }
       free(lt);
-
-      // check if \psi-orthonormal
-      
   }
 
   // clean up
