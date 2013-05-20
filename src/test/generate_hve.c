@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "../schemas/hve_ip.h"
+#include "../schemas/utils.h"
 
 // usage: generatehve database_file, param_file, column_number, data_row_number
 // assumes column numerical

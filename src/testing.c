@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <string.h>
 
 #include <openssl/aes.h>
 #include "schemas/utils.h"
+
 
 int main(int argc, char ** argv) {
   const unsigned char * passwd = "this is the key";
@@ -12,16 +14,21 @@ int main(int argc, char ** argv) {
 
   printf("set password: %d\n", AES_set_encrypt_key(passwd, 128, &ekey));
 
-  AES_encrypt(plaintext, ciphertext, &ekey);
+  //  for (int processed = 0;processed < strlen(plaintext); processed += AES_BLOCK_SIZE)
+  //AES_encrypt(plaintext+processed, ciphertext+processed, &ekey);
+
+  //AES_cfb128_encrypt(plaintext, ciphertext, strlen(plaintext), 
+
   printf("plaintext:\n'''\n%s\n'''\n", plaintext);
-  printf("ciphertext:\n'''\n%s\n'''\n%d\n", ciphertext, sizeof(ciphertext));
+  printf("ciphertext:\n'''\n%s\n'''\n%lu\n", ciphertext, strlen(ciphertext));
+
 
   AES_set_decrypt_key(passwd, 128, &dkey);
   AES_decrypt(ciphertext, pt2, &dkey);
 
   printf("decrypttext:\n'''\n%s\n'''\n", pt2);
 
-  
+  /*  
   pairing_t * pairing = load_pairing(argv[1]);
   
   element_t e[3];
@@ -42,7 +49,7 @@ int main(int argc, char ** argv) {
 	printf("%d %d %d -> %d\n", i, j, k, fs2[k](e[i]));
       }
     }
-  }
+    }*/
 
   return 0;
 }
