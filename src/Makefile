@@ -63,19 +63,21 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_benchmarkhve_OBJECTS = hve_ip.$(OBJEXT) benchmark_hve.$(OBJEXT)
+am_benchmarkhve_OBJECTS = hve_ip.$(OBJEXT) benchmark_hve.$(OBJEXT) \
+	utils.$(OBJEXT)
 benchmarkhve_OBJECTS = $(am_benchmarkhve_OBJECTS)
 benchmarkhve_LDADD = $(LDADD)
 am_cryptoquery_OBJECTS = configuration.$(OBJEXT) cryptoquery.$(OBJEXT) \
 	database.$(OBJEXT) encryption.$(OBJEXT) hve.$(OBJEXT) \
-	lostw.$(OBJEXT) hve_ip.$(OBJEXT)
+	lostw.$(OBJEXT) hve_ip.$(OBJEXT) utils.$(OBJEXT)
 cryptoquery_OBJECTS = $(am_cryptoquery_OBJECTS)
 cryptoquery_LDADD = $(LDADD)
-am_generatehve_OBJECTS = hve_ip.$(OBJEXT) generate_hve.$(OBJEXT)
+am_generatehve_OBJECTS = hve_ip.$(OBJEXT) generate_hve.$(OBJEXT) \
+	utils.$(OBJEXT)
 generatehve_OBJECTS = $(am_generatehve_OBJECTS)
 generatehve_LDADD = $(LDADD)
-testing_SOURCES = testing.c
-testing_OBJECTS = testing.$(OBJEXT)
+am_testing_OBJECTS = testing.$(OBJEXT) utils.$(OBJEXT)
+testing_OBJECTS = $(am_testing_OBJECTS)
 testing_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
@@ -110,9 +112,9 @@ am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES) \
-	$(generatehve_SOURCES) testing.c
+	$(generatehve_SOURCES) $(testing_SOURCES)
 DIST_SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES) \
-	$(generatehve_SOURCES) testing.c
+	$(generatehve_SOURCES) $(testing_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -229,9 +231,10 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-cryptoquery_SOURCES = common.h config.h configuration.c configuration.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h schemas/hve_ip.c schemas/hve_ip.h
-benchmarkhve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/benchmark_hve.c
-generatehve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/generate_hve.c
+cryptoquery_SOURCES = common.h config.h configuration.c configuration.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h schemas/hve_ip.c schemas/hve_ip.h schemas/utils.c schemas/utils.h
+benchmarkhve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/benchmark_hve.c schemas/utils.h schemas/utils.c
+generatehve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/generate_hve.c schemas/utils.h schemas/utils.c
+testing_SOURCES = testing.c schemas/utils.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -353,6 +356,7 @@ include ./$(DEPDIR)/hve.Po
 include ./$(DEPDIR)/hve_ip.Po
 include ./$(DEPDIR)/lostw.Po
 include ./$(DEPDIR)/testing.Po
+include ./$(DEPDIR)/utils.Po
 
 .c.o:
 	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -395,6 +399,20 @@ benchmark_hve.obj: test/benchmark_hve.c
 #	$(AM_V_CC)source='test/benchmark_hve.c' object='benchmark_hve.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o benchmark_hve.obj `if test -f 'test/benchmark_hve.c'; then $(CYGPATH_W) 'test/benchmark_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/benchmark_hve.c'; fi`
+
+utils.o: schemas/utils.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT utils.o -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.o `test -f 'schemas/utils.c' || echo '$(srcdir)/'`schemas/utils.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/utils.Tpo $(DEPDIR)/utils.Po
+#	$(AM_V_CC)source='schemas/utils.c' object='utils.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utils.o `test -f 'schemas/utils.c' || echo '$(srcdir)/'`schemas/utils.c
+
+utils.obj: schemas/utils.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT utils.obj -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.obj `if test -f 'schemas/utils.c'; then $(CYGPATH_W) 'schemas/utils.c'; else $(CYGPATH_W) '$(srcdir)/schemas/utils.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/utils.Tpo $(DEPDIR)/utils.Po
+#	$(AM_V_CC)source='schemas/utils.c' object='utils.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utils.obj `if test -f 'schemas/utils.c'; then $(CYGPATH_W) 'schemas/utils.c'; else $(CYGPATH_W) '$(srcdir)/schemas/utils.c'; fi`
 
 hve.o: schemas/hve.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.o -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c

@@ -3,6 +3,8 @@
 
 #include <pbc/pbc.h>
 
+#include "schemas/utils.h"
+
 typedef struct {
   int l;
   element_t ***B;
