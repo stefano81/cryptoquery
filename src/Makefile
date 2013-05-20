@@ -49,7 +49,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = cryptoquery$(EXEEXT) benchmarkhve$(EXEEXT) \
-	generatehve$(EXEEXT)
+	generatehve$(EXEEXT) testing$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/depcomp
@@ -74,6 +74,9 @@ cryptoquery_LDADD = $(LDADD)
 am_generatehve_OBJECTS = hve_ip.$(OBJEXT) generate_hve.$(OBJEXT)
 generatehve_OBJECTS = $(am_generatehve_OBJECTS)
 generatehve_LDADD = $(LDADD)
+testing_SOURCES = testing.c
+testing_OBJECTS = testing.$(OBJEXT)
+testing_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -107,9 +110,9 @@ am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES) \
-	$(generatehve_SOURCES)
+	$(generatehve_SOURCES) testing.c
 DIST_SOURCES = $(benchmarkhve_SOURCES) $(cryptoquery_SOURCES) \
-	$(generatehve_SOURCES)
+	$(generatehve_SOURCES) testing.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -147,7 +150,8 @@ CC = gcc -std=gnu99
 CCDEPMODE = depmode=gcc3
 
 # what flags you want to pass to the C compiler & linker
-CFLAGS = --pedantic -Wall -O2 -ggdb
+#CFLAGS = --pedantic -Wall -g0 -O2
+CFLAGS = --pedantic -Wall -ggdb -O2
 CPP = gcc -std=gnu99 -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -166,7 +170,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lreadline -lsqlite3 -lpbc -lgmp -lm 
+LIBS = -lcrypto -lreadline -lsqlite3 -lpbc -lgmp -lm 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing makeinfo
 MKDIR_P = .././install-sh -c -d
@@ -329,6 +333,9 @@ cryptoquery$(EXEEXT): $(cryptoquery_OBJECTS) $(cryptoquery_DEPENDENCIES) $(EXTRA
 generatehve$(EXEEXT): $(generatehve_OBJECTS) $(generatehve_DEPENDENCIES) $(EXTRA_generatehve_DEPENDENCIES) 
 	@rm -f generatehve$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(generatehve_OBJECTS) $(generatehve_LDADD) $(LIBS)
+testing$(EXEEXT): $(testing_OBJECTS) $(testing_DEPENDENCIES) $(EXTRA_testing_DEPENDENCIES) 
+	@rm -f testing$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(testing_OBJECTS) $(testing_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -345,6 +352,7 @@ include ./$(DEPDIR)/generate_hve.Po
 include ./$(DEPDIR)/hve.Po
 include ./$(DEPDIR)/hve_ip.Po
 include ./$(DEPDIR)/lostw.Po
+include ./$(DEPDIR)/testing.Po
 
 .c.o:
 	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

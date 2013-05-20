@@ -1,30 +1,24 @@
-#include "schemas/ksw_predicate.h"
+#include <stdio.h>
+
+#include <openssl/aes.h>
 
 int main(int argc, char ** argv) {
-  unsigned char c = -1;
+  const unsigned char * passwd = "this is the key";
+  const unsigned char * plaintext = "This is a simple plaintext\nLet's try if it works!!";
+  AES_KEY key;
+  unsigned char ciphertext[4 * 1024 * 1024];
+  unsigned char pt2[4 * 1024 * 1024];
 
 
+  printf("set password: %d\n", AES_set_encrypt_key(passwd, 128, &key));
 
-/*   printf("%d\n", c); */
+  AES_encrypt(plaintext, ciphertext, &key);
+  printf("plaintext:\n'''\n%s\n'''\n", plaintext);
+  //  printf("ciphertext:\n'''\n%s\n'''\n", ciphertext);
 
-/*   const unsigned int l = 6; */
+  //  AES_decrypt(ciphertext, pt2, key);
 
-/*   setup_output * gp = setup(l, argv[1]);//"a.param"); */
-
-/*   unsigned char x[] = {'1', '2', '3', '4', '5', '6'}; */
-
-/*   printf("sizeof x%d\n", sizeof(x)/sizeof(*x)); */
-
-/*   message m1; */
-  
-/*   cipher * ct = enc(&m1, x, gp->info, gp->mpk); */
-
-/*   int y[] = {'1', '2', '3', '4', '5', '6'}; */
-/*   public_key * key = keygen(y, gp->info, gp->msk); */
-
-/*   message *m2 = dec(ct, key, gp->info); */
-
-/*   printf("Result: %s\n", check(&m1, m2) ? "true" : "false"); */
+  printf("decrypttext:\n'''\n%s\n'''\n", pt2);
 
   return 0;
 }
