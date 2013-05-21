@@ -1,6 +1,8 @@
 #include "hve_ip.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
+#include <string.h>
 
 static element_t ** create_identity_matrix(pairing_t *pairing, int n) {
   element_t **I = malloc(sizeof(element_t *) * n);
@@ -59,7 +61,7 @@ static void copy(element_t **dst, element_t **src, int sizeY, int sizeX, int x, 
   }
 }
 
-static void invert2(element_t **m, int n) {
+static element_t ** invert2(element_t **m, int n) {
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j < n; ++j) {
       if (i == j)
@@ -263,24 +265,28 @@ element_t * decript(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
 }
 
 
-int serialize_ct(void ** buffer, ciphertext_t ct) {
-  int size = sizeof(int) + element_length_in_bytes(ct->c) + (3 * ct->l * element_length_in_bytes(ct->ci[0][0]));
-  void * buff = *buffer = malloc(size);
+int serialize_ct(unsigned char ** buffer, ciphertext_t ct) {
+  int size = sizeof(int) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
+  unsigned char * tbuf, * buff = tbuf = *buffer = malloc(size);
   int l1 = htons(ct->l);
-  //memcpy(buff, &(l1), sizeof(
-  
+  memcpy(buff, &(l1), sizeof(int));
+  tbuf += sizeof(int);
+
+  tbuf += element_to_bytes(tbuf, ct->c);
+
   for (int i = 0; i < ct->l; ++i) {
-    
+    for (int j = 0; j < 3; ++j)
+      tbuf += element_to_bytes(tbuf, ct->ci[i][j]);
   }
 
   return size;
 }
 
-int serialize_mpk(void ** buffer, mpk_t pulbic) {
+int serialize_mpk(unsigned char ** buffer, mpk_t pulbic) {
 }
 
-int serialize_msk(void ** buffer, msk_t private) {
+int serialize_msk(unsigned char ** buffer, msk_t private) {
 }
 
-int serialize_key(void ** buffer, dkey_t k) {
+int serialize_key(unsigned char ** buffer, dkey_t k) {
 }

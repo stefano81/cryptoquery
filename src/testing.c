@@ -28,7 +28,6 @@ int main(int argc, char ** argv) {
 
   printf("decrypttext:\n'''\n%s\n'''\n", pt2);
 
-  /*  
   pairing_t * pairing = load_pairing(argv[1]);
   
   element_t e[3];
@@ -49,7 +48,7 @@ int main(int argc, char ** argv) {
 	printf("%d %d %d -> %d\n", i, j, k, fs2[k](e[i]));
       }
     }
-    }*/
+  }
 
   return 0;
 }
