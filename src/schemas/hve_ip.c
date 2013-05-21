@@ -51,7 +51,7 @@ static element_t ** transpose(element_t **m, int n) {
   return m;
 }
 
-static copy(element_t **dst, element_t **src, int sizeY, int sizeX, int x, int y) {
+static void copy(element_t **dst, element_t **src, int sizeY, int sizeX, int x, int y) {
   for (int i = y; i < sizeY; ++i) {
     for (int j = x; j < sizeX; ++j) {
       element_set(dst[i - y][j - x], src[i][j]);
@@ -59,7 +59,7 @@ static copy(element_t **dst, element_t **src, int sizeY, int sizeX, int x, int y
   }
 }
 
-static invert2(element_t **m, int n) {
+static void invert2(element_t **m, int n) {
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j < n; ++j) {
       if (i == j)
@@ -254,19 +254,26 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, unsigned int x[], element
   return ct;
 }
 
-key_t keygen(pairing_t* pairing, msk_t private, int y[]) {
+dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
 
 }
 
-element_t * decript(pairing_t* pairing, ciphertext_t ct, key_t key) {
+element_t * decript(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
 
 }
 
 
 int serialize_ct(void ** buffer, ciphertext_t ct) {
+  int size = sizeof(int) + element_length_in_bytes(ct->c) + (3 * ct->l * element_length_in_bytes(ct->ci[0][0]));
+  void * buff = *buffer = malloc(size);
+  int l1 = htons(ct->l);
+  //memcpy(buff, &(l1), sizeof(
+  
   for (int i = 0; i < ct->l; ++i) {
     
   }
+
+  return size;
 }
 
 int serialize_mpk(void ** buffer, mpk_t pulbic) {
@@ -275,5 +282,5 @@ int serialize_mpk(void ** buffer, mpk_t pulbic) {
 int serialize_msk(void ** buffer, msk_t private) {
 }
 
-int serialize_key(void ** buffer, key_t k) {
+int serialize_key(void ** buffer, dkey_t k) {
 }

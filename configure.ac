@@ -57,6 +57,7 @@ AC_CHECK_HEADERS([string.h])
 AC_CHECK_HEADERS([unistd.h])
 AC_CHECK_HEADERS([readline/readline.h])
 AC_CHECK_HEADERS([readline/history.h])
+AC_CHECK_HEADERS([arpa/inet.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T

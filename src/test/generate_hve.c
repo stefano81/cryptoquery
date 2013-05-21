@@ -103,7 +103,6 @@ int main(int argc, char *argv[]) {
   element_t m;
   element_init_GT(m, *pairing);
 
-
   strcpy(insert_query, "INSERT INTO plain VALUES (?");
   p = strlen(insert_query);
 

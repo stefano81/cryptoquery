@@ -3893,6 +3893,18 @@ fi
 
 done
 
+for ac_header in arpa/inet.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "arpa/inet.h" "ac_cv_header_arpa_inet_h" "$ac_includes_default"
+if test "x$ac_cv_header_arpa_inet_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ARPA_INET_H 1
+_ACEOF
+
+fi
+
+done
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
