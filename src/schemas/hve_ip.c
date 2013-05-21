@@ -304,15 +304,18 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, unsigned int x[], element
 
 dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   dkey_t k = malloc(sizeof(*k));
-
+  k->S = 0;
   element_t *Y = malloc(sizeof(element_t) * private->l),
     *s = malloc(sizeof(element_t) * (private->l)),
     *d = malloc(sizeof(element_t) * (private->l)),
     s0;
 
+  unsigned short m = 0x01;
   for (int i = 0; i < private->l; ++i) {
+    m << 1;
+    
     if (-1 == y[i]) {
-      Y[i] = NULL;
+      k->S
       continue;
     }
 

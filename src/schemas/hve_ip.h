@@ -29,6 +29,7 @@ typedef struct {
 }* ciphertext_t;
 
 typedef struct {
+  unsigned short S;
   element_t k0;
   element_t *k;
 }* dkey_t;
