@@ -29,6 +29,7 @@ typedef struct {
 }* ciphertext_t;
 
 typedef struct {
+  element_t k0;
   element_t *k;
 }* dkey_t;
 
@@ -42,5 +43,10 @@ int serialize_ct(unsigned char ** buffer, ciphertext_t ct);
 int serialize_mpk(unsigned char ** buffer, mpk_t pulbic);
 int serialize_msk(unsigned char ** buffer, msk_t private);
 int serialize_key(unsigned char ** buffer, dkey_t k);
+
+ciphertext_t deserialize_ct(unsigned char * buffer);
+mpk_t deserialize_mpk(unsigned char * buffer);
+msk_t deserialize_msk(unsigned char * buffer);
+dkey_t deserialize_key(unsigned char * buffer);
 
 #endif

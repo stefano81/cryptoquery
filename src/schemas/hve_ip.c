@@ -249,15 +249,77 @@ setup_t setup(pairing_t* pairing, int l) {
 ciphertext_t encrypt(pairing_t* pairing, mpk_t public, unsigned int x[], element_t *m) {
   element_random(*m);
 
-  ciphertext_t ct = malloc(sizeof(ciphertext_t));
+  ciphertext_t ct = malloc(sizeof(*ct));
+  ct->l = public->l;
 
+  element_t * X = malloc(sizeof(element_t) * ct->l);
+
+  for (int i = 0; i < ct->l; ++i) {
+    element_init_Zr(X[i], *pairing);
+    element_set_si(X[i], x[i]);
+  }
+
+  ct->ci = malloc(sizeof(element_t) * (ct->l + 1));
   
+  element_t z, *w = malloc(sizeof(element_t) * (ct->l + 1));
+
+  element_init_Zr(z, *pairing);
+  element_random(z);
+
+  for (int i = 0; i <= ct->l; ++i) {
+    element_init_G1(w[i], *pairing);
+    element_random(w[i]);
+  }
+
+  element_pow_zn(ct->c, public->g_T, z);
+  element_mul(ct->c, ct->c, *m);
+
+  element_t t;
+
+  element_init_G1(t, *pairing);
+
+  element_t v[3];
+  element_init_G1(v[0], *pairing);
+  element_set(v[0], w[0]);
+
+  element_init_G1(v[1], *pairing);
+  element_set1(t);
+  element_mul_zn(v[1], t, z);
+
+  element_init_G1(v[2], *pairing);
+  element_set0(v[2]);
+
+  ct->ci[0] = vector_times_matrix(v, public->B[0], 3);
+
+  element_set(v[2], w[0]);
+  for (int i = 1; i <= ct->l; ++i) {
+    element_set(v[0], w[i]);
+    element_mul_zn(v[1], w[i], X[i]);
+
+    ct->ci[i]  = vector_times_matrix(v, public->B[i], 3);
+  }
 
   return ct;
 }
 
 dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
+  dkey_t k = malloc(sizeof(*k));
 
+  element_t *Y = malloc(sizeof(element_t) * private->l),
+    *s = malloc(sizeof(element_t) * (private->l)),
+    *d = malloc(sizeof(element_t) * (private->l)),
+    s0;
+
+  for (int i = 0; i < private->l; ++i) {
+    if (-1 == y[i])
+      continue;
+
+    element_init_G1(s[i], *pairing);
+    element_init_G1(d[i], *pairing);
+    element_init_G1(Y[i], *pairing);
+  }
+
+  return k;
 }
 
 element_t * decript(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
@@ -266,27 +328,55 @@ element_t * decript(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
 
 
 int serialize_ct(unsigned char ** buffer, ciphertext_t ct) {
-  int size = sizeof(int) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
+  int size = sizeof(unsigned short) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
   unsigned char * tbuf, * buff = tbuf = *buffer = malloc(size);
-  int l1 = htons(ct->l);
-  memcpy(buff, &(l1), sizeof(int));
-  tbuf += sizeof(int);
+  unsigned short l1 = htons(ct->l);
+  memcpy(buff, &(l1), sizeof(unsigned short));
+  tbuf += sizeof(unsigned short);
 
   tbuf += element_to_bytes(tbuf, ct->c);
 
-  for (int i = 0; i < ct->l; ++i) {
+  for (int i = 0; i <= ct->l; ++i)
     for (int j = 0; j < 3; ++j)
       tbuf += element_to_bytes(tbuf, ct->ci[i][j]);
-  }
 
   return size;
+}
+
+ciphertext_t deserialize_ct(unsigned char *buffer) {
+  ciphertext_t ct = malloc(sizeof(*ct));
+
+  unsigned short l1;
+  memcpy(&l1, buffer, sizeof(unsigned short));
+  ct->l = ntohs(l1);
+
+  buffer += sizeof(unsigned short);
+
+  buffer += element_from_bytes(ct->c, buffer);
+  ct->ci = malloc(sizeof(element_t *) * ct->l);
+  for (int i = 0; i <= ct->l; ++i) {
+    ct->ci[i] = malloc(sizeof(element_t) * 3);
+    for (int j = 0; j < 3; ++j)
+      buffer += element_from_bytes(ct->ci[i][j], buffer);
+  }
+
+  return ct;
 }
 
 int serialize_mpk(unsigned char ** buffer, mpk_t pulbic) {
 }
 
+mpk_t deserialize_mpk(unsigned char * buffer) {
+}
+
 int serialize_msk(unsigned char ** buffer, msk_t private) {
 }
 
+msk_t deserialize_msk(unsigned char * buffer) {
+}
+
 int serialize_key(unsigned char ** buffer, dkey_t k) {
+}
+
+dkey_t deserialize_key(unsigned char * buffer) {
 }
