@@ -244,8 +244,14 @@ setup_t setup(pairing_t* pairing, int l) {
   return out;
 }
 
-ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
+ciphertext_t encrypt(pairing_t* pairing, mpk_t public, unsigned int x[], element_t *m) {
+  element_random(*m);
+
+  ciphertext_t ct = malloc(sizeof(ciphertext_t));
+
   
+
+  return ct;
 }
 
 key_t keygen(pairing_t* pairing, msk_t private, int y[]) {
@@ -257,3 +263,17 @@ element_t * decript(pairing_t* pairing, ciphertext_t ct, key_t key) {
 }
 
 
+int serialize_ct(void ** buffer, ciphertext_t ct) {
+  for (int i = 0; i < ct->l; ++i) {
+    
+  }
+}
+
+int serialize_mpk(void ** buffer, mpk_t pulbic) {
+}
+
+int serialize_msk(void ** buffer, msk_t private) {
+}
+
+int serialize_key(void ** buffer, key_t k) {
+}

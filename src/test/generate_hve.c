@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <math.h>
+#include <string.h>
 
 #include "../schemas/hve_ip.h"
 #include "../schemas/utils.h"
@@ -48,7 +49,6 @@ int main(int argc, char *argv[]) {
   int p = sprintf(create_query, "CREATE TABLE IF NOT EXISTS plain (id integer");
 
   char buff[1024];
-  int p2 = 0;
 
   sprintf(buff, ", column%%.%dd integer", nchar);
   for (int i = 0; i < ncolumn; ++i) {
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
   p += sprintf(create_query+p, ");");
 
-  fprintf(stderr, "strlen(create_query) -> %d\n", strlen(create_query));
+  fprintf(stderr, "strlen(create_query) -> %u\n", strlen(create_query));
 
   sqlite3_stmt * stmt;
 
@@ -67,24 +67,26 @@ int main(int argc, char *argv[]) {
 
     return 1;
   }
+  free(create_query);
 
   if (SQLITE_DONE != sqlite3_step(stmt)) {
     fprintf(stderr, "Error creating table plain\n");
 
     return 1;
   }
+  sqlite3_free(stmt);
 
-  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS ciphertext (id integer, cipher blob)", NULL, NULL, NULL)) {
+  if (SQLITE_OK !=  sqlite3_exec(db, "DELETE FROM plain; CREATE TABLE IF NOT EXISTS cipher (id integer, cipher blob); DELETE FROM cipher;", NULL, NULL, NULL)) {
     fprintf(stderr, "Error creating table ciphertext\n");
 
     return 1;
   }
-  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS key (id integer, key blob)", NULL, NULL, NULL)) {
+  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS key (id integer, key blob); DELETE FROM key;", NULL, NULL, NULL)) {
     fprintf(stderr, "Error creating table key\n");
 
     return 1;
   }
-  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS param (key integer, val blob)", NULL, NULL, NULL)) {
+  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS param (key integer, val blob); DELETE FROM param;", NULL, NULL, NULL)) {
     fprintf(stderr, "Error creating table param\n");
 
     return 1;
@@ -97,16 +99,54 @@ int main(int argc, char *argv[]) {
   setup_t mks = setup(pairing, ncolumn);
 
   unsigned int * vals = malloc(sizeof(unsigned int) * ncolumn);
-  for (int i = 0, p = 0; i < ncolumn; ++i) {
-    
+  char insert_query[4096];
+  element_t m;
+  element_init_GT(m, *pairing);
+
+
+  strcpy(insert_query, "INSERT INTO plain VALUES (?");
+  p = strlen(insert_query);
+
+  for (int j = 0; j < ncolumn; ++j) {
+    sprintf(insert_query + p, ", ?");
+    p += strlen(",?");
   }
+  sqlite3_stmt * c_stmt;
+
+  sqlite3_prepare(db, "INSERT INTO cipher (id, cipher) VALUES (?, ?)", -1, &stmt, NULL);
+
+  strcpy(insert_query + p, ");");
+  sqlite3_prepare(db, insert_query, -1, &stmt, NULL);
+  
   for (int i = 0; i < nrow; ++i) {
-    for (int j = 0; j < ncolumn; ++j) {
-      
+    sqlite3_bind_int(stmt, 1, i);
+    for (int j = 0; ncolumn > j; ++j) {
+      vals[j] = random() % 1024;
+      sqlite3_bind_int(stmt, j+1, vals[j]);
     }
+    if (SQLITE_OK != sqlite3_step(stmt)) {
+      fprintf(stderr, "Error inserting the %d row");
+
+      return 1;
+    }
+
+    ciphertext_t ct = encrypt(pairing, mks->public, vals, &m);
+
+    void * ser_ct;
+    int size = serialize_ct(&ser_ct, ct);
+
+    sqlite3_bind_int(c_stmt, 1, i);
+    sqlite3_bind_blob(c_stmt, 2, ser_ct, size, NULL);
+    if (SQLITE_OK != sqlite3_step(c_stmt)) {
+      fprintf(stderr, "Error inserting the %d id in ct: \n", i, sqlite3_errmsg(db));
+
+      return 1;
+    }
+    free(ser_ct);
   }
   free(vals);
-
+  sqlite3_free(stmt);
+  sqlite3_free(c_stmt);
 
   sqlite3_close(db);
 
