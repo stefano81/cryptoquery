@@ -311,10 +311,13 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
     s0;
 
   for (int i = 0; i < private->l; ++i) {
-    if (-1 == y[i])
+    if (-1 == y[i]) {
+      Y[i] = NULL;
       continue;
+    }
 
     element_init_G1(s[i], *pairing);
+    element_random(s[i]);
     element_init_G1(d[i], *pairing);
     element_init_G1(Y[i], *pairing);
   }
