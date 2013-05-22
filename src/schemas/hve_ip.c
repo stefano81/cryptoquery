@@ -144,22 +144,30 @@ setup_t setup(pairing_t* pairing, int l) {
   }
   printf(" -----\n");
 
-
-  element_init_G1(psi, *pairing);
+  element_init_Zr(psi, *pairing);
   element_random(psi);
 
   for (int i = 0; i < 3; ++i)
-    element_mul(cbase[i][i], cbase[i][i], psi); // now \psi-identity -> canonical base
+    element_mul_zn(cbase[i][i], cbase[i][i], psi); // now \psi-identity -> canonical base
 
   setup_t out = malloc(sizeof(*out));
   msk_t private = out->private = malloc(sizeof(*private));
   mpk_t public = out->public = malloc(sizeof(*public));
+
+  element_init_G1(out->g, *pairing);
+  element_random(out->g);
 
   private->l = public->l = l;
   private->C = malloc(sizeof(element_t **) * l);
   public->B = malloc(sizeof(element_t **) * l);
   
   element_t t;
+  element_init_GT(t, *pairing);
+  pairing_apply(t, out->g, out->g, *pairing);
+  element_pow_zn(public->gT, t, psi);
+
+  element_free(t);
+
   element_init_G1(t, *pairing);
 
   for (int k = 0; k < l; ++k) {
@@ -271,7 +279,7 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, unsigned int x[], element
     element_random(w[i]);
   }
 
-  element_pow_zn(ct->c, public->g_T, z);
+  element_pow_zn(ct->c, public->gT, z);
   element_mul(ct->c, ct->c, *m);
 
   element_t t;
@@ -305,31 +313,79 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, unsigned int x[], element
 dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   dkey_t k = malloc(sizeof(*k));
   k->S = 0;
-  element_t *Y = malloc(sizeof(element_t) * private->l),
-    *s = malloc(sizeof(element_t) * (private->l)),
-    *d = malloc(sizeof(element_t) * (private->l)),
-    s0;
+  element_t yt, dt, s0;
+  element_t v[3];
 
-  unsigned short m = 0x01;
-  for (int i = 0; i < private->l; ++i) {
-    m << 1;
-    
+  element_init_G1(v[0], *pairing);
+  element_init_G1(v[1], *pairing);
+  element_init_G1(v[2], *pairing);
+  element_init_G1(dt, *pairing);
+  element_init_Zr(yt, *pairing);
+  element_init_G1(s0, *pairing);
+
+  element_set0(s0);
+
+  unsigned long mask = 0x01;
+  for (int i = 0; i < private->l; ++i, mask <<= 1) {
     if (-1 == y[i]) {
-      k->S
+      k->k = NULL;
       continue;
     }
 
-    element_init_G1(s[i], *pairing);
-    element_random(s[i]);
-    element_init_G1(d[i], *pairing);
-    element_init_G1(Y[i], *pairing);
+    k->S |= mask;
+
+    element_random(dt);
+    element_random(v[2]); // st
+    element_set_si(yt, y[i]);
+
+    element_mul_zn(v[0], dt, yt);
+    element_neg(v[1], dt);
+    element_add(s0, s0, v[2]); // sum st
+
+    k->k[i + 1] = vector_times_matrix(v, private->C[i + 1], 3);
   }
+
+  element_neg(v[0], s0); // s0 = - \sum s_t
+  element_set1(v[1]);
+  element_random(v[2]); // eta
+
+  k->k[0] = vector_times_matrix(v, private->C[0], 3);
+
+  element_clear(v[0]);
+  element_clear(v[1]);
+  element_clear(v[2]);
+  element_clear(dt);
+  element_clear(yt);
+  element_clear(s0);
 
   return k;
 }
 
 element_t * decript(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
+  element_t * m = malloc(sizeof(element_t));
+  element_t t1, t2;
 
+  element_init_GT(*m, *pairing);
+  element_init_GT(t1, *pairing);
+  element_init_GT(t2, *pairing);
+
+  element_prod_pairing(t2, key->k[0], ct->ci[0], 3);
+
+  unsigned long mask = 0x01;
+  for (int i = 1; i <= ct->l; ++i, mask <<= 1) {
+    if (key->S & mask) {
+      // i \in S
+      element_prod_pairing(t1, key->k[i], ct->ci[i], 3);
+      element_mul(t2, t2, t1);
+    }
+  }
+
+  element_div(*m, ct->c, t2);
+
+  element_clear(t1);
+  element_clear(t2);
+
+  return m;
 }
 
 

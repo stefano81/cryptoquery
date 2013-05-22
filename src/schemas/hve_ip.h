@@ -8,7 +8,7 @@
 typedef struct {
   unsigned short l;
   element_t ***B;
-  element_t g_T;
+  element_t gT;
 }* mpk_t;
 
 typedef struct {
@@ -29,9 +29,8 @@ typedef struct {
 }* ciphertext_t;
 
 typedef struct {
-  unsigned short S;
-  element_t k0;
-  element_t *k;
+  unsigned long S;
+  element_t **k;
 }* dkey_t;
 
 pairing_t* load_pairing(char *params_path);
