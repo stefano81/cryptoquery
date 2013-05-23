@@ -4,6 +4,32 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+#ifdef DEBUG
+void print_vector(element_t *v, int N) {
+  for (int i = 0; i < N; ++i) {
+    element_fprintf(stderr, " %B", v[i]);
+  }
+  fprintf(stderr, "\n");
+}
+
+void print_matrix(element_t **m, int N) {
+  for (int i = 0; i < N; ++i)
+    print_vector(m[i], N);
+}
+
+void print_10_vector(element_t *v, int N) {
+  for (int i = 0; i < N; ++i) {
+    fprintf(stderr, " %s", element_is1(v[i]) ? "1" : element_is0(v[i]) ? "0" : "x");
+  }
+  fprintf(stderr, "\n");
+}
+
+void print_10_matrix(element_t **m, int N) {
+  for (int i = 0; i < N; ++i)
+    print_10_vector(m[i], N);
+}
+#endif
+
 static element_t ** create_identity_matrix(pairing_t *pairing, int n) {
   element_t **I = malloc(sizeof(element_t *) * n);
 
@@ -15,9 +41,17 @@ static element_t ** create_identity_matrix(pairing_t *pairing, int n) {
 	element_set1(I[i][j]);
       else
 	element_set0(I[i][j]);
-      //      printf("%d %d -> %s\n", i, j, (element_is0(I[i][j]) ? "true" : "false"));
     }
+#ifdef DEBUG
+    fprintf(stderr, "IDENTITY ROW: %d\n", i);
+    print_10_vector(I[i], n);
+#endif
   }
+
+#ifdef DEBUG
+  fprintf(stderr, "IDENTITY:\n");
+  print_10_matrix(I, n);
+#endif
 
   return I;
 }
@@ -40,8 +74,8 @@ static element_t ** transpose(element_t **m, int n) {
   element_t t;
   element_init_same_as(t, m[0][0]);
 
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
+  for (int i = 0; i < (n - 1); ++i) {
+    for (int j = i + 1; j < n; ++j) {
       element_set(t, m[i][j]);
       element_set(m[i][j], m[j][i]);
       element_set(m[j][i], t);
@@ -143,8 +177,17 @@ setup_t setup(pairing_t* pairing, int l) {
   element_init_Zr(psi, *pairing);
   element_random(psi);
 
+#ifdef DEBUG
+  element_fprintf(stderr, "psi: %B\n", psi);
+#endif
+
   for (int i = 0; i < 3; ++i)
     element_mul_zn(cbase[i][i], cbase[i][i], psi); // now \psi-identity -> canonical base
+
+#ifdef DEBUG
+  print_10_matrix(cbase, 3);
+#endif
+
 
 
   element_init_G1(out->g, *pairing);
@@ -166,50 +209,50 @@ setup_t setup(pairing_t* pairing, int l) {
   element_init_G1(t, *pairing);
 
   for (int k = 0; k <= l; ++k) {
-      element_t ** lt = sample_linear_transformation_Zr(pairing, 3);
+    element_t ** lt = sample_linear_transformation_Zr(pairing, 3);
 
-      element_t ** B = public->B[k] = malloc(sizeof(element_t *) * 3);
+    element_t ** B = public->B[k] = malloc(sizeof(element_t *) * 3);
 
-      for (int i = 0; i < 3; ++i) {
-	B[i] = malloc(sizeof(element_t) * 3);
+    for (int i = 0; i < 3; ++i) {
+      B[i] = malloc(sizeof(element_t) * 3);
 
+      for (int j = 0; j < 3; ++j) {
+	element_init_G1(B[i][j], *pairing);
+	element_mul_zn(B[i][j], cbase[0][j], lt[i][0]);
+      }
+      for (int r = 1; r < 3; ++r) {
 	for (int j = 0; j < 3; ++j) {
-	  element_init_G1(B[i][j], *pairing);
-	  element_mul_zn(B[i][j], cbase[0][j], lt[i][0]);
-	}
-	for (int r = 1; r < 3; ++r) {
-	  for (int j = 0; j < 3; ++j) {
-	    element_mul_zn(t, cbase[r][j], lt[i][r]);
-	    element_add(B[i][j], B[i][j], t);
-	  }
+	  element_mul_zn(t, cbase[r][j], lt[i][r]);
+	  element_add(B[i][j], B[i][j], t);
 	}
       }
+    }
 
-      lt = invert(transpose(lt, 3), 3);
+    lt = invert(transpose(lt, 3), 3);
 
-      element_t ** C = private->C[k] = malloc(sizeof(element_t*) * 3);
+    element_t ** C = private->C[k] = malloc(sizeof(element_t*) * 3);
 
-      for (int i = 0; i < 3; ++i) {
-	C[i] = malloc(sizeof(element_t) * 3);
+    for (int i = 0; i < 3; ++i) {
+      C[i] = malloc(sizeof(element_t) * 3);
 
+      for (int j = 0; j < 3; ++j) {
+	element_init_G1(C[i][j], *pairing);
+	element_mul_zn(C[i][j], cbase[0][j], lt[i][0]);
+      }
+      for (int r = 1; r < 3; ++r) {
 	for (int j = 0; j < 3; ++j) {
-	  element_init_G1(C[i][j], *pairing);
-	  element_mul_zn(C[i][j], cbase[0][j], lt[i][0]);
-	}
-	for (int r = 1; r < 3; ++r) {
-	  for (int j = 0; j < 3; ++j) {
-	    element_mul_zn(t, cbase[r][j], lt[i][r]);
-	    element_add(C[i][j], C[i][j], t);
-	  }
+	  element_mul_zn(t, cbase[r][j], lt[i][r]);
+	  element_add(C[i][j], C[i][j], t);
 	}
       }
+    }
 
-      for (int i = 0; i < 3; ++i) {
-	for (int j = 0; j < 3; ++j)
-	  element_clear(lt[i][j]);
-	free(lt[i]);
-      }
-      free(lt);
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j)
+	element_clear(lt[i][j]);
+      free(lt[i]);
+    }
+    free(lt);
   }
 
   for (int i = 0; i < 3; ++i) {
