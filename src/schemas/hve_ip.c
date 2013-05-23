@@ -249,29 +249,28 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
 
   element_init_GT(ct->c, *pairing);
   element_pow_zn(ct->c, public->gT, z);
-  element_mul(ct->c, ct->c, *m);
-
+  element_mul(ct->c, ct->c, *m); // c = g_T ^ z \times m
 
   element_init_G1(v[0], *pairing);
+  element_init_G1(v[1], *pairing);
+  element_init_G1(v[2], *pairing);
+
   element_random(wt); // w_0
   element_mul_zn(v[0], one, wt);
-
-  element_init_G1(v[1], *pairing);
   element_mul_zn(v[1], one, z);
-
-  element_init_G1(v[2], *pairing);
-  element_set0(v[2]);
+  element_set0(v[2]); // (w_0, z, 0)
 
   ct->ci[0] = vector_times_matrix(v, public->B[0], 3);
 
-  element_mul_zn(v[2], one, wt);
+  element_mul_zn(v[2], one, wt); // set w0 to the third element of the vector
 
   for (int i = 1; i <= ct->l; ++i) {
     element_random(wt); // wt <- F_q
+
     element_mul_zn(v[0], one, wt);
     element_set_si(xt, x[i-1]);
     element_mul(wt, wt, xt);
-    element_mul_zn(v[1], one, wt);
+    element_mul_zn(v[1], one, wt); // (w_t, w_t x_t, w_0)
 
     ct->ci[i]  = vector_times_matrix(v, public->B[i], 3);
   }
@@ -287,7 +286,7 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
 }
 
 dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
-  dkey_t k = malloc(sizeof(*k));
+ dkey_t k = malloc(sizeof(*k));
   element_t yt, dt, st, s0, v[3], one;
 
   k->S = 0;
@@ -309,6 +308,7 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   for (int i = 1; i <= private->l; ++i, mask <<= 1) {
     if (-1 == y[i - 1]) {
       k->k[i] = NULL;
+
       continue;
     }
 
@@ -316,24 +316,22 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
 
     element_random(dt);
     element_random(st);
+
     element_add(s0, s0, st); // sum st
 
     element_set_si(yt, y[i - 1]);
-
     element_mul(yt, dt, yt);
     element_mul_zn(v[0], one, yt);
-
     element_neg(dt, dt);
     element_mul_zn(v[1], one, dt);
-
-    element_mul_zn(v[2], one, st);
+    element_mul_zn(v[2], one, st); // (d_t \times y_t, -d_t, s_t)
 
     k->k[i] = vector_times_matrix(v, private->C[i], 3);
   }
 
-  element_neg(v[0], s0); // s0 = - \sum s_t
+  element_neg(v[0], s0); // s0 = -(\sum_{t \in S} s_t)
   element_set1(v[1]);
-  element_random(v[2]); // eta
+  element_random(v[2]); // (s_0, 1, eta)
 
   k->k[0] = vector_times_matrix(v, private->C[0], 3);
 
@@ -357,18 +355,18 @@ element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
   element_init_GT(t1, *pairing);
   element_init_GT(t2, *pairing);
 
-  element_prod_pairing(t2, key->k[0], ct->ci[0], 3);
+  element_prod_pairing(t2, key->k[0], ct->ci[0], 3); // p_0 = e(k_0, c_0)
 
   unsigned long mask = 0x01;
   for (int i = 1; i <= ct->l; ++i, mask <<= 1) {
     if (key->S & mask) {
       // i \in S
-      element_prod_pairing(t1, key->k[i], ct->ci[i], 3);
-      element_mul(t2, t2, t1);
+      element_prod_pairing(t1, key->k[i], ct->ci[i], 3); // p_t =e(k_t, c_t)
+      element_mul(t2, t2, t1); // den = p_0 \times \Pi_{t \in S} p_t
     }
   }
 
-  element_div(*m, ct->c, t2);
+  element_div(*m, ct->c, t2); // c / den
 
   element_clear(t1);
   element_clear(t2);
