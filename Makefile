@@ -159,15 +159,15 @@ distuninstallcheck_listfiles = find . -type f -print
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing aclocal-1.13
+ACLOCAL = ${SHELL} /tmp/cryptoquery/missing aclocal-1.13
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
-AUTOCONF = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing autoconf
-AUTOHEADER = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing autoheader
-AUTOMAKE = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing automake-1.13
+AUTOCONF = ${SHELL} /tmp/cryptoquery/missing autoconf
+AUTOHEADER = ${SHELL} /tmp/cryptoquery/missing autoheader
+AUTOMAKE = ${SHELL} /tmp/cryptoquery/missing automake-1.13
 AWK = gawk
 CC = gcc -std=gnu99
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS =  -I/opt/local/include
 CPP = gcc -std=gnu99 -E
 CPPFLAGS = 
@@ -189,7 +189,7 @@ LDFLAGS =  -L/opt/local/lib
 LIBOBJS = 
 LIBS = -lcrypto -lreadline -lsqlite3 -lpbc -lgmp -lm 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing makeinfo
+MAKEINFO = ${SHELL} /tmp/cryptoquery/missing makeinfo
 MKDIR_P = ./install-sh -c -d
 OBJEXT = o
 PACKAGE = cryptoquery
@@ -204,10 +204,10 @@ SET_MAKE =
 SHELL = /bin/sh
 STRIP = 
 VERSION = 0.0.1
-abs_builddir = /Users/stefano/Dropbox/GitHUB/cryptoquery
-abs_srcdir = /Users/stefano/Dropbox/GitHUB/cryptoquery
-abs_top_builddir = /Users/stefano/Dropbox/GitHUB/cryptoquery
-abs_top_srcdir = /Users/stefano/Dropbox/GitHUB/cryptoquery
+abs_builddir = /tmp/cryptoquery
+abs_srcdir = /tmp/cryptoquery
+abs_top_builddir = /tmp/cryptoquery
+abs_top_srcdir = /tmp/cryptoquery
 ac_ct_CC = gcc
 am__include = include
 am__leading_dot = .
@@ -226,7 +226,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/install-sh
+install_sh = ${SHELL} /tmp/cryptoquery/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale

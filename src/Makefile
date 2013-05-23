@@ -142,15 +142,15 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing aclocal-1.13
+ACLOCAL = ${SHELL} /tmp/cryptoquery/missing aclocal-1.13
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
-AUTOCONF = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing autoconf
-AUTOHEADER = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing autoheader
-AUTOMAKE = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing automake-1.13
+AUTOCONF = ${SHELL} /tmp/cryptoquery/missing autoconf
+AUTOHEADER = ${SHELL} /tmp/cryptoquery/missing autoheader
+AUTOMAKE = ${SHELL} /tmp/cryptoquery/missing automake-1.13
 AWK = gawk
 CC = gcc -std=gnu99
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 
 # what flags you want to pass to the C compiler & linker
 #CFLAGS = -g0 -O2
@@ -175,7 +175,7 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = -lcrypto -lreadline -lsqlite3 -lpbc -lgmp -lm 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/missing makeinfo
+MAKEINFO = ${SHELL} /tmp/cryptoquery/missing makeinfo
 MKDIR_P = .././install-sh -c -d
 OBJEXT = o
 PACKAGE = cryptoquery
@@ -190,10 +190,10 @@ SET_MAKE =
 SHELL = /bin/sh
 STRIP = 
 VERSION = 0.0.1
-abs_builddir = /Users/stefano/Dropbox/GitHUB/cryptoquery/src
-abs_srcdir = /Users/stefano/Dropbox/GitHUB/cryptoquery/src
-abs_top_builddir = /Users/stefano/Dropbox/GitHUB/cryptoquery
-abs_top_srcdir = /Users/stefano/Dropbox/GitHUB/cryptoquery
+abs_builddir = /tmp/cryptoquery/src
+abs_srcdir = /tmp/cryptoquery/src
+abs_top_builddir = /tmp/cryptoquery
+abs_top_srcdir = /tmp/cryptoquery
 ac_ct_CC = gcc
 am__include = include
 am__leading_dot = .
@@ -212,7 +212,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /Users/stefano/Dropbox/GitHUB/cryptoquery/install-sh
+install_sh = ${SHELL} /tmp/cryptoquery/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -360,102 +360,102 @@ include ./$(DEPDIR)/testing.Po
 include ./$(DEPDIR)/utils.Po
 
 .c.o:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(COMPILE) -c $<
+#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)source='$<' object='$@' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(COMPILE) -c $<
 
 .c.obj:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(COMPILE) -c `$(CYGPATH_W) '$<'`
+#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)source='$<' object='$@' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 hve_ip.o: schemas/hve_ip.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.o -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip.Tpo $(DEPDIR)/hve_ip.Po
-#	$(AM_V_CC)source='schemas/hve_ip.c' object='hve_ip.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.o -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip.Tpo $(DEPDIR)/hve_ip.Po
+	$(AM_V_CC)source='schemas/hve_ip.c' object='hve_ip.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
 
 hve_ip.obj: schemas/hve_ip.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.obj -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.obj `if test -f 'schemas/hve_ip.c'; then $(CYGPATH_W) 'schemas/hve_ip.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip.Tpo $(DEPDIR)/hve_ip.Po
-#	$(AM_V_CC)source='schemas/hve_ip.c' object='hve_ip.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip.obj `if test -f 'schemas/hve_ip.c'; then $(CYGPATH_W) 'schemas/hve_ip.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.obj -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.obj `if test -f 'schemas/hve_ip.c'; then $(CYGPATH_W) 'schemas/hve_ip.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip.Tpo $(DEPDIR)/hve_ip.Po
+	$(AM_V_CC)source='schemas/hve_ip.c' object='hve_ip.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip.obj `if test -f 'schemas/hve_ip.c'; then $(CYGPATH_W) 'schemas/hve_ip.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip.c'; fi`
 
 benchmark_hve.o: test/benchmark_hve.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT benchmark_hve.o -MD -MP -MF $(DEPDIR)/benchmark_hve.Tpo -c -o benchmark_hve.o `test -f 'test/benchmark_hve.c' || echo '$(srcdir)/'`test/benchmark_hve.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/benchmark_hve.Tpo $(DEPDIR)/benchmark_hve.Po
-#	$(AM_V_CC)source='test/benchmark_hve.c' object='benchmark_hve.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o benchmark_hve.o `test -f 'test/benchmark_hve.c' || echo '$(srcdir)/'`test/benchmark_hve.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT benchmark_hve.o -MD -MP -MF $(DEPDIR)/benchmark_hve.Tpo -c -o benchmark_hve.o `test -f 'test/benchmark_hve.c' || echo '$(srcdir)/'`test/benchmark_hve.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/benchmark_hve.Tpo $(DEPDIR)/benchmark_hve.Po
+	$(AM_V_CC)source='test/benchmark_hve.c' object='benchmark_hve.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o benchmark_hve.o `test -f 'test/benchmark_hve.c' || echo '$(srcdir)/'`test/benchmark_hve.c
 
 benchmark_hve.obj: test/benchmark_hve.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT benchmark_hve.obj -MD -MP -MF $(DEPDIR)/benchmark_hve.Tpo -c -o benchmark_hve.obj `if test -f 'test/benchmark_hve.c'; then $(CYGPATH_W) 'test/benchmark_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/benchmark_hve.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/benchmark_hve.Tpo $(DEPDIR)/benchmark_hve.Po
-#	$(AM_V_CC)source='test/benchmark_hve.c' object='benchmark_hve.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o benchmark_hve.obj `if test -f 'test/benchmark_hve.c'; then $(CYGPATH_W) 'test/benchmark_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/benchmark_hve.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT benchmark_hve.obj -MD -MP -MF $(DEPDIR)/benchmark_hve.Tpo -c -o benchmark_hve.obj `if test -f 'test/benchmark_hve.c'; then $(CYGPATH_W) 'test/benchmark_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/benchmark_hve.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/benchmark_hve.Tpo $(DEPDIR)/benchmark_hve.Po
+	$(AM_V_CC)source='test/benchmark_hve.c' object='benchmark_hve.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o benchmark_hve.obj `if test -f 'test/benchmark_hve.c'; then $(CYGPATH_W) 'test/benchmark_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/benchmark_hve.c'; fi`
 
 utils.o: schemas/utils.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT utils.o -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.o `test -f 'schemas/utils.c' || echo '$(srcdir)/'`schemas/utils.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/utils.Tpo $(DEPDIR)/utils.Po
-#	$(AM_V_CC)source='schemas/utils.c' object='utils.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utils.o `test -f 'schemas/utils.c' || echo '$(srcdir)/'`schemas/utils.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT utils.o -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.o `test -f 'schemas/utils.c' || echo '$(srcdir)/'`schemas/utils.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/utils.Tpo $(DEPDIR)/utils.Po
+	$(AM_V_CC)source='schemas/utils.c' object='utils.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utils.o `test -f 'schemas/utils.c' || echo '$(srcdir)/'`schemas/utils.c
 
 utils.obj: schemas/utils.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT utils.obj -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.obj `if test -f 'schemas/utils.c'; then $(CYGPATH_W) 'schemas/utils.c'; else $(CYGPATH_W) '$(srcdir)/schemas/utils.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/utils.Tpo $(DEPDIR)/utils.Po
-#	$(AM_V_CC)source='schemas/utils.c' object='utils.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utils.obj `if test -f 'schemas/utils.c'; then $(CYGPATH_W) 'schemas/utils.c'; else $(CYGPATH_W) '$(srcdir)/schemas/utils.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT utils.obj -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.obj `if test -f 'schemas/utils.c'; then $(CYGPATH_W) 'schemas/utils.c'; else $(CYGPATH_W) '$(srcdir)/schemas/utils.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/utils.Tpo $(DEPDIR)/utils.Po
+	$(AM_V_CC)source='schemas/utils.c' object='utils.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utils.obj `if test -f 'schemas/utils.c'; then $(CYGPATH_W) 'schemas/utils.c'; else $(CYGPATH_W) '$(srcdir)/schemas/utils.c'; fi`
 
 hve.o: schemas/hve.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.o -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/hve.Tpo $(DEPDIR)/hve.Po
-#	$(AM_V_CC)source='schemas/hve.c' object='hve.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.o -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/hve.Tpo $(DEPDIR)/hve.Po
+	$(AM_V_CC)source='schemas/hve.c' object='hve.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c
 
 hve.obj: schemas/hve.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.obj -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/hve.Tpo $(DEPDIR)/hve.Po
-#	$(AM_V_CC)source='schemas/hve.c' object='hve.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.obj -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/hve.Tpo $(DEPDIR)/hve.Po
+	$(AM_V_CC)source='schemas/hve.c' object='hve.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
 
 lostw.o: schemas/lostw.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.o -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lostw.Tpo $(DEPDIR)/lostw.Po
-#	$(AM_V_CC)source='schemas/lostw.c' object='lostw.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.o -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/lostw.Tpo $(DEPDIR)/lostw.Po
+	$(AM_V_CC)source='schemas/lostw.c' object='lostw.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
 
 lostw.obj: schemas/lostw.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.obj -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lostw.Tpo $(DEPDIR)/lostw.Po
-#	$(AM_V_CC)source='schemas/lostw.c' object='lostw.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.obj -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/lostw.Tpo $(DEPDIR)/lostw.Po
+	$(AM_V_CC)source='schemas/lostw.c' object='lostw.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
 
 generate_hve.o: test/generate_hve.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT generate_hve.o -MD -MP -MF $(DEPDIR)/generate_hve.Tpo -c -o generate_hve.o `test -f 'test/generate_hve.c' || echo '$(srcdir)/'`test/generate_hve.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/generate_hve.Tpo $(DEPDIR)/generate_hve.Po
-#	$(AM_V_CC)source='test/generate_hve.c' object='generate_hve.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o generate_hve.o `test -f 'test/generate_hve.c' || echo '$(srcdir)/'`test/generate_hve.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT generate_hve.o -MD -MP -MF $(DEPDIR)/generate_hve.Tpo -c -o generate_hve.o `test -f 'test/generate_hve.c' || echo '$(srcdir)/'`test/generate_hve.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/generate_hve.Tpo $(DEPDIR)/generate_hve.Po
+	$(AM_V_CC)source='test/generate_hve.c' object='generate_hve.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o generate_hve.o `test -f 'test/generate_hve.c' || echo '$(srcdir)/'`test/generate_hve.c
 
 generate_hve.obj: test/generate_hve.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT generate_hve.obj -MD -MP -MF $(DEPDIR)/generate_hve.Tpo -c -o generate_hve.obj `if test -f 'test/generate_hve.c'; then $(CYGPATH_W) 'test/generate_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/generate_hve.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/generate_hve.Tpo $(DEPDIR)/generate_hve.Po
-#	$(AM_V_CC)source='test/generate_hve.c' object='generate_hve.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o generate_hve.obj `if test -f 'test/generate_hve.c'; then $(CYGPATH_W) 'test/generate_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/generate_hve.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT generate_hve.obj -MD -MP -MF $(DEPDIR)/generate_hve.Tpo -c -o generate_hve.obj `if test -f 'test/generate_hve.c'; then $(CYGPATH_W) 'test/generate_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/generate_hve.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/generate_hve.Tpo $(DEPDIR)/generate_hve.Po
+	$(AM_V_CC)source='test/generate_hve.c' object='generate_hve.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o generate_hve.obj `if test -f 'test/generate_hve.c'; then $(CYGPATH_W) 'test/generate_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/generate_hve.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
