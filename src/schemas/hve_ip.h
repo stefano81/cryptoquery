@@ -33,7 +33,6 @@ typedef struct {
   element_t **k;
 }* dkey_t;
 
-pairing_t* load_pairing(char *params_path);
 setup_t setup(pairing_t* pairing, int l);
 ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m);
 dkey_t keygen(pairing_t* pairing, msk_t private, int y[]);
