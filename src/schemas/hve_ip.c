@@ -132,16 +132,13 @@ static element_t ** invert(element_t **m, int n) {
 }
 
 setup_t setup(pairing_t* pairing, int l) {
-  element_t ** cbase = create_identity_matrix(pairing, 3);
-  element_t psi;
+  element_t **cbase, psi, t;
 
-/*   printf("Identity:\n"); */
-/*   for (int i = 0; i < 3; ++i) { */
-/*     for (int j = 0; j < 3; ++j) */
-/*       printf(" %c", element_is0(cbase[i][j]) ? '0': element_is1(cbase[i][j]) ? '1' : 'x'); */
-/*     printf("\n"); */
-/*   } */
-/*   printf(" -----\n"); */
+  setup_t out = malloc(sizeof(*out));
+  msk_t private = out->private = malloc(sizeof(*private));
+  mpk_t public = out->public = malloc(sizeof(*public));
+
+  cbase = create_identity_matrix(pairing, 3);
 
   element_init_Zr(psi, *pairing);
   element_random(psi);
@@ -149,9 +146,6 @@ setup_t setup(pairing_t* pairing, int l) {
   for (int i = 0; i < 3; ++i)
     element_mul_zn(cbase[i][i], cbase[i][i], psi); // now \psi-identity -> canonical base
 
-  setup_t out = malloc(sizeof(*out));
-  msk_t private = out->private = malloc(sizeof(*private));
-  mpk_t public = out->public = malloc(sizeof(*public));
 
   element_init_G1(out->g, *pairing);
   element_random(out->g);
@@ -160,7 +154,7 @@ setup_t setup(pairing_t* pairing, int l) {
   private->C = malloc(sizeof(element_t **) * (l + 1));
   public->B = malloc(sizeof(element_t **) * (l + 1));
   
-  element_t t;
+
   element_init_GT(t, *pairing);
   element_init_GT(public->gT, *pairing);
 
@@ -210,28 +204,6 @@ setup_t setup(pairing_t* pairing, int l) {
 	}
       }
 
-      // check if \psi-orthonormal using lt as a support
-/*       for (int i = 0; i < 3; ++i) { */
-/* 	for (int j = 0; j < 3; ++j) { */
-/* 	  element_set0(lt[i][j]); */
-/* 	  for (int r = 0; r < 3; ++r) { */
-/* 	    element_mul(t, B[i][r], C[r][j]); */
-/* 	    element_add(lt[i][j], lt[i][j], t); */
-/* 	  } */
-/* 	} */
-/*       } */
-
-/*       for (int i = 0; i < 3; ++i) { */
-/* 	for (int j = 0; j < 3; ++j) */
-/* 	  printf(" %c", element_is0(lt[i][j]) ? '0': element_is1(lt[i][j]) ? '1' : 'x'); */
-/* 	for (int j = 0; j < 3; ++j) */
-/* 	  printf(" %c", element_is0(B[i][j]) ? '0': element_is1(C[i][j]) ? '1' : 'x'); */
-/* 	for (int j = 0; j < 3; ++j) */
-/* 	  printf(" %c", element_is0(C[i][j]) ? '0': element_is1(C[i][j]) ? '1' : 'x'); */
-/* 	printf("\n"); */
-/*       } */
-/*       printf(" ----- ----- -----\n"); */
-
       for (int i = 0; i < 3; ++i) {
 	for (int j = 0; j < 3; ++j)
 	  element_clear(lt[i][j]);
@@ -240,14 +212,12 @@ setup_t setup(pairing_t* pairing, int l) {
       free(lt);
   }
 
-  // clean up
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j)
       element_clear(cbase[i][j]);
 
     free(cbase[i]);
   }
-
   free(cbase);
   element_clear(psi);
   element_clear(t);
@@ -256,74 +226,83 @@ setup_t setup(pairing_t* pairing, int l) {
 }
 
 ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
+  ciphertext_t ct = malloc(sizeof(*ct));
+  element_t one, xt, v[3],
+    z,
+    wt;
+
   element_init_GT(*m, *pairing);
   element_random(*m);
 
-  ciphertext_t ct = malloc(sizeof(*ct));
   ct->l = public->l;
 
-  element_t xt;
   element_init_Zr(xt, *pairing);
 
+  element_init_G1(one, *pairing);
+  element_set1(one);
+
   ct->ci = malloc(sizeof(element_t) * (ct->l + 1));
-  
-  element_t z, *w = malloc(sizeof(element_t) * (ct->l + 1));
 
   element_init_Zr(z, *pairing);
+  element_init_Zr(wt, *pairing);
   element_random(z);
-
-  for (int i = 0; i <= ct->l; ++i) {
-    element_init_G1(w[i], *pairing);
-    element_random(w[i]);
-  }
 
   element_init_GT(ct->c, *pairing);
   element_pow_zn(ct->c, public->gT, z);
   element_mul(ct->c, ct->c, *m);
 
-  element_t t;
 
-  element_init_G1(t, *pairing);
-
-  element_t v[3];
   element_init_G1(v[0], *pairing);
-  element_set(v[0], w[0]);
+  element_random(wt); // w_0
+  element_mul_zn(v[0], one, wt);
 
   element_init_G1(v[1], *pairing);
-  element_set1(t);
-  element_mul_zn(v[1], t, z);
+  element_mul_zn(v[1], one, z);
 
   element_init_G1(v[2], *pairing);
   element_set0(v[2]);
 
   ct->ci[0] = vector_times_matrix(v, public->B[0], 3);
 
-  element_set(v[2], w[0]);
+  element_mul_zn(v[2], one, wt);
+
   for (int i = 1; i <= ct->l; ++i) {
-    element_set(v[0], w[i]);
+    element_random(wt); // wt <- F_q
+    element_mul_zn(v[0], one, wt);
     element_set_si(xt, x[i-1]);
-    element_mul_zn(v[1], w[i], xt);
+    element_mul(wt, wt, xt);
+    element_mul_zn(v[1], one, wt);
 
     ct->ci[i]  = vector_times_matrix(v, public->B[i], 3);
   }
+
+  element_clear(v[0]);
+  element_clear(v[1]);
+  element_clear(v[2]);
+  element_clear(wt);
+  element_clear(xt);
+  element_clear(z);
 
   return ct;
 }
 
 dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   dkey_t k = malloc(sizeof(*k));
+  element_t yt, dt, st, s0, v[3], one;
+
   k->S = 0;
   k->k = malloc(sizeof(element_t) * (private->l + 1));
-  element_t yt, dt, s0;
-  element_t v[3];
 
+  element_init_G1(one, *pairing);
   element_init_G1(v[0], *pairing);
   element_init_G1(v[1], *pairing);
   element_init_G1(v[2], *pairing);
-  element_init_G1(dt, *pairing);
+  element_init_Zr(dt, *pairing);
   element_init_Zr(yt, *pairing);
-  element_init_G1(s0, *pairing);
+  element_init_Zr(s0, *pairing);
+  element_init_Zr(st, *pairing);
 
+  element_set1(one);
   element_set0(s0);
 
   unsigned long mask = 0x01;
@@ -336,13 +315,19 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
     k->S |= mask;
 
     element_random(dt);
-    element_random(v[2]); // st
+    element_random(st);
+    element_add(s0, s0, st); // sum st
+
     element_set_si(yt, y[i - 1]);
 
-    element_mul_zn(v[0], dt, yt);
-    element_neg(v[1], dt);
-    element_add(s0, s0, v[2]); // sum st
-    //    printf("keygen: i = %d, y[i] = %d\n", i, y[i-1]);
+    element_mul(yt, dt, yt);
+    element_mul_zn(v[0], one, yt);
+
+    element_neg(dt, dt);
+    element_mul_zn(v[1], one, dt);
+
+    element_mul_zn(v[2], one, st);
+
     k->k[i] = vector_times_matrix(v, private->C[i], 3);
   }
 
@@ -356,8 +341,10 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   element_clear(v[1]);
   element_clear(v[2]);
   element_clear(dt);
+  element_clear(st);
   element_clear(yt);
   element_clear(s0);
+  element_clear(one);
 
   return k;
 }
