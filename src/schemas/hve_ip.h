@@ -26,11 +26,23 @@ typedef struct {
   unsigned short l;
   element_t c;
   element_t **ci;
+#ifdef DEBUG
+  element_t gT;
+  element_t z;
+  element_t *w;
+  int *x;
+#endif
 }* ciphertext_t;
 
 typedef struct {
   unsigned long S;
   element_t **k;
+#ifdef DEBUG
+  int *y;
+  element_t *d;
+  element_t *s;
+  element_t eta;
+#endif
 }* dkey_t;
 
 setup_t setup(pairing_t* pairing, int l);
