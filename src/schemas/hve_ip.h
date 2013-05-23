@@ -35,9 +35,9 @@ typedef struct {
 
 pairing_t* load_pairing(char *params_path);
 setup_t setup(pairing_t* pairing, int l);
-ciphertext_t encrypt(pairing_t* pairing, mpk_t public, unsigned int x[], element_t *m);
+ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m);
 dkey_t keygen(pairing_t* pairing, msk_t private, int y[]);
-element_t * decript(pairing_t* pairing, ciphertext_t ct, dkey_t key);
+element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key);
 
 int serialize_ct(unsigned char ** buffer, ciphertext_t ct);
 int serialize_mpk(unsigned char ** buffer, mpk_t pulbic);

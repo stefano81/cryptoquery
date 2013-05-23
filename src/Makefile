@@ -76,7 +76,8 @@ am_generatehve_OBJECTS = hve_ip.$(OBJEXT) generate_hve.$(OBJEXT) \
 	utils.$(OBJEXT)
 generatehve_OBJECTS = $(am_generatehve_OBJECTS)
 generatehve_LDADD = $(LDADD)
-am_testing_OBJECTS = testing.$(OBJEXT) utils.$(OBJEXT)
+am_testing_OBJECTS = testing.$(OBJEXT) utils.$(OBJEXT) \
+	hve_ip.$(OBJEXT)
 testing_OBJECTS = $(am_testing_OBJECTS)
 testing_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
@@ -152,8 +153,8 @@ CC = gcc -std=gnu99
 CCDEPMODE = depmode=gcc3
 
 # what flags you want to pass to the C compiler & linker
-#CFLAGS = --pedantic -Wall -g0 -O2
-CFLAGS = --pedantic -Wall -ggdb -O2
+#CFLAGS = -g0 -O2
+CFLAGS = --pedantic -Wall -ggdb
 CPP = gcc -std=gnu99 -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -234,7 +235,7 @@ top_srcdir = ..
 cryptoquery_SOURCES = common.h config.h configuration.c configuration.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h schemas/hve_ip.c schemas/hve_ip.h schemas/utils.c schemas/utils.h
 benchmarkhve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/benchmark_hve.c schemas/utils.h schemas/utils.c
 generatehve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/generate_hve.c schemas/utils.h schemas/utils.c
-testing_SOURCES = testing.c schemas/utils.c
+testing_SOURCES = testing.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
