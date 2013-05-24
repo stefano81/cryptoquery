@@ -65,7 +65,7 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 
-AM_INIT_AUTOMAKE([1.12 foreign no-define])
+AM_INIT_AUTOMAKE([1.11 foreign no-define])
 
 AC_CONFIG_FILES([Makefile
 	src/Makefile])
