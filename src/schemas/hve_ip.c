@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <math.h>
 
 #ifdef DEBUG
 void print_vector(element_t *v, int N) {
@@ -165,6 +166,136 @@ static element_t ** invert(element_t **m, int n) {
   return m;
 }
 
+static element_t * determinant(element_t **a, int n) {
+   element_t * det = malloc(sizeof(element_t));
+   element_t **m = NULL, t;
+
+   element_init_same_as(*det, a[0][0]);
+   element_init_same_as(t, a[0][0]);
+
+   if (n == 1) { /* Shouldn't get used */
+     element_set(*det, a[0][0]);
+   } else if (n == 2) {
+     element_mul(*det, a[0][0], a[1][1]);
+     element_mul(t, a[1][0], a[0][1]);
+     element_sub(*det, *det, t);
+   } else {
+     element_set0(*det);
+
+      for (int j1 = 0; j1<n; j1++) {
+	m = malloc((n-1)*sizeof(element_t *));
+	for (int i = 0;i < n-1;i++) {
+	  m[i] = malloc((n-1)*sizeof(element_t));
+	}
+	for (int i=1;i<n;i++) {
+	  int j2 = 0;
+	  for (int j=0;j<n;j++) {
+	    if (j == j1)
+	      continue;
+	    element_init_same_as(m[i-1][j2], a[i][j]);
+	    element_set(m[i-1][j2], a[i][j]);
+	    ++j2;
+	  }
+	}
+	element_t * d1 = determinant(m,n-1);
+	element_mul(t, a[0][j1], *d1);
+	element_clear(*d1);
+	free(d1);
+	if (!signbit(pow(-1.0,j1+2.0)))
+	  element_neg(t, t);
+
+	element_add(*det, *det, t);
+	for (int i=0; i < n-1; ++i) {
+	  for (int j = 0; j < n-1; ++j)
+	    element_clear(m[i][j]);
+	  free(m[i]);
+	}
+	free(m);
+      }
+   }
+
+   element_clear(t);
+
+   return det;
+}
+
+static element_t ** cofactor_matrix(element_t **a, int n) {
+  element_t * det;
+  element_t **c;
+  element_t **b = malloc(sizeof(element_t*) * n);
+
+  for (int i = 0; i < n; ++i) {
+    b[i] = malloc(sizeof(element_t) * n);
+    for (int j = 0; j < n; ++j)
+      element_init_same_as(b[i][j], a[0][0]);
+  }
+
+  c = malloc((n - 1) * sizeof(element_t *));
+  for (int i = 0; i < n - 1; ++i)
+    c[i] = malloc((n-1)*sizeof(element_t));
+
+  for (int j=0;j<n;j++) {
+    for (int i=0;i<n;i++) {
+
+      /* Form the adjoint a_ij */
+      int i1 = 0;
+      for (int ii = 0; ii < n; ++ii) {
+	if (ii == i)
+	  continue;
+	int j1 = 0;
+	for (int jj = 0; jj < n; ++jj) {
+	  if (jj == j)
+	    continue;
+	  element_init_same_as(c[i1][j1], a[ii][jj]);
+	  element_set(c[i1][j1], a[ii][jj]);
+	  j1++;
+	}
+	i1++;
+      }
+
+      /* Calculate the determinate */
+      det = determinant(c, n-1);
+
+      /* Fill in the elements of the cofactor */
+      if (!pow(-1.0,i+j+2.0))
+	element_neg(b[i][j], *det);
+      else
+	element_set(b[i][j], *det);
+
+      element_clear(*det);
+      free(det);
+    }
+  }
+
+  for (int i = 0; i < n - 1; ++i) {
+    for (int j = 0; j < n -1; ++j) {
+      element_clear(c[i][j]);
+      element_clear(a[i][j]);
+    }
+    free(a[i]);
+    free(c[i]);
+  }
+  free(a);
+  free(c);
+
+  return b;
+}
+
+
+static element_t ** invert_square(element_t **m, int n) {
+  element_t * det = determinant(m, n);
+
+  element_t ** m1 = cofactor_matrix(m, n);
+
+  m1 = transpose(m1, n);
+
+  for (int i = 0; i < n; ++i)
+    for (int j = 0; j < n; ++j)
+      element_div(m1[i][j], m1[i][j], det);
+
+  return m1;
+}
+
 setup_t setup(pairing_t* pairing, int l) {
   element_t **cbase, psi, t;
 
@@ -228,7 +359,18 @@ setup_t setup(pairing_t* pairing, int l) {
       }
     }
 
-    lt = invert(transpose(lt, 3), 3);
+#ifdef DEBUG
+    fprintf(stderr, "B %d\n", k);
+    print_matrix(B, 3);
+#endif
+
+    // lt = invert(transpose(lt, 3), 3);
+    lt = invert_square(lt, 3); //traspose(lt, 3), 3);
+
+#ifdef DEBUG
+    fprintf(stderr, "LT^{-1} %d\n", k);
+    print_matrix(lt, 3);
+#endif
 
     element_t ** C = private->C[k] = malloc(sizeof(element_t*) * 3);
 
@@ -474,6 +616,7 @@ element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
 
   fprintf(stderr, "e(k0', c0') == gT^{s0w0}? %s\n", 0 == element_cmp(t2, _t1) ? "true" : "false");
   fprintf(stderr, "e(k0', c0') == 1? %s\n", element_is1(t2) ? "true" : "false");
+  fprintf(stderr, "e(k0', c0') == 0? %s\n", element_is0(t2) ? "true" : "false");
 
   pairing_apply(_t2, key->k[0][1], ct->ci[0][1], *pairing);
   element_mul(t2, t2, _t2);
@@ -482,11 +625,13 @@ element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
 
   fprintf(stderr, "e(k0'', c0'') == gT^{z}? %s\n", 0 == element_cmp(_t2, _t1) ? "true" : "false");
   fprintf(stderr, "e(k0'', c0'') == 1? %s\n", element_is1(_t2) ? "true" : "false");
+  fprintf(stderr, "e(k0'', c0'') == 0? %s\n", element_is0(_t2) ? "true" : "false");
 
   pairing_apply(_t2, key->k[0][2], ct->ci[0][2], *pairing);
   element_mul(t2, t2, _t2);
 
   fprintf(stderr, "e(k0''', c0''') == 1? %s\n", element_is1(_t2) ? "true" : "false");
+  fprintf(stderr, "e(k0''', c0''') == 0? %s\n", element_is0(_t2) ? "true" : "false");
 
 #else
   element_prod_pairing(t2, key->k[0], ct->ci[0], 3); // p_0 = e(k_0, c_0)
