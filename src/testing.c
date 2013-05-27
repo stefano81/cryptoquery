@@ -20,8 +20,7 @@ void minorX(element_t * tmp1, element_t a, element_t b, element_t c, element_t d
 }
     
 
-setup_t 
-setupAlgo(pairing_t *pairing, int l) {
+setup_t setupAlgo(pairing_t *pairing, int l) {
   element_t ***BB, ***CC;
   element_t g1,g2,psi,**A1, **A2, **B, **C, **X, **Xs;
   element_t tmp1,tmp2;
@@ -225,6 +224,26 @@ for(int zz=0;zz<l+1;zz++){
   setup->public->B = BB;
   setup->private->C = CC;
 
+#ifdef DEBUG
+  element_t check, oneT;
+  element_init_GT(check, *pairing);
+  element_init_GT(oneT, *pairing);
+  element_set1(oneT);
+  for (int k = 0; k < l + 1; ++k) {
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+	element_prod_pairing(check, BB[k][i], CC[k][j], 3);
+	if (i == j)
+	  fprintf(stderr, "[%d] %d == %d -> gT: %s\n", k, i, j, 0 == element_cmp(gT, check) ? "true" : "false");
+	else
+	  fprintf(stderr, "[%d] %d != %d -> 1T: %s\n", k, i, j, 0 == element_cmp(oneT, check) ? "true" : "false");
+      }
+    }
+  }
+  element_clear(oneT);
+  element_clear(check);
+#endif
+
   return setup;
 }
 
@@ -258,38 +277,6 @@ void test_fixed(const char *path) {
   r = element_cmp(m, *dm);
   printf("3: %s\n", !r ? "OK!" : "No!");
 }
-
-/* void test_variale(consta char *path, int size, int ntry) { */
-/*   pairing_t * pairing = load_pairing(path); */
-/*   setup_t out = setup(pairing, size); */
-
-/*   element_t m, *dm; */
-
-/*   int *x = malloc(sizeof(int) * size); */
-/*   int **y = malloc(sizeof(int) * ntry); */
-
-/*   for (int i = 0; i < size; ++i) { */
-/*     x[i] = (int) (rand() / (double) RAND_MAX) * 100; */
-/*   } */
-
-/*   ciphertext_t ct = encrypt(pairing, out->public, x, &m); */
-
-/*   dkey_t k = keygen(pairing, out->private, y1); */
-/*   dm = decrypt(pairing, ct, key1); */
-/*   int r = element_cmp(m, *dm); */
-/*   printf("1: %s\n", !r ? "OK!" : "No!"); */
-
-/*   dkey_t key2 = keygen(pairing, out->private, y2); */
-/*   dm = decrypt(pairing, ct, key2); */
-/*   r = element_cmp(m, *dm); */
-/*   printf("2: %s\n", !r ? "OK!" : "No!"); */
-
-/*   dkey_t key3 = keygen(pairing, out->private, y3); */
-/*   dm = decrypt(pairing, ct, key3); */
-/*   r = element_cmp(m, *dm); */
-/*   printf("3: %s\n", r ? "OK!" : "No!"); */
-
-/* } */
 
 int main(int argc, char ** argv) {
   if (2 == argc)

@@ -505,10 +505,6 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
   element_mul_zn(v[2], one, wt); // set w0 to the third element of the vector
   //element_set(v[2], wt); // set w0 to the third element of the vector
 
-#ifdef DEBUG
-  printf("ct-l: %d\n", ct->l);
-#endif
-
   for (int i = 1; i <= ct->l; ++i) {
     element_random(wt); // wt <- F_q
 
@@ -521,9 +517,6 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
     element_mul_zn(v[0], one, wt);
     //element_set(v[0], wt);
     element_set_si(xt, x[i-1]);
-#ifdef DEBUG
-    element_printf("x[%d]: %B\n", i-1, xt);
-#endif
     element_mul(wt, wt, xt);
     element_mul_zn(v[1], one, wt);
     //element_set(v[1], wt); // (w_t, w_t x_t, w_0)
