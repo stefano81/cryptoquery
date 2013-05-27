@@ -8,15 +8,15 @@
 #include "schemas/hve_ip.h"
 
 void minorX(element_t * tmp1, element_t a, element_t b, element_t c, element_t d){
-    element_t tmp2;
+  element_t tmp2;
 
-    element_init_same_as(*tmp1,a);
-    element_init_same_as(tmp2,a);
-    element_mul(*tmp1,a,b);
-    element_mul(tmp2,c,d);
-    element_sub(*tmp1,*tmp1,tmp2);
+  element_init_same_as(*tmp1,a);
+  element_init_same_as(tmp2,a);
+  element_mul(*tmp1,a,b);
+  element_mul(tmp2,c,d);
+  element_sub(*tmp1,*tmp1,tmp2);
 
-    element_clear(tmp2);
+  element_clear(tmp2);
 }
     
 
@@ -26,24 +26,36 @@ setup_t setupAlgo(pairing_t *pairing, int l) {
   element_t tmp1,tmp2;
   element_t ptmp;
   element_t t,gT;
+  element_t t1,t2,t3;
+  element_t delta;
+  
+  element_init_Zr(delta,*pairing); 
+  element_init_Zr(t1,*pairing);
+  element_init_Zr(t2,*pairing);
+  element_init_Zr(t3,*pairing);
+  
 
-/* pick random psi in the field */
+  /* pick random psi in the field */
   element_init_Zr(psi, *pairing);
   element_random(psi);
 
-/* any element of G1/G2 other than 0 is a generator*/
+  /* any element of G1/G2 other than 0 is a generator*/
   element_init_G1(g1, *pairing);
   element_random(g1);
   element_init_G2(g2, *pairing);
   element_random(g2);
 
-/* compute gT=e(g1,g2)^psi */
+  /* compute gT=e(g1,g2)^psi */
   element_init_GT(gT, *pairing);
   element_init_GT(t, *pairing);
   pairing_apply(t, g1, g2, *pairing);
   element_pow_zn(gT, t, psi);
 
-/* if you want to see psi, g1, g2, gT */
+  element_init_G1(tmp1,*pairing);
+  element_init_G2(tmp2,*pairing);
+
+
+  /* if you want to see psi, g1, g2, gT */
 #ifdef DEBUG
   printf("psi=\n");
   element_printf("%B\n",psi);  
@@ -55,7 +67,7 @@ setup_t setupAlgo(pairing_t *pairing, int l) {
   element_printf("%B\n",gT);  
 #endif
 
-/* constructing the canonical bases: A1 for G1 and A2 for G2 */
+  /* constructing the canonical bases: A1 for G1 and A2 for G2 */
   A1=malloc(sizeof(element_t *)*3);  A1[0]=malloc(sizeof(element_t)*3); 
   A1[1]=malloc(sizeof(element_t)*3); A1[2]=malloc(sizeof(element_t)*3); 
 
@@ -64,151 +76,21 @@ setup_t setupAlgo(pairing_t *pairing, int l) {
 
   for(int i=0;i<3;i++){
     for(int j=0;j<3;j++){
-        element_init_G1(A1[i][j],*pairing); element_init_G2(A2[i][j],*pairing);
-        if (i==j){
-            element_set(A1[i][j],g1);  /* element_set(dest,source) */
-            element_set(A2[i][j],g2);  /* element_set(dest,source) */
-        }
-        else{
-            element_set0(A1[i][j]);
-            element_set0(A2[i][j]);
-        }
+      element_init_G1(A1[i][j],*pairing); element_init_G2(A2[i][j],*pairing);
+      if (i==j){
+	element_set(A1[i][j],g1);  /* element_set(dest,source) */
+	element_set(A2[i][j],g2);  /* element_set(dest,source) */
+      }
+      else{
+	element_set0(A1[i][j]);
+	element_set0(A2[i][j]);
+      }
     }
   }
 
-BB=(element_t ***)malloc(sizeof(element_t **)*(l+1));
-CC=(element_t ***)malloc(sizeof(element_t **)*(l+1));
+  BB=(element_t ***)malloc(sizeof(element_t **)*(l+1));
+  CC=(element_t ***)malloc(sizeof(element_t **)*(l+1));
 
-for(int zz=0;zz<l+1;zz++){
-  BB[zz]=malloc(sizeof(element_t *)*3); CC[zz]=malloc(sizeof(element_t *)*3);
-  BB[zz][0]=malloc(sizeof(element_t)*3); CC[zz][0]=malloc(sizeof(element_t)*3);
-  BB[zz][1]=malloc(sizeof(element_t)*3); CC[zz][1]=malloc(sizeof(element_t)*3);
-  BB[zz][2]=malloc(sizeof(element_t)*3); CC[zz][2]=malloc(sizeof(element_t)*3);
-
-  B=BB[zz]; C=CC[zz];
-  X=malloc(sizeof(element_t *)*3); Xs=malloc(sizeof(element_t *)*3);
-  X[0]=malloc(sizeof(element_t)*3); Xs[0]=malloc(sizeof(element_t)*3);
-  X[1]=malloc(sizeof(element_t)*3); Xs[1]=malloc(sizeof(element_t)*3);
-  X[2]=malloc(sizeof(element_t)*3); Xs[2]=malloc(sizeof(element_t)*3);
-/* pick a random X */
-  for(int i=0;i<3;i++){
-    for(int j=0;j<3;j++){
-        element_init_Zr(X[i][j],*pairing);
-	element_random(X[i][j]);
-    }
-  }
-
-/* let us invert X in Xs*/
-  minorX(&ptmp, X[1][1],X[2][2],X[1][2],X[2][1]);
-  element_init_Zr(Xs[0][0],*pairing); 
-  element_set(Xs[0][0],ptmp); element_clear(ptmp);
-  minorX(&ptmp, X[1][2],X[2][0],X[1][0],X[2][2]);
-  element_init_Zr(Xs[1][0],*pairing); 
-  element_set(Xs[1][0],ptmp); element_clear(ptmp);
-  minorX(&ptmp, X[1][0],X[2][1],X[1][1],X[2][0]);
-  element_init_Zr(Xs[2][0],*pairing); 
-  element_set(Xs[2][0],ptmp); element_clear(ptmp);
-
-  minorX(&ptmp, X[0][2],X[2][1],X[0][1],X[2][2]);
-  element_init_Zr(Xs[0][1],*pairing); 
-  element_set(Xs[0][1],ptmp); element_clear(ptmp);
-  minorX(&ptmp, X[0][0],X[2][2],X[0][2],X[2][0]);
-  element_init_Zr(Xs[1][1],*pairing); 
-  element_set(Xs[1][1],ptmp); element_clear(ptmp);
-  minorX(&ptmp, X[0][1],X[2][0],X[0][0],X[2][1]);
-  element_init_Zr(Xs[2][1],*pairing); 
-  element_set(Xs[2][1],ptmp); element_clear(ptmp);
-
-  minorX(&ptmp, X[0][1],X[1][2],X[0][2],X[1][1]);
-  element_init_Zr(Xs[0][2],*pairing); 
-  element_set(Xs[0][2],ptmp); element_clear(ptmp);
-  minorX(&ptmp, X[0][2],X[1][0],X[0][0],X[1][2]);
-  element_init_Zr(Xs[1][2],*pairing); 
-  element_set(Xs[1][2],ptmp); element_clear(ptmp);
-  minorX(&ptmp, X[0][0],X[1][1],X[0][1],X[1][0]);
-  element_init_Zr(Xs[2][2],*pairing); 
-  element_set(Xs[2][2],ptmp); element_clear(ptmp);
-
-
-  element_t t1,t2,t3;
-  element_t delta;
-  element_init_Zr(delta,*pairing); 
-  element_init_Zr(t1,*pairing);
-  element_init_Zr(t2,*pairing);
-  element_init_Zr(t3,*pairing);
-  
-/* computing the determinat of X */
-  element_mul(t1,X[0][0],X[1][1]); element_mul(t1,t1,X[2][2]);
-  element_mul(t2,X[0][1],X[1][2]); element_mul(t2,t2,X[2][0]);
-  element_mul(t3,X[0][2],X[1][0]); element_mul(t3,t3,X[2][1]);
-  element_add(delta,t1,t2); element_add(delta,delta,t3);
-  element_mul(t1,X[0][2],X[1][1]); element_mul(t1,t1,X[2][0]);
-  element_mul(t2,X[0][0],X[1][2]); element_mul(t2,t2,X[2][1]);
-  element_mul(t3,X[0][1],X[1][0]); element_mul(t3,t3,X[2][2]);
-  element_sub(delta,delta,t1);   element_sub(delta,delta,t2);
-  element_sub(delta,delta,t3);  
-
-  for(int i=0;i<3;i++){
-    for(int j=0;j<3;j++){
-        element_div(Xs[i][j],Xs[i][j],delta);
-        element_mul(Xs[i][j],Xs[i][j],psi);
-    }
-  }
-/* now X * Xs = psi * I */
-  
-/* if you want to check X and Xs */
-#ifdef DEBUG
-  for(int i=0; i<3; ++i){
-    for(int j=0; j<3; ++j){
-      printf("(%d %d)\n", i, j);
-        element_mul(t1,X[i][0],Xs[0][j]);
-        element_mul(t2,X[i][1],Xs[1][j]);
-        element_mul(t3,X[i][2],Xs[2][j]);
-        element_add(t1,t1,t2);
-        element_add(t1,t1,t3);
-        element_printf("(X*Xs)[i][j] %B\n",t1);
-    }
-}
-#endif
-
-/* now we compute B=X x A1 and C=Xs x A2 */
-  element_init_G1(tmp1,*pairing);
-  element_init_G2(tmp2,*pairing);
-  for(int i=0;i<3;i++){
-    for(int j=0;j<3;j++){
-        element_init_G1(B[i][j],*pairing);
-        element_init_G2(C[i][j],*pairing);
-        element_set0(tmp1); element_set0(tmp2);
-        for(int k=0;k<3;k++){
-            element_mul_zn(tmp1,A1[k][j],X[i][k]);
-            element_mul_zn(tmp2,A2[k][j],Xs[i][k]);
-            element_add(B[i][j],B[i][j],tmp1);
-            element_add(C[i][j],C[i][j],tmp2);
-        }
-    }
-  }
-
-/* if you want to check that B and C are psi ortogonal */
-#ifdef DEBUG
-  /*  printf("Checking if B and C from l=%d are psi-orthogonal\n",zz);
-  printf("gT=\n");
-  element_printf("%B\n",gT);
-  element_init_GT(tmp1, *pairing);
-  element_init_GT(tmp2, *pairing);
-  for(int i=0;i<3;i++){
-    for(int j=0;j<3;j++){
-        printf("Checking the product of B[%d] and C[%d] for component %d\n",i,j,zz);
-        pairing_apply(tmp1, B[i][0], C[0][j],*pairing);
-        pairing_apply(tmp2, B[i][1], C[1][j],*pairing);
-        element_add(tmp1,tmp1,tmp2);
-        pairing_apply(tmp2, B[i][2], C[2][j],*pairing);
-        element_add(tmp1,tmp1,tmp2);
-        element_printf("%B\n",tmp1);
-    }
-    }*/
-#endif
-} /* for zz */
-    
   setup_t setup = malloc(sizeof(setup_t));
 
   /* qui ho fatto un qualche errore con i puntatori */
@@ -217,12 +99,127 @@ for(int zz=0;zz<l+1;zz++){
   element_init_GT(public->gT,*pairing);
   element_set(public->gT, gT);
   /*  element_init_G1(public->g1, *pairing);
-  element_set(public->g1, g1);
-  element_init_G2(setup->public->g2,*pairing);
-  element_set(public->g2, g2);*/
+      element_set(public->g1, g1);
+      element_init_G2(setup->public->g2,*pairing);
+      element_set(public->g2, g2);*/
   setup->private->l = setup->public->l = l;
   setup->public->B = BB;
   setup->private->C = CC;
+
+
+  for(int zz=0;zz<l+1;zz++){
+    BB[zz]=malloc(sizeof(element_t *)*3); CC[zz]=malloc(sizeof(element_t *)*3);
+    BB[zz][0]=malloc(sizeof(element_t)*3); CC[zz][0]=malloc(sizeof(element_t)*3);
+    BB[zz][1]=malloc(sizeof(element_t)*3); CC[zz][1]=malloc(sizeof(element_t)*3);
+    BB[zz][2]=malloc(sizeof(element_t)*3); CC[zz][2]=malloc(sizeof(element_t)*3);
+
+    B=BB[zz]; C=CC[zz];
+    X=malloc(sizeof(element_t *)*3); Xs=malloc(sizeof(element_t *)*3);
+    X[0]=malloc(sizeof(element_t)*3); Xs[0]=malloc(sizeof(element_t)*3);
+    X[1]=malloc(sizeof(element_t)*3); Xs[1]=malloc(sizeof(element_t)*3);
+    X[2]=malloc(sizeof(element_t)*3); Xs[2]=malloc(sizeof(element_t)*3);
+    /* pick a random X */
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        element_init_Zr(X[i][j],*pairing);
+	element_random(X[i][j]);
+      }
+    }
+
+    /* let us invert X in Xs*/
+    minorX(&ptmp, X[1][1],X[2][2],X[1][2],X[2][1]);
+    element_init_Zr(Xs[0][0],*pairing); 
+    element_set(Xs[0][0],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[1][2],X[2][0],X[1][0],X[2][2]);
+    element_init_Zr(Xs[1][0],*pairing); 
+    element_set(Xs[1][0],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[1][0],X[2][1],X[1][1],X[2][0]);
+    element_init_Zr(Xs[2][0],*pairing); 
+    element_set(Xs[2][0],ptmp); element_clear(ptmp);
+
+    minorX(&ptmp, X[0][2],X[2][1],X[0][1],X[2][2]);
+    element_init_Zr(Xs[0][1],*pairing); 
+    element_set(Xs[0][1],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[0][0],X[2][2],X[0][2],X[2][0]);
+    element_init_Zr(Xs[1][1],*pairing); 
+    element_set(Xs[1][1],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[0][1],X[2][0],X[0][0],X[2][1]);
+    element_init_Zr(Xs[2][1],*pairing); 
+    element_set(Xs[2][1],ptmp); element_clear(ptmp);
+
+    minorX(&ptmp, X[0][1],X[1][2],X[0][2],X[1][1]);
+    element_init_Zr(Xs[0][2],*pairing); 
+    element_set(Xs[0][2],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[0][2],X[1][0],X[0][0],X[1][2]);
+    element_init_Zr(Xs[1][2],*pairing); 
+    element_set(Xs[1][2],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[0][0],X[1][1],X[0][1],X[1][0]);
+    element_init_Zr(Xs[2][2],*pairing); 
+    element_set(Xs[2][2],ptmp); element_clear(ptmp);
+
+    /* computing the determinat of X */
+    element_mul(t1,X[0][0],X[1][1]); element_mul(t1,t1,X[2][2]);
+    element_mul(t2,X[0][1],X[1][2]); element_mul(t2,t2,X[2][0]);
+    element_mul(t3,X[0][2],X[1][0]); element_mul(t3,t3,X[2][1]);
+    element_add(delta,t1,t2); element_add(delta,delta,t3);
+    element_mul(t1,X[0][2],X[1][1]); element_mul(t1,t1,X[2][0]);
+    element_mul(t2,X[0][0],X[1][2]); element_mul(t2,t2,X[2][1]);
+    element_mul(t3,X[0][1],X[1][0]); element_mul(t3,t3,X[2][2]);
+    element_sub(delta,delta,t1);   element_sub(delta,delta,t2);
+    element_sub(delta,delta,t3);  
+
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        element_div(Xs[i][j],Xs[i][j],delta);
+        element_mul(Xs[i][j],Xs[i][j],psi);
+      }
+    }
+    /* now X * Xs = psi * I */
+  
+    /* if you want to check X and Xs */
+#ifdef DEBUG
+    for(int i=0; i<3; ++i){
+      for(int j=0; j<3; ++j){
+	printf("(%d %d)\n", i, j);
+        element_mul(t1,X[i][0],Xs[0][j]);
+        element_mul(t2,X[i][1],Xs[1][j]);
+        element_mul(t3,X[i][2],Xs[2][j]);
+        element_add(t1,t1,t2);
+        element_add(t1,t1,t3);
+        element_printf("(X*Xs)[i][j] %B\n",t1);
+      }
+    }
+#endif
+
+    /* now we compute B=X x A1 and C=Xs x A2 */
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        element_init_G1(B[i][j],*pairing);
+        element_init_G2(C[i][j],*pairing);
+        element_set0(tmp1); element_set0(tmp2);
+        for(int k=0;k<3;k++){
+	  element_mul_zn(tmp1,A1[k][j],X[i][k]);
+	  element_mul_zn(tmp2,A2[k][j],Xs[i][k]);
+	  element_add(B[i][j],B[i][j],tmp1);
+	  element_add(C[i][j],C[i][j],tmp2);
+        }
+      }
+    }
+
+    C = transpose(C, 3);
+
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+	element_clear(X[i][j]);
+	element_clear(Xs[i][j]);
+      }
+      free(X[i]);
+      free(Xs[i]);
+    }
+    free(X);
+    free(Xs);
+
+  } /* for zz */
 
 #ifdef DEBUG
   element_t check, oneT;
@@ -243,6 +240,29 @@ for(int zz=0;zz<l+1;zz++){
   element_clear(oneT);
   element_clear(check);
 #endif
+  element_clear(tmp1);
+  element_clear(tmp2);
+  element_clear(delta); 
+  element_clear(t1);
+  element_clear(t2);
+  element_clear(t3);
+
+  element_clear(g1);
+  element_clear(g2);
+  element_clear(psi);
+  element_clear(t);
+  element_clear(gT);
+
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      element_clear(A1[i][j]);
+      element_clear(A2[i][j]);
+    }
+    free(A1[i]);
+    free(A2[i]);
+  }
+  free(A1);
+  free(A2);
 
   return setup;
 }
@@ -281,8 +301,8 @@ void test_fixed(const char *path) {
 int main(int argc, char ** argv) {
   if (2 == argc)
     test_fixed(argv[1]);
-/*   else if (4 == argc) */
-/*     test_variable(argv[1], atoi(argv[2]), atoi(argv[3])); */
+  /*   else if (4 == argc) */
+  /*     test_variable(argv[1], atoi(argv[2]), atoi(argv[3])); */
   else
     printf("error testing");
 

@@ -47,3 +47,21 @@ element_t * vector_times_matrix(pairing_t *pairing, element_t *v, element_t **m,
 
   return result;
 }
+
+element_t ** transpose(element_t **m, int n) {
+  element_t t;
+  element_init_same_as(t, m[0][0]);
+
+  for (int i = 0; i < (n - 1); ++i) {
+    for (int j = i + 1; j < n; ++j) {
+      element_set(t, m[i][j]);
+      element_set(m[i][j], m[j][i]);
+      element_set(m[j][i], t);
+    }
+  }
+
+  element_clear(t);
+
+  return m;
+}
+

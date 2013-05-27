@@ -2,8 +2,6 @@
 #define HVE_IP_H
 
 #include <pbc/pbc.h>
-#include "schemas/utils.h"
-
 
 typedef struct {
   unsigned short l;
