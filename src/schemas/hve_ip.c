@@ -37,7 +37,7 @@ static element_t ** create_identity_matrix(pairing_t *pairing, int n) {
   for (int i = 0; i < n; ++i) {
     I[i] = malloc(sizeof(element_t) * n);
     for (int j = 0; j < n; ++j) {
-      element_init_G1(I[i][j], *pairing);
+      element_init_Zr(I[i][j], *pairing);
       if (i == j)
 	element_set1(I[i][j]);
       else
@@ -142,8 +142,17 @@ static element_t ** invert2(element_t **m, int n) {
 
 static element_t ** invert(element_t **m, int n) {
   element_t **tm = malloc(sizeof(element_t*) * n);
+#ifdef DEBUG
+  element_t **rm = malloc(sizeof(element_t*) * n);
+#endif
   
   for (int i = 0; i < n; ++i) {
+#ifdef DEBUG
+    rm[i] = malloc(sizeof(element_t));
+    for (int j = 0; j < n; ++j)
+      element_init_same_as(rm[i][j], m[0][0]);
+#endif
+
     tm[i] = malloc(sizeof(element_t)*  2 * n);
     for (int j = 0; j < n * 2; ++j) {
       element_init_same_as(tm[i][j], m[0][0]);
@@ -152,7 +161,11 @@ static element_t ** invert(element_t **m, int n) {
 
   copy(tm, m, n, n, 0, 0);
   invert2(tm, n);
+#ifdef DEBUG
+  copy(rm, tm, n, 2 * n, 0, n);
+#else
   copy(m, tm, n, 2 * n, 0, n);
+#endif
   
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j < n * 2; ++j) {
@@ -163,9 +176,14 @@ static element_t ** invert(element_t **m, int n) {
   
   free(tm);
 
+#ifdef DEBUG
+  return rm;
+#else
   return m;
+#endif
 }
 
+/*
 static element_t * determinant(element_t **a, int n) {
    element_t * det = malloc(sizeof(element_t));
    element_t **m = NULL, t;
@@ -173,7 +191,7 @@ static element_t * determinant(element_t **a, int n) {
    element_init_same_as(*det, a[0][0]);
    element_init_same_as(t, a[0][0]);
 
-   if (n == 1) { /* Shouldn't get used */
+   if (n == 1) { // Shouldn't get used
      element_set(*det, a[0][0]);
    } else if (n == 2) {
      element_mul(*det, a[0][0], a[1][1]);
@@ -237,7 +255,7 @@ static element_t ** cofactor_matrix(element_t **a, int n) {
   for (int j=0;j<n;j++) {
     for (int i=0;i<n;i++) {
 
-      /* Form the adjoint a_ij */
+      // Form the adjoint a_ij
       int i1 = 0;
       for (int ii = 0; ii < n; ++ii) {
 	if (ii == i)
@@ -253,10 +271,10 @@ static element_t ** cofactor_matrix(element_t **a, int n) {
 	i1++;
       }
 
-      /* Calculate the determinate */
+      // Calculate the determinate
       det = determinant(c, n-1);
 
-      /* Fill in the elements of the cofactor */
+      // Fill in the elements of the cofactor
       if (!pow(-1.0,i+j+2.0))
 	element_neg(b[i][j], *det);
       else
@@ -281,7 +299,6 @@ static element_t ** cofactor_matrix(element_t **a, int n) {
   return b;
 }
 
-
 static element_t ** invert_square(element_t **m, int n) {
   element_t * det = determinant(m, n);
 
@@ -295,6 +312,7 @@ static element_t ** invert_square(element_t **m, int n) {
 
   return m1;
 }
+*/
 
 setup_t setup(pairing_t* pairing, int l) {
   element_t **cbase, psi, t;
@@ -309,17 +327,16 @@ setup_t setup(pairing_t* pairing, int l) {
   element_random(psi);
 
 #ifdef DEBUG
-  element_fprintf(stderr, "psi: %B\n", psi);
+  //element_fprintf(stderr, "psi: %B\n", psi);
 #endif
 
   for (int i = 0; i < 3; ++i)
-    element_mul_zn(cbase[i][i], cbase[i][i], psi); // now \psi-identity -> canonical base
+    //element_mul_zn(cbase[i][i], cbase[i][i], psi); // now \psi-identity -> canonical base
+    element_mul(cbase[i][i], cbase[i][i], psi);
 
 #ifdef DEBUG
-  print_10_matrix(cbase, 3);
+  //print_10_matrix(cbase, 3);
 #endif
-
-
 
   element_init_G1(out->g, *pairing);
   element_random(out->g);
@@ -337,7 +354,7 @@ setup_t setup(pairing_t* pairing, int l) {
 
   element_clear(t);
 
-  element_init_G1(t, *pairing);
+  element_init_Zr(t, *pairing);
 
   for (int k = 0; k <= l; ++k) {
     element_t ** lt = sample_linear_transformation_Zr(pairing, 3);
@@ -348,28 +365,33 @@ setup_t setup(pairing_t* pairing, int l) {
       B[i] = malloc(sizeof(element_t) * 3);
 
       for (int j = 0; j < 3; ++j) {
-	element_init_G1(B[i][j], *pairing);
-	element_mul_zn(B[i][j], cbase[0][j], lt[i][0]);
+	element_init_Zr(B[i][j], *pairing);
+	element_mul(B[i][j], cbase[0][j], lt[i][0]);
       }
       for (int r = 1; r < 3; ++r) {
 	for (int j = 0; j < 3; ++j) {
-	  element_mul_zn(t, cbase[r][j], lt[i][r]);
+	  element_mul(t, cbase[r][j], lt[i][r]);
 	  element_add(B[i][j], B[i][j], t);
 	}
       }
     }
 
 #ifdef DEBUG
-    fprintf(stderr, "B %d\n", k);
-    print_matrix(B, 3);
+    //fprintf(stderr, "B %d\n", k);
+    //print_matrix(B, 3);
 #endif
 
-    // lt = invert(transpose(lt, 3), 3);
-    lt = invert_square(lt, 3); //traspose(lt, 3), 3);
+#ifdef DEBUG
+    element_t ** oldlt = lt;
+    lt = invert(transpose(lt, 3), 3);
+    //lt = invert_square(lt, 3); //traspose(lt, 3), 3);
+#else
+    lt = invert(transpose(lt, 3), 3);
+#endif
 
 #ifdef DEBUG
-    fprintf(stderr, "LT^{-1} %d\n", k);
-    print_matrix(lt, 3);
+    //fprintf(stderr, "LT^{-1} %d\n", k);
+    //print_matrix(lt, 3);
 #endif
 
     element_t ** C = private->C[k] = malloc(sizeof(element_t*) * 3);
@@ -378,12 +400,12 @@ setup_t setup(pairing_t* pairing, int l) {
       C[i] = malloc(sizeof(element_t) * 3);
 
       for (int j = 0; j < 3; ++j) {
-	element_init_G1(C[i][j], *pairing);
-	element_mul_zn(C[i][j], cbase[0][j], lt[i][0]);
+	element_init_Zr(C[i][j], *pairing);
+	element_mul(C[i][j], cbase[0][j], lt[i][0]);
       }
       for (int r = 1; r < 3; ++r) {
 	for (int j = 0; j < 3; ++j) {
-	  element_mul_zn(t, cbase[r][j], lt[i][r]);
+	  element_mul(t, cbase[r][j], lt[i][r]);
 	  element_add(C[i][j], C[i][j], t);
 	}
       }
@@ -391,9 +413,21 @@ setup_t setup(pairing_t* pairing, int l) {
 
     for (int i = 0; i < 3; ++i) {
       for (int j = 0; j < 3; ++j)
-	element_clear(lt[i][j]);
+#ifdef DEBUG
+	{
+	element_clear(oldlt[i][j]);
+#endif
+       element_clear(lt[i][j]);
+#ifdef DEBUG
+	}
+      free(oldlt[i]);
+#endif
       free(lt[i]);
+
     }
+#ifdef DEBUG
+    free(oldlt);
+#endif
     free(lt);
   }
 
@@ -459,13 +493,21 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
   element_set(w[0], wt);
 #endif
 
-  element_mul_zn(v[0], one, wt);
-  element_mul_zn(v[1], one, z);
+  element_mul(v[0], one, wt);
+  element_mul(v[1], one, z);
+  
+  /*element_set(v[0], wt);
+    element_set(v[1], z);*/
   element_set0(v[2]); // (w_0, z, 0)
 
-  ct->ci[0] = vector_times_matrix(v, public->B[0], 3);
+  ct->ci[0] = vector_times_matrix(pairing, v, public->B[0], 3);
 
   element_mul_zn(v[2], one, wt); // set w0 to the third element of the vector
+  //element_set(v[2], wt); // set w0 to the third element of the vector
+
+#ifdef DEBUG
+  printf("ct-l: %d\n", ct->l);
+#endif
 
   for (int i = 1; i <= ct->l; ++i) {
     element_random(wt); // wt <- F_q
@@ -477,11 +519,16 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
 #endif
 
     element_mul_zn(v[0], one, wt);
+    //element_set(v[0], wt);
     element_set_si(xt, x[i-1]);
+#ifdef DEBUG
+    element_printf("x[%d]: %B\n", i-1, xt);
+#endif
     element_mul(wt, wt, xt);
-    element_mul_zn(v[1], one, wt); // (w_t, w_t x_t, w_0)
+    element_mul_zn(v[1], one, wt);
+    //element_set(v[1], wt); // (w_t, w_t x_t, w_0)
 
-    ct->ci[i]  = vector_times_matrix(v, public->B[i], 3);
+    ct->ci[i]  = vector_times_matrix(pairing, v, public->B[i], 3);
   }
 
   element_clear(v[0]);
@@ -551,7 +598,7 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
     element_mul_zn(v[1], one, dt);
     element_mul_zn(v[2], one, st); // (d_t \times y_t, -d_t, s_t)
 
-    k->k[i] = vector_times_matrix(v, private->C[i], 3);
+    k->k[i] = vector_times_matrix(pairing, v, private->C[i], 3);
   }
 
   element_neg(s0, s0); // s0 = -(\sum_{t \in S} s_t)
@@ -567,7 +614,7 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   element_set(k->eta, v[2]);
 #endif
 
-  k->k[0] = vector_times_matrix(v, private->C[0], 3);
+  k->k[0] = vector_times_matrix(pairing, v, private->C[0], 3);
 
   element_clear(v[0]);
   element_clear(v[1]);
