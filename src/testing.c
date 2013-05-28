@@ -69,8 +69,29 @@ void test_fixed2(const char *path) {
 
   int ixt = 5;
 
-  element_t w0, wt, dt, st, xt, v[3], *ct, *kt;
+  element_t w0, wt, dt, st, xt, v[3], *ct, *kt, s0, z, eta;
+  element_t prod;
+  element_t m;
 
+  element_t p;
+  element_t t1, t2, t3;
+
+  element_init_GT(prod, *pairing);
+  element_init_GT(m, *pairing);
+
+  element_set1(prod);
+  element_random(m);
+
+  element_init_Zr(t1, *pairing);
+  element_init_Zr(t2, *pairing);
+  element_init_Zr(t3, *pairing);
+
+  element_init_GT(p, *pairing);
+
+
+  element_init_Zr(eta, *pairing);
+  element_init_Zr(z, *pairing);
+  element_init_Zr(s0, *pairing);
   element_init_Zr(xt, *pairing);
   element_init_Zr(w0, *pairing);
   element_init_Zr(wt, *pairing);
@@ -81,11 +102,17 @@ void test_fixed2(const char *path) {
   element_init_Zr(v[1], *pairing);
   element_init_Zr(v[2], *pairing);
 
+  element_set0(s0);
+  element_random(w0);
+  element_random(z);
+  element_random(eta);
+
   for (int t = 1; t <= public->l; ++t) {
     element_random(dt);
     element_random(st);
-    element_random(w0);
     element_random(wt);
+
+    element_add(s0, s0, st);
 
     element_set_si(xt, ixt);
 
@@ -101,10 +128,6 @@ void test_fixed2(const char *path) {
 
     ct = vector_times_matrix(pairing, v, public->B[t], 3);// ct = (wt, wt * xt, w0)_{Bt}
 
-    element_t t1, t2, t3;
-    element_init_Zr(t1, *pairing);
-    element_init_Zr(t2, *pairing);
-    element_init_Zr(t3, *pairing);
 
     element_sub(t2, xt, xt);
     element_mul(t3, w0, st);
@@ -114,31 +137,61 @@ void test_fixed2(const char *path) {
 
     element_pow_zn(et, public->gT, t1);
 
-    element_t p;
-    element_init_GT(p, *pairing);
-
     //element_printf("gT^{*}: %B\n", et);
 
     element_prod_pairing(p, kt, ct, 3);
+    //e(kt, ct) = g_T^{dt * wt * (xt - yt) + w0 * st}
 
     printf("[%d] gT^{*} == e(kt, ct): %s\n", t, 0 == element_cmp(et, p) ? "true":"false");
+
+    element_mul(prod, prod, p);
 
     //element_printf("e(kt, ct): %B\n", et);
   }
 
-  //e(kt, ct) = g_T^{dt * wt * (xt - yt) + w0 * st}
+  // k0 = (s0, 1, eta)_{B0}
+  element_neg(s0, s0);
+  element_set(v[0], s0);
+  element_set1(v[1]);
+  element_set(v[2], eta);
 
-  element_t m, *dm;
+  kt = vector_times_matrix(pairing, v, public->B[0], 3);
 
-  //  ciphertext_t ct = encrypt(pairing, out->public, x, &m);
+  element_set(v[0], w0);
+  element_set(v[1], z);
+  element_set0(v[2]);
 
-  //dkey_t key = keygen(pairing, out->private, y);
+  // c0 = (w0, z, 0)_{C0};
+  ct = vector_times_matrix(pairing, v, private->C[0], 3);
 
+  // e(k0, c0) = g_T^{s0, w0}
+
+  element_mul(t1, s0, w0);
+  element_add(t1, t1, z);
+  element_pow_zn(et, public->gT, t1);
+
+  element_prod_pairing(p, kt, ct, 3);
+
+
+  printf("[0] gT^{s0*w0 + z} == e(k0, c0): %s\n", 0 == element_cmp(et, p) ? "true":"false");
+
+  element_mul(prod, prod, p);
+
+  element_pow_zn(p, public->gT, z);
+
+  printf("gT^z == e(k0, c0) * \\Pi e(kt, ct): %s\n", 0 == element_cmp(p, prod) ? "true":"false");
+
+  element_t c;
+
+  element_init_GT(c, *pairing);
+
+
+  element_mul(c, p, m); // c = gT^z * m
+
+  element_div(et, c, prod);
+
+  printf("m == m': %s\n", 0 == element_cmp(m, et) ? "true":"false");
   
-
-  //  dm = decrypt(pairing, ct, key1);
-  //int r = element_cmp(m, *dm);
-
 }
 
 int main(int argc, char ** argv) {
