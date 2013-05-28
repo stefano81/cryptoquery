@@ -155,14 +155,14 @@ void test_fixed2(const char *path) {
   element_set1(v[1]);
   element_set(v[2], eta);
 
-  kt = vector_times_matrix(pairing, v, public->B[0], 3);
+  kt = vector_times_matrix(pairing, v, private->C[0], 3);
 
   element_set(v[0], w0);
   element_set(v[1], z);
   element_set0(v[2]);
 
   // c0 = (w0, z, 0)_{C0};
-  ct = vector_times_matrix(pairing, v, private->C[0], 3);
+  ct = vector_times_matrix(pairing, v, public->B[0], 3);
 
   // e(k0, c0) = g_T^{s0, w0}
 
@@ -196,8 +196,8 @@ void test_fixed2(const char *path) {
 
 int main(int argc, char ** argv) {
   if (2 == argc)
-    test_fixed2(argv[1]);
-    //test_fixed(argv[1]);
+    //test_fixed2(argv[1]);
+    test_fixed(argv[1]);
   /*   else if (4 == argc) */
   /*     test_variable(argv[1], atoi(argv[2]), atoi(argv[3])); */
   else
