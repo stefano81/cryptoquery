@@ -475,7 +475,7 @@ setup_t setup(pairing_t *pairing, int l) {
       for(int j=0;j<3;j++){
         element_init_G1(B[i][j],*pairing);
         element_init_G2(C[i][j],*pairing);
-        element_set0(tmp1); element_set0(tmp2);
+        //element_set0(tmp1); element_set0(tmp2);
         for(int k=0;k<3;k++){
 	  element_mul_zn(tmp1,A1[k][j],X[i][k]);
 	  element_mul_zn(tmp2,A2[k][j],Xs[i][k]);
@@ -817,11 +817,13 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
 #endif
 
     element_set_si(yt, y[i - 1]);
-    element_mul(yt, dt, yt);
-    element_mul_zn(v[0], one, yt);
-    element_neg(dt, dt);
-    element_mul_zn(v[1], one, dt);
-    element_mul_zn(v[2], one, st); // (d_t \times y_t, -d_t, s_t)
+    //element_mul(yt, dt, yt);
+    element_mul(v[0], dt, yt);
+    //element_neg(dt, dt);
+    //element_mul_zn(v[1], one, dt);
+    element_neg(v[1], dt);
+    //element_mul_zn(v[2], one, st);
+    element_set(v[2], st); // (d_t \times y_t, -d_t, s_t)
 
     k->k[i] = vector_times_matrix(pairing, v, private->C[i], 3);
   }

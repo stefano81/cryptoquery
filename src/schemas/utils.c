@@ -16,6 +16,39 @@ pairing_t * load_pairing(char *params_path) {
 }
 
 element_t * vector_times_matrix(pairing_t *pairing, element_t *v, element_t **m, int n) {
+  element_t *result = malloc(sizeof(element_t) * 3);
+  element_t t;
+
+  element_init_same_as(t, m[0][0]);
+  element_init_same_as(result[0], m[0][0]);
+  element_init_same_as(result[1], m[0][0]);
+  element_init_same_as(result[2], m[0][0]);
+  /*  element_set0(result[0]);
+  element_set0(result[1]);
+  element_set0(result[2]);*/
+
+  element_mul_zn(result[0], m[0][0], v[0]);
+  element_mul_zn(result[1], m[0][1], v[0]);
+  element_mul_zn(result[2], m[0][2], v[0]);
+
+  element_mul_zn(t, m[1][0], v[1]);
+  element_add(result[0], result[0], t);
+  element_mul_zn(t, m[1][1], v[1]);
+  element_add(result[1], result[1], t);
+  element_mul_zn(t, m[1][2], v[1]);
+  element_add(result[2], result[2], t);
+
+  element_mul_zn(t, m[2][0], v[2]);
+  element_add(result[0], result[0], t);
+  element_mul_zn(t, m[2][1], v[2]);
+  element_add(result[1], result[1], t);
+  element_mul_zn(t, m[2][2], v[2]);
+  element_add(result[2], result[2], t);
+
+  return result;
+}
+
+/*element_t * vector_times_matrix(pairing_t *pairing, element_t *v, element_t **m, int n) {
   element_t * result = malloc(sizeof(element_t) * n);
   element_t t, one;
 
@@ -45,7 +78,20 @@ element_t * vector_times_matrix(pairing_t *pairing, element_t *v, element_t **m,
   element_clear(one);
 
   return result;
+  }*/
+
+void minorX(element_t * tmp1, element_t a, element_t b, element_t c, element_t d){
+  element_t tmp2;
+
+  element_init_same_as(*tmp1,a);
+  element_init_same_as(tmp2,a);
+  element_mul(*tmp1,a,b);
+  element_mul(tmp2,c,d);
+  element_sub(*tmp1,*tmp1,tmp2);
+
+  element_clear(tmp2);
 }
+
 
 element_t ** transpose(element_t **m, int n) {
   element_t t;
