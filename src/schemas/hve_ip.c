@@ -299,135 +299,382 @@ static element_t ** invert_square(element_t **m, int n) {
 }
 */
 
-setup_t setup(pairing_t* pairing, int l) {
-  element_t **cbase, psi, t;
+setup_t setup(pairing_t *pairing, int l) {
+  element_t ***BB, ***CC;
+  element_t g1,g2,psi,**A1, **A2, **B, **C, **X, **Xs;
+  element_t tmp1,tmp2;
+  element_t ptmp;
+  element_t t,gT;
+  element_t t1,t2,t3;
+  element_t delta;
+  
+  element_init_Zr(delta,*pairing); 
+  element_init_Zr(t1,*pairing);
+  element_init_Zr(t2,*pairing);
+  element_init_Zr(t3,*pairing);
+  
 
-  setup_t out = malloc(sizeof(*out));
-  msk_t private = out->private = malloc(sizeof(*private));
-  mpk_t public = out->public = malloc(sizeof(*public));
-
-  cbase = create_identity_matrix(pairing, 3);
-
+  /* pick random psi in the field */
   element_init_Zr(psi, *pairing);
   element_random(psi);
 
-#ifdef DEBUG
-  //element_fprintf(stderr, "psi: %B\n", psi);
-#endif
+  /* any element of G1/G2 other than 0 is a generator*/
+  element_init_G1(g1, *pairing);
+  element_random(g1);
+  element_init_G2(g2, *pairing);
+  element_random(g2);
 
-  for (int i = 0; i < 3; ++i)
-    //element_mul_zn(cbase[i][i], cbase[i][i], psi); // now \psi-identity -> canonical base
-    element_mul(cbase[i][i], cbase[i][i], psi);
-
-#ifdef DEBUG
-  //print_10_matrix(cbase, 3);
-#endif
-
-  element_init_G1(out->g, *pairing);
-  element_random(out->g);
-
-  private->l = public->l = l;
-  private->C = malloc(sizeof(element_t **) * (l + 1));
-  public->B = malloc(sizeof(element_t **) * (l + 1));
-  
-
+  /* compute gT=e(g1,g2)^psi */
+  element_init_GT(gT, *pairing);
   element_init_GT(t, *pairing);
-  element_init_GT(public->gT, *pairing);
+  pairing_apply(t, g1, g2, *pairing);
+  element_pow_zn(gT, t, psi);
 
-  pairing_apply(t, out->g, out->g, *pairing);
-  element_pow_zn(public->gT, t, psi);
+  element_init_G1(tmp1,*pairing);
+  element_init_G2(tmp2,*pairing);
 
-  element_clear(t);
 
-  element_init_Zr(t, *pairing);
-
-  for (int k = 0; k <= l; ++k) {
-    element_t ** lt = sample_linear_transformation_Zr(pairing, 3);
-
-    element_t ** B = public->B[k] = malloc(sizeof(element_t *) * 3);
-
-    for (int i = 0; i < 3; ++i) {
-      B[i] = malloc(sizeof(element_t) * 3);
-
-      for (int j = 0; j < 3; ++j) {
-	element_init_Zr(B[i][j], *pairing);
-	element_mul(B[i][j], cbase[0][j], lt[i][0]);
-      }
-      for (int r = 1; r < 3; ++r) {
-	for (int j = 0; j < 3; ++j) {
-	  element_mul(t, cbase[r][j], lt[i][r]);
-	  element_add(B[i][j], B[i][j], t);
-	}
-      }
-    }
-
+  /* if you want to see psi, g1, g2, gT */
 #ifdef DEBUG
-    //fprintf(stderr, "B %d\n", k);
-    //print_matrix(B, 3);
+  printf("psi=\n");
+  element_printf("%B\n",psi);  
+  printf("g1=\n");
+  element_printf("%B\n",g1);  
+  printf("g2=\n");
+  element_printf("%B\n",g2);  
+  printf("gT=\n");
+  element_printf("%B\n",gT);  
 #endif
 
-#ifdef DEBUG
-    element_t ** oldlt = lt;
-    lt = invert(transpose(lt, 3), 3);
-    //lt = invert_square(lt, 3); //traspose(lt, 3), 3);
-#else
-    lt = invert(transpose(lt, 3), 3);
-#endif
+  /* constructing the canonical bases: A1 for G1 and A2 for G2 */
+  A1=malloc(sizeof(element_t *)*3);  A1[0]=malloc(sizeof(element_t)*3); 
+  A1[1]=malloc(sizeof(element_t)*3); A1[2]=malloc(sizeof(element_t)*3); 
 
-#ifdef DEBUG
-    //fprintf(stderr, "LT^{-1} %d\n", k);
-    //print_matrix(lt, 3);
-#endif
+  A2=malloc(sizeof(element_t *)*3);  A2[0]=malloc(sizeof(element_t)*3); 
+  A2[1]=malloc(sizeof(element_t)*3); A2[2]=malloc(sizeof(element_t)*3); 
 
-    element_t ** C = private->C[k] = malloc(sizeof(element_t*) * 3);
-
-    for (int i = 0; i < 3; ++i) {
-      C[i] = malloc(sizeof(element_t) * 3);
-
-      for (int j = 0; j < 3; ++j) {
-	element_init_Zr(C[i][j], *pairing);
-	element_mul(C[i][j], cbase[0][j], lt[i][0]);
+  for(int i=0;i<3;i++){
+    for(int j=0;j<3;j++){
+      element_init_G1(A1[i][j],*pairing); element_init_G2(A2[i][j],*pairing);
+      if (i==j){
+	element_set(A1[i][j],g1);  /* element_set(dest,source) */
+	element_set(A2[i][j],g2);  /* element_set(dest,source) */
       }
-      for (int r = 1; r < 3; ++r) {
-	for (int j = 0; j < 3; ++j) {
-	  element_mul(t, cbase[r][j], lt[i][r]);
-	  element_add(C[i][j], C[i][j], t);
-	}
+      else{
+	element_set0(A1[i][j]);
+	element_set0(A2[i][j]);
       }
     }
-
-    for (int i = 0; i < 3; ++i) {
-      for (int j = 0; j < 3; ++j)
-#ifdef DEBUG
-	{
-	element_clear(oldlt[i][j]);
-#endif
-       element_clear(lt[i][j]);
-#ifdef DEBUG
-	}
-      free(oldlt[i]);
-#endif
-      free(lt[i]);
-
-    }
-#ifdef DEBUG
-    free(oldlt);
-#endif
-    free(lt);
   }
 
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j)
-      element_clear(cbase[i][j]);
+  BB=(element_t ***)malloc(sizeof(element_t **)*(l+1));
+  CC=(element_t ***)malloc(sizeof(element_t **)*(l+1));
 
-    free(cbase[i]);
+  setup_t setup = malloc(sizeof(setup_t));
+
+  /* qui ho fatto un qualche errore con i puntatori */
+  mpk_t public = setup->public = malloc(sizeof(*public));
+  msk_t private = setup->private = malloc(sizeof(*private));
+  element_init_GT(public->gT,*pairing);
+  element_set(public->gT, gT);
+  /*  element_init_G1(public->g1, *pairing);
+      element_set(public->g1, g1);
+      element_init_G2(setup->public->g2,*pairing);
+      element_set(public->g2, g2);*/
+  setup->private->l = setup->public->l = l;
+  setup->public->B = BB;
+  setup->private->C = CC;
+
+
+  for(int zz=0;zz<l+1;zz++){
+    BB[zz]=malloc(sizeof(element_t *)*3); CC[zz]=malloc(sizeof(element_t *)*3);
+    BB[zz][0]=malloc(sizeof(element_t)*3); CC[zz][0]=malloc(sizeof(element_t)*3);
+    BB[zz][1]=malloc(sizeof(element_t)*3); CC[zz][1]=malloc(sizeof(element_t)*3);
+    BB[zz][2]=malloc(sizeof(element_t)*3); CC[zz][2]=malloc(sizeof(element_t)*3);
+
+    B=BB[zz]; C=CC[zz];
+    X=malloc(sizeof(element_t *)*3); Xs=malloc(sizeof(element_t *)*3);
+    X[0]=malloc(sizeof(element_t)*3); Xs[0]=malloc(sizeof(element_t)*3);
+    X[1]=malloc(sizeof(element_t)*3); Xs[1]=malloc(sizeof(element_t)*3);
+    X[2]=malloc(sizeof(element_t)*3); Xs[2]=malloc(sizeof(element_t)*3);
+    /* pick a random X */
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        element_init_Zr(X[i][j],*pairing);
+	element_random(X[i][j]);
+      }
+    }
+
+    /* let us invert X in Xs*/
+    minorX(&ptmp, X[1][1],X[2][2],X[1][2],X[2][1]);
+    element_init_Zr(Xs[0][0],*pairing); 
+    element_set(Xs[0][0],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[1][2],X[2][0],X[1][0],X[2][2]);
+    element_init_Zr(Xs[1][0],*pairing); 
+    element_set(Xs[1][0],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[1][0],X[2][1],X[1][1],X[2][0]);
+    element_init_Zr(Xs[2][0],*pairing); 
+    element_set(Xs[2][0],ptmp); element_clear(ptmp);
+
+    minorX(&ptmp, X[0][2],X[2][1],X[0][1],X[2][2]);
+    element_init_Zr(Xs[0][1],*pairing); 
+    element_set(Xs[0][1],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[0][0],X[2][2],X[0][2],X[2][0]);
+    element_init_Zr(Xs[1][1],*pairing); 
+    element_set(Xs[1][1],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[0][1],X[2][0],X[0][0],X[2][1]);
+    element_init_Zr(Xs[2][1],*pairing); 
+    element_set(Xs[2][1],ptmp); element_clear(ptmp);
+
+    minorX(&ptmp, X[0][1],X[1][2],X[0][2],X[1][1]);
+    element_init_Zr(Xs[0][2],*pairing); 
+    element_set(Xs[0][2],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[0][2],X[1][0],X[0][0],X[1][2]);
+    element_init_Zr(Xs[1][2],*pairing); 
+    element_set(Xs[1][2],ptmp); element_clear(ptmp);
+    minorX(&ptmp, X[0][0],X[1][1],X[0][1],X[1][0]);
+    element_init_Zr(Xs[2][2],*pairing); 
+    element_set(Xs[2][2],ptmp); element_clear(ptmp);
+
+    /* computing the determinat of X */
+    element_mul(t1,X[0][0],X[1][1]); element_mul(t1,t1,X[2][2]);
+    element_mul(t2,X[0][1],X[1][2]); element_mul(t2,t2,X[2][0]);
+    element_mul(t3,X[0][2],X[1][0]); element_mul(t3,t3,X[2][1]);
+    element_add(delta,t1,t2); element_add(delta,delta,t3);
+    element_mul(t1,X[0][2],X[1][1]); element_mul(t1,t1,X[2][0]);
+    element_mul(t2,X[0][0],X[1][2]); element_mul(t2,t2,X[2][1]);
+    element_mul(t3,X[0][1],X[1][0]); element_mul(t3,t3,X[2][2]);
+    element_sub(delta,delta,t1);   element_sub(delta,delta,t2);
+    element_sub(delta,delta,t3);  
+
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        element_div(Xs[i][j],Xs[i][j],delta);
+        element_mul(Xs[i][j],Xs[i][j],psi);
+      }
+    }
+    /* now X * Xs = psi * I */
+  
+    /* if you want to check X and Xs */
+#ifdef DEBUG
+    for(int i=0; i<3; ++i){
+      for(int j=0; j<3; ++j){
+	printf("(%d %d)\n", i, j);
+        element_mul(t1,X[i][0],Xs[0][j]);
+        element_mul(t2,X[i][1],Xs[1][j]);
+        element_mul(t3,X[i][2],Xs[2][j]);
+        element_add(t1,t1,t2);
+        element_add(t1,t1,t3);
+        element_printf("(X*Xs)[i][j] %B\n",t1);
+      }
+    }
+#endif
+
+    /* now we compute B=X x A1 and C=Xs x A2 */
+    for(int i=0;i<3;i++){
+      for(int j=0;j<3;j++){
+        element_init_G1(B[i][j],*pairing);
+        element_init_G2(C[i][j],*pairing);
+        element_set0(tmp1); element_set0(tmp2);
+        for(int k=0;k<3;k++){
+	  element_mul_zn(tmp1,A1[k][j],X[i][k]);
+	  element_mul_zn(tmp2,A2[k][j],Xs[i][k]);
+	  element_add(B[i][j],B[i][j],tmp1);
+	  element_add(C[i][j],C[i][j],tmp2);
+        }
+      }
+    }
+
+    C = transpose(C, 3);
+
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+	element_clear(X[i][j]);
+	element_clear(Xs[i][j]);
+      }
+      free(X[i]);
+      free(Xs[i]);
+    }
+    free(X);
+    free(Xs);
+
+  } /* for zz */
+
+#ifdef DEBUG
+  element_t check, oneT;
+  element_init_GT(check, *pairing);
+  element_init_GT(oneT, *pairing);
+  element_set1(oneT);
+  for (int k = 0; k < l + 1; ++k) {
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+	element_prod_pairing(check, BB[k][i], CC[k][j], 3);
+	if (i == j)
+	  fprintf(stderr, "[%d] %d == %d -> gT: %s\n", k, i, j, 0 == element_cmp(gT, check) ? "true" : "false");
+	else
+	  fprintf(stderr, "[%d] %d != %d -> 1T: %s\n", k, i, j, 0 == element_cmp(oneT, check) ? "true" : "false");
+      }
+    }
   }
-  free(cbase);
+  element_clear(oneT);
+  element_clear(check);
+#endif
+  element_clear(tmp1);
+  element_clear(tmp2);
+  element_clear(delta); 
+  element_clear(t1);
+  element_clear(t2);
+  element_clear(t3);
+
+  element_clear(g1);
+  element_clear(g2);
   element_clear(psi);
   element_clear(t);
+  element_clear(gT);
 
-  return out;
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      element_clear(A1[i][j]);
+      element_clear(A2[i][j]);
+    }
+    free(A1[i]);
+    free(A2[i]);
+  }
+  free(A1);
+  free(A2);
+
+  return setup;
 }
+
+/* setup_t setup(pairing_t* pairing, int l) { */
+/*   element_t **cbase, psi, t; */
+
+/*   setup_t out = malloc(sizeof(*out)); */
+/*   msk_t private = out->private = malloc(sizeof(*private)); */
+/*   mpk_t public = out->public = malloc(sizeof(*public)); */
+
+/*   cbase = create_identity_matrix(pairing, 3); */
+
+/*   element_init_Zr(psi, *pairing); */
+/*   element_random(psi); */
+
+/* #ifdef DEBUG */
+/*   //element_fprintf(stderr, "psi: %B\n", psi); */
+/* #endif */
+
+/*   for (int i = 0; i < 3; ++i) */
+/*     //element_mul_zn(cbase[i][i], cbase[i][i], psi); // now \psi-identity -> canonical base */
+/*     element_mul(cbase[i][i], cbase[i][i], psi); */
+
+/* #ifdef DEBUG */
+/*   //print_10_matrix(cbase, 3); */
+/* #endif */
+
+/*   element_init_G1(out->g, *pairing); */
+/*   element_random(out->g); */
+
+/*   private->l = public->l = l; */
+/*   private->C = malloc(sizeof(element_t **) * (l + 1)); */
+/*   public->B = malloc(sizeof(element_t **) * (l + 1)); */
+  
+
+/*   element_init_GT(t, *pairing); */
+/*   element_init_GT(public->gT, *pairing); */
+
+/*   pairing_apply(t, out->g, out->g, *pairing); */
+/*   element_pow_zn(public->gT, t, psi); */
+
+/*   element_clear(t); */
+
+/*   element_init_Zr(t, *pairing); */
+
+/*   for (int k = 0; k <= l; ++k) { */
+/*     element_t ** lt = sample_linear_transformation_Zr(pairing, 3); */
+
+/*     element_t ** B = public->B[k] = malloc(sizeof(element_t *) * 3); */
+
+/*     for (int i = 0; i < 3; ++i) { */
+/*       B[i] = malloc(sizeof(element_t) * 3); */
+
+/*       for (int j = 0; j < 3; ++j) { */
+/* 	element_init_Zr(B[i][j], *pairing); */
+/* 	element_mul(B[i][j], cbase[0][j], lt[i][0]); */
+/*       } */
+/*       for (int r = 1; r < 3; ++r) { */
+/* 	for (int j = 0; j < 3; ++j) { */
+/* 	  element_mul(t, cbase[r][j], lt[i][r]); */
+/* 	  element_add(B[i][j], B[i][j], t); */
+/* 	} */
+/*       } */
+/*     } */
+
+/* #ifdef DEBUG */
+/*     //fprintf(stderr, "B %d\n", k); */
+/*     //print_matrix(B, 3); */
+/* #endif */
+
+/* #ifdef DEBUG */
+/*     element_t ** oldlt = lt; */
+/*     lt = invert(transpose(lt, 3), 3); */
+/*     //lt = invert_square(lt, 3); //traspose(lt, 3), 3); */
+/* #else */
+/*     lt = invert(transpose(lt, 3), 3); */
+/* #endif */
+
+/* #ifdef DEBUG */
+/*     //fprintf(stderr, "LT^{-1} %d\n", k); */
+/*     //print_matrix(lt, 3); */
+/* #endif */
+
+/*     element_t ** C = private->C[k] = malloc(sizeof(element_t*) * 3); */
+
+/*     for (int i = 0; i < 3; ++i) { */
+/*       C[i] = malloc(sizeof(element_t) * 3); */
+
+/*       for (int j = 0; j < 3; ++j) { */
+/* 	element_init_Zr(C[i][j], *pairing); */
+/* 	element_mul(C[i][j], cbase[0][j], lt[i][0]); */
+/*       } */
+/*       for (int r = 1; r < 3; ++r) { */
+/* 	for (int j = 0; j < 3; ++j) { */
+/* 	  element_mul(t, cbase[r][j], lt[i][r]); */
+/* 	  element_add(C[i][j], C[i][j], t); */
+/* 	} */
+/*       } */
+/*     } */
+
+/*     for (int i = 0; i < 3; ++i) { */
+/*       for (int j = 0; j < 3; ++j) */
+/* #ifdef DEBUG */
+/* 	{ */
+/* 	element_clear(oldlt[i][j]); */
+/* #endif */
+/*        element_clear(lt[i][j]); */
+/* #ifdef DEBUG */
+/* 	} */
+/*       free(oldlt[i]); */
+/* #endif */
+/*       free(lt[i]); */
+
+/*     } */
+/* #ifdef DEBUG */
+/*     free(oldlt); */
+/* #endif */
+/*     free(lt); */
+/*   } */
+
+/*   for (int i = 0; i < 3; ++i) { */
+/*     for (int j = 0; j < 3; ++j) */
+/*       element_clear(cbase[i][j]); */
+
+/*     free(cbase[i]); */
+/*   } */
+/*   free(cbase); */
+/*   element_clear(psi); */
+/*   element_clear(t); */
+
+/*   return out; */
+/* } */
 
 ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
   ciphertext_t ct = malloc(sizeof(*ct));
@@ -449,8 +696,8 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
 
   element_init_Zr(xt, *pairing);
 
-  element_init_G1(one, *pairing);
-  element_set1(one);
+  //element_init_G1(one, *pairing);
+  //element_set1(one);
 
   ct->ci = malloc(sizeof(element_t) * (ct->l + 1));
 
@@ -467,9 +714,9 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
   element_pow_zn(ct->c, public->gT, z);
   element_mul(ct->c, ct->c, *m); // c = g_T ^ z \times m
 
-  element_init_G1(v[0], *pairing);
-  element_init_G1(v[1], *pairing);
-  element_init_G1(v[2], *pairing);
+  element_init_Zr(v[0], *pairing);
+  element_init_Zr(v[1], *pairing);
+  element_init_Zr(v[2], *pairing);
 
   element_random(wt); // w_0
 
@@ -478,17 +725,17 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
   element_set(w[0], wt);
 #endif
 
-  element_mul(v[0], one, wt);
+  /*element_mul(v[0], one, wt);
   element_mul(v[1], one, z);
-  
-  /*element_set(v[0], wt);
-    element_set(v[1], z);*/
+  */
+  element_set(v[0], wt);
+  element_set(v[1], z);
   element_set0(v[2]); // (w_0, z, 0)
 
   ct->ci[0] = vector_times_matrix(pairing, v, public->B[0], 3);
 
-  element_mul_zn(v[2], one, wt); // set w0 to the third element of the vector
-  //element_set(v[2], wt); // set w0 to the third element of the vector
+  //element_mul_zn(v[2], one, wt); // set w0 to the third element of the vector
+  element_set(v[2], wt); // set w0 to the third element of the vector
 
   for (int i = 1; i <= ct->l; ++i) {
     element_random(wt); // wt <- F_q
@@ -499,12 +746,12 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
     ct->x[i - 1] = x[i - 1];
 #endif
 
-    element_mul_zn(v[0], one, wt);
-    //element_set(v[0], wt);
+    //element_mul_zn(v[0], one, wt);
+    element_set(v[0], wt);
     element_set_si(xt, x[i-1]);
     element_mul(wt, wt, xt);
-    element_mul_zn(v[1], one, wt);
-    //element_set(v[1], wt); // (w_t, w_t x_t, w_0)
+    //element_mul_zn(v[1], one, wt);
+    element_set(v[1], wt); // (w_t, w_t x_t, w_0)
 
     ct->ci[i]  = vector_times_matrix(pairing, v, public->B[i], 3);
   }
@@ -533,9 +780,9 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
 #endif
 
   element_init_G1(one, *pairing);
-  element_init_G1(v[0], *pairing);
-  element_init_G1(v[1], *pairing);
-  element_init_G1(v[2], *pairing);
+  element_init_Zr(v[0], *pairing);
+  element_init_Zr(v[1], *pairing);
+  element_init_Zr(v[2], *pairing);
   element_init_Zr(dt, *pairing);
   element_init_Zr(yt, *pairing);
   element_init_Zr(s0, *pairing);
