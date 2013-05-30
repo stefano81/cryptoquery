@@ -7,298 +7,6 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef DEBUG
-void print_vector(element_t *v, int N) {
-  for (int i = 0; i < N; ++i) {
-    element_fprintf(stderr, " %B", v[i]);
-  }
-  fprintf(stderr, "\n");
-}
-
-void print_matrix(element_t **m, int N) {
-  for (int i = 0; i < N; ++i)
-    print_vector(m[i], N);
-}
-
-void print_10_vector(element_t *v, int N) {
-  for (int i = 0; i < N; ++i) {
-    fprintf(stderr, " %s", element_is1(v[i]) ? "1" : element_is0(v[i]) ? "0" : "x");
-  }
-  fprintf(stderr, "\n");
-}
-
-void print_10_matrix(element_t **m, int N) {
-  for (int i = 0; i < N; ++i)
-    print_10_vector(m[i], N);
-}
-#endif
-
-static element_t ** create_identity_matrix(pairing_t *pairing, int n) {
-  element_t **I = malloc(sizeof(element_t *) * n);
-
-  for (int i = 0; i < n; ++i) {
-    I[i] = malloc(sizeof(element_t) * n);
-    for (int j = 0; j < n; ++j) {
-      element_init_Zr(I[i][j], *pairing);
-      if (i == j)
-	element_set1(I[i][j]);
-      else
-	element_set0(I[i][j]);
-    }
-#ifdef DEBUG
-    fprintf(stderr, "IDENTITY ROW: %d\n", i);
-    print_10_vector(I[i], n);
-#endif
-  }
-
-#ifdef DEBUG
-  fprintf(stderr, "IDENTITY:\n");
-  print_10_matrix(I, n);
-#endif
-
-  return I;
-}
-
-static element_t ** sample_linear_transformation_Zr(pairing_t * pairing, int n) {
-  element_t ** lt = malloc(sizeof(element_t *) * n);
-
-  for (int i = 0; i < n; ++i) {
-    lt[i] = malloc(sizeof(element_t) * n);
-    for (int j = 0; j < n; ++j) {
-      element_init_Zr(lt[i][j], *pairing);
-      element_random(lt[i][j]);
-    }
-  }
-
-  return lt;
-}
-
-static void copy(element_t **dst, element_t **src, int sizeY, int sizeX, int x, int y) {
-  for (int i = y; i < sizeY; ++i) {
-    for (int j = x; j < sizeX; ++j) {
-      element_set(dst[i - y][j - x], src[i][j]);
-    }
-  }
-}
-
-static element_t ** invert2(element_t **m, int n) {
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
-      if (i == j)
-	element_set1(m[i][j + n]);
-      else
-	element_set0(m[i][j + n]);
-    }
-  }
-
-  element_t alpha, beta, t;
-  element_init_same_as(alpha, m[0][0]);
-  element_init_same_as(beta, alpha);
-  element_init_same_as(t, beta);
-
-  for (int i = 0; i < n; ++i) {
-    element_set(alpha, m[i][i]);
-
-    if (element_is0(alpha))
-      pbc_die("Singular matric, cannot invert");
-    else {
-      for (int j = 0; j < n * 2; ++j) {
-	element_div(m[i][j], m[i][j], alpha);
-      }
-
-      for (int k = 0; k < n; ++k) {
-	if (0 != k - i) {
-	  element_set(beta, m[k][i]);
-	  for (int j = 0; j < n * 2; ++j) {
-	    element_mul(t, beta, m[i][j]);
-	    element_sub(m[k][j], m[k][j], t);
-	  }
-	}
-      }
-    }
-  }
-
-  element_clear(alpha);
-  element_clear(beta);
-  element_clear(t);
-
-  return m;
-}
-
-static element_t ** invert(element_t **m, int n) {
-  element_t **tm = malloc(sizeof(element_t*) * n);
-#ifdef DEBUG
-  element_t **rm = malloc(sizeof(element_t*) * n);
-#endif
-  
-  for (int i = 0; i < n; ++i) {
-#ifdef DEBUG
-    rm[i] = malloc(sizeof(element_t));
-    for (int j = 0; j < n; ++j)
-      element_init_same_as(rm[i][j], m[0][0]);
-#endif
-
-    tm[i] = malloc(sizeof(element_t)*  2 * n);
-    for (int j = 0; j < n * 2; ++j) {
-      element_init_same_as(tm[i][j], m[0][0]);
-    }
-  }
-
-  copy(tm, m, n, n, 0, 0);
-  invert2(tm, n);
-#ifdef DEBUG
-  copy(rm, tm, n, 2 * n, 0, n);
-#else
-  copy(m, tm, n, 2 * n, 0, n);
-#endif
-  
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n * 2; ++j) {
-      element_clear(tm[i][j]);
-    }
-    free(tm[i]);
-  }
-  
-  free(tm);
-
-#ifdef DEBUG
-  return rm;
-#else
-  return m;
-#endif
-}
-
-/*
-static element_t * determinant(element_t **a, int n) {
-   element_t * det = malloc(sizeof(element_t));
-   element_t **m = NULL, t;
-
-   element_init_same_as(*det, a[0][0]);
-   element_init_same_as(t, a[0][0]);
-
-   if (n == 1) { // Shouldn't get used
-     element_set(*det, a[0][0]);
-   } else if (n == 2) {
-     element_mul(*det, a[0][0], a[1][1]);
-     element_mul(t, a[1][0], a[0][1]);
-     element_sub(*det, *det, t);
-   } else {
-     element_set0(*det);
-
-      for (int j1 = 0; j1<n; j1++) {
-	m = malloc((n-1)*sizeof(element_t *));
-	for (int i = 0;i < n-1;i++) {
-	  m[i] = malloc((n-1)*sizeof(element_t));
-	}
-	for (int i=1;i<n;i++) {
-	  int j2 = 0;
-	  for (int j=0;j<n;j++) {
-	    if (j == j1)
-	      continue;
-	    element_init_same_as(m[i-1][j2], a[i][j]);
-	    element_set(m[i-1][j2], a[i][j]);
-	    ++j2;
-	  }
-	}
-	element_t * d1 = determinant(m,n-1);
-	element_mul(t, a[0][j1], *d1);
-	element_clear(*d1);
-	free(d1);
-	if (!signbit(pow(-1.0,j1+2.0)))
-	  element_neg(t, t);
-
-	element_add(*det, *det, t);
-	for (int i=0; i < n-1; ++i) {
-	  for (int j = 0; j < n-1; ++j)
-	    element_clear(m[i][j]);
-	  free(m[i]);
-	}
-	free(m);
-      }
-   }
-
-   element_clear(t);
-
-   return det;
-}
-
-static element_t ** cofactor_matrix(element_t **a, int n) {
-  element_t * det;
-  element_t **c;
-  element_t **b = malloc(sizeof(element_t*) * n);
-
-  for (int i = 0; i < n; ++i) {
-    b[i] = malloc(sizeof(element_t) * n);
-    for (int j = 0; j < n; ++j)
-      element_init_same_as(b[i][j], a[0][0]);
-  }
-
-  c = malloc((n - 1) * sizeof(element_t *));
-  for (int i = 0; i < n - 1; ++i)
-    c[i] = malloc((n-1)*sizeof(element_t));
-
-  for (int j=0;j<n;j++) {
-    for (int i=0;i<n;i++) {
-
-      // Form the adjoint a_ij
-      int i1 = 0;
-      for (int ii = 0; ii < n; ++ii) {
-	if (ii == i)
-	  continue;
-	int j1 = 0;
-	for (int jj = 0; jj < n; ++jj) {
-	  if (jj == j)
-	    continue;
-	  element_init_same_as(c[i1][j1], a[ii][jj]);
-	  element_set(c[i1][j1], a[ii][jj]);
-	  j1++;
-	}
-	i1++;
-      }
-
-      // Calculate the determinate
-      det = determinant(c, n-1);
-
-      // Fill in the elements of the cofactor
-      if (!pow(-1.0,i+j+2.0))
-	element_neg(b[i][j], *det);
-      else
-	element_set(b[i][j], *det);
-
-      element_clear(*det);
-      free(det);
-    }
-  }
-
-  for (int i = 0; i < n - 1; ++i) {
-    for (int j = 0; j < n -1; ++j) {
-      element_clear(c[i][j]);
-      element_clear(a[i][j]);
-    }
-    free(a[i]);
-    free(c[i]);
-  }
-  free(a);
-  free(c);
-
-  return b;
-}
-
-static element_t ** invert_square(element_t **m, int n) {
-  element_t * det = determinant(m, n);
-
-  element_t ** m1 = cofactor_matrix(m, n);
-
-  m1 = transpose(m1, n);
-
-  for (int i = 0; i < n; ++i)
-    for (int j = 0; j < n; ++j)
-      element_div(m1[i][j], m1[i][j], det);
-
-  return m1;
-}
-*/
-
 setup_t setup(pairing_t *pairing, int l) {
   element_t ***BB, ***CC;
   element_t g1,g2,psi,**A1, **A2, **B, **C, **X, **Xs;
@@ -633,6 +341,7 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   dkey_t k = malloc(sizeof(*k));
   element_t yt, dt, st, s0, v[3];
 
+  k->l = private->l;
   k->S = 0x00;
   k->k = malloc(sizeof(element_t) * (private->l + 1));
 
@@ -831,19 +540,86 @@ ciphertext_t deserialize_ct(unsigned char *buffer) {
   return ct;
 }
 
-int serialize_mpk(unsigned char ** buffer, mpk_t pulbic) {
+int serialize_mpk(unsigned char ** buffer, mpk_t public) {
+  int size = sizeof(unsigned short) + ((public->l + 1) * 3 * 3 * element_length_in_bytes(public->B[0][0][0])) + element_length_in_bytes(public->gT);
+  unsigned char *tbuff = *buffer = malloc(size);
+
+  unsigned short l1 = htons(public->l);
+  memcpy(tbuff, l1, sizeof(unsigned short));
+  tbuff += sizeof(unsigned short);
+  for (int t = 0; t <= public->l; ++t)
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+	tbuff += element_to_bytes(tbuff, public->B[t][i][j]);
+  element_to_bytes(tbuff, public->gT);
+
+  return size;
 }
 
 mpk_t deserialize_mpk(unsigned char * buffer) {
+  mpk_t public = malloc(sizeof(*public));
+  
+  unsigned short l1;
+  memcpy(&li, l1, sizeof(unsigned short));
+  buffer += sizeof(unsigned short);
+
+  public->l = ntohs(l1);
+  public->B = malloc(sizeof(element_t **) * (public->l + 1));
+  for (int t = 0; t <= public->l; ++t) {
+    public->B[t] = malloc(sizeof(element_t *) * 3);
+    for (int i = 0; i < 3; ++i) {
+      public->B[t][i] = malloc(sizeof(element_t) * 3);
+      for (int j = 0; j < 3; ++j)
+	buffer += element_from_bytes(public->B[t][i][j], buffer);
+    }
+  }
+  element_from_bytes(public->gT, buffer);
+
+  return public;
 }
 
 int serialize_msk(unsigned char ** buffer, msk_t private) {
+  int size = sizeof(unsigned short) + ((private->l + 1) * 3 * 3 * element_length_in_bytes(private->C[0][0][0])));
+  unsigned char *tbuff = *buffer = malloc(size);
+
+  unsigned short l1 = htons(private->l);
+  memcpy(tbuff, l1, sizeof(unsigned short));
+  tbuff += sizeof(unsigned short);
+  for (int t = 0; t <= private->l; ++t)
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+	tbuff += element_to_bytes(tbuff, public->C[t][i][j]);
+
+  return size;
 }
 
 msk_t deserialize_msk(unsigned char * buffer) {
+  msk_t private = malloc(sizeof(*private));
+
+  unsigned short l1;
+  memcpy(&l1, buffer, sizeof(unsigned short));
+  buffer += sizeof(unsigned short);
+
+  private->l = ntohs(l1);
+  private->C = malloc(sizeof(element_t **) * (private->l + 1));
+
+  for (int t = 0; t <= private->l; ++t) {
+    private->C[t] = malloc(sizeof(element_t *) * 3);
+    for (int i = 0; i < 3; ++i) {
+      private->C[t][i] = malloc(sizeof(element_t) * 3);
+      for (int j = 0; j < 3; ++j)
+	buffer += element_from_bytes(private->C[t][i][j], buffer);
+
+  return private;
 }
 
 int serialize_key(unsigned char ** buffer, dkey_t k) {
+  int size = sizeof(unsigned long) + sizeof(unsigned short) + (element_length_in_bytes(k[0][0]) * (key->l + 1));
+  unsigned char *tbuff  = *buffer = malloc(size);
+
+
+
+  return size;
 }
 
 dkey_t deserialize_key(unsigned char * buffer) {
