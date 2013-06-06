@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <sys/time.h>
+
 #include <openssl/aes.h>
 #include "schemas/utils.h"
 
@@ -194,12 +196,58 @@ void test_fixed2(const char *path) {
   
 }
 
+void test_EandD(const char *path, int l) {
+  fprintf(stderr, "testing EandD %d\n", l);
+
+  struct timeval tvb, tve;
+
+  element_t m;
+  int *X,*Y;
+  pairing_t * pairing = load_pairing(path);
+
+  Y=malloc(l*sizeof(int));
+  X=malloc(l*sizeof(int));
+  for (int i=0;i<l;i++){
+        Y[i]=i+1; X[i]=i+1;
+  }
+
+  gettimeofday(&tvb, NULL);
+  setup_t out=setup(pairing,l);
+  gettimeofday(&tve, NULL);
+
+  printf("%d setup %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+
+  gettimeofday(&tvb, NULL);
+  ciphertext_t ct=encrypt(pairing, out->public, X, &m);
+  gettimeofday(&tve, NULL);
+
+  printf("%d encrypt %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+
+  gettimeofday(&tvb, NULL);
+  dkey_t tok=keygen(pairing, out->private,Y);
+  gettimeofday(&tve, NULL);
+
+  printf("%d keygen %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+
+  gettimeofday(&tvb, NULL);
+  element_t *dm=decrypt(pairing,ct,tok);
+  gettimeofday(&tve, NULL);
+
+  printf("%d decrypt %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+
+  int r = element_cmp(m, *dm);
+  fprintf(stderr, "%d: %s\n",r,!r ? "OK!" : "No!");
+
+}
+
 int main(int argc, char ** argv) {
   if (2 == argc)
     //test_fixed2(argv[1]);
     test_fixed(argv[1]);
   /*   else if (4 == argc) */
   /*     test_variable(argv[1], atoi(argv[2]), atoi(argv[3])); */
+  else if (3 == argc)
+    test_EandD(argv[1], atoi(argv[2]));
   else
     printf("error testing");
 
