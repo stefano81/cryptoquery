@@ -194,12 +194,40 @@ void test_fixed2(const char *path) {
   
 }
 
+void 
+test_EandD(const char *path, int l) {
+
+  element_t m;
+  int *X,*Y;
+  pairing_t * pairing = load_pairing(path);
+
+  Y=malloc(l*sizeof(int));
+  X=malloc(l*sizeof(int));
+  for (int i=0;i<l;i++){
+        Y[i]=i+1; X[i]=i+1;
+  }
+
+  setup_t out=setup(pairing,l);
+  ciphertext_t ct=encrypt(pairing, out->public, X, &m);
+  dkey_t tok=keygen(pairing, out->private,Y);
+  element_t *dm=decrypt(pairing,ct,tok);
+
+  int r = element_cmp(m, *dm);
+  printf("%d: %s\n",r,!r ? "OK!" : "No!");
+
+}
+
+
 int main(int argc, char ** argv) {
+  //  printf("%d\n", sizeof(short));
+  
   if (2 == argc)
     //test_fixed2(argv[1]);
     test_fixed(argv[1]);
   /*   else if (4 == argc) */
   /*     test_variable(argv[1], atoi(argv[2]), atoi(argv[3])); */
+  else if (3 == argc)
+    test_EandD(argv[1], atoi(argv[2]));
   else
     printf("error testing");
 
