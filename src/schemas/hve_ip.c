@@ -633,7 +633,13 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   dkey_t k = malloc(sizeof(*k));
   element_t yt, dt, st, s0, v[3];
 
-  k->S = 0x00;
+  k->Sn = 0;
+  for (int i = 0; i < private->l; ++i) {
+    if (-1 != y[i])
+      ++(k->Sn);
+  }
+  k->S = malloc(sizeof(unsigned long) * k->Sn);
+  
   k->k = malloc(sizeof(element_t) * (private->l + 1));
 
 #ifdef DEBUG
@@ -652,8 +658,8 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
 
   element_set0(s0);
 
-  unsigned long mask = 0x01;
-  for (int t = 1; t <= private->l; ++t, mask <<= 1) {
+  //unsigned long mask = 0x01;
+  for (int t = 1, sc = 0; t <= private->l; ++t) {
 #ifdef DEBUG
     k->y[t - 1] = y[t - 1];
 #endif
@@ -664,7 +670,8 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
       continue;
     }
 
-    k->S |= mask;
+    //k->S |= mask;
+    k->S[sc++] = t - 1;
 
     element_random(dt);
     element_random(st);
@@ -735,12 +742,13 @@ element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
 
   element_set1(t2);
   
-  unsigned long mask = 0x01;
-  for (int t = 1; t <= ct->l; ++t, mask <<= 1) {
+  //unsigned long mask = 0x01;
+  for (int t = 1, sc = 0; t <= ct->l && sc < key->Sn; ++t) {
 #ifdef DEBUG
     fprintf(stderr, "x[%d] = %d\ny[%d] = %d\n", (t-1), ct->x[t-1], (t-1), key->y[t-1]);
 #endif
-    if (key->S & mask) {
+    if (t - 1 == key->S[sc]) {
+      ++sc;
       // i \in S
       element_prod_pairing(t1, key->k[t], ct->ci[t], 3); // p_t =e(k_t, c_t)
 #ifdef DEBUG
@@ -796,11 +804,11 @@ element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
 
 
 int serialize_ct(unsigned char ** buffer, ciphertext_t ct) {
-  int size = sizeof(unsigned short) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
+  int size = sizeof(unsigned int) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
   unsigned char * tbuf, * buff = tbuf = *buffer = malloc(size);
-  unsigned short l1 = htons(ct->l);
-  memcpy(buff, &(l1), sizeof(unsigned short));
-  tbuf += sizeof(unsigned short);
+  unsigned int l1 = htonl(ct->l);
+  memcpy(buff, &(l1), sizeof(unsigned int));
+  tbuf += sizeof(unsigned int);
 
   tbuf += element_to_bytes(tbuf, ct->c);
 
@@ -814,11 +822,11 @@ int serialize_ct(unsigned char ** buffer, ciphertext_t ct) {
 ciphertext_t deserialize_ct(unsigned char *buffer) {
   ciphertext_t ct = malloc(sizeof(*ct));
 
-  unsigned short l1;
-  memcpy(&l1, buffer, sizeof(unsigned short));
-  ct->l = ntohs(l1);
+  unsigned int l1;
+  memcpy(&l1, buffer, sizeof(unsigned int));
+  ct->l = ntohl(l1);
 
-  buffer += sizeof(unsigned short);
+  buffer += sizeof(unsigned int);
 
   buffer += element_from_bytes(ct->c, buffer);
   ct->ci = malloc(sizeof(element_t *) * ct->l);

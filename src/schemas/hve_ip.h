@@ -4,13 +4,13 @@
 #include <pbc/pbc.h>
 
 typedef struct {
-  unsigned short l;
+  unsigned int l;
   element_t ***B;
   element_t gT;
 }* mpk_t;
 
 typedef struct {
-  unsigned short l;
+  unsigned int l;
   element_t ***C;
 }* msk_t;
 
@@ -21,7 +21,7 @@ typedef struct {
 }* setup_t;
 
 typedef struct {
-  unsigned short l;
+  unsigned int l;
   element_t c;
   element_t **ci;
 #ifdef DEBUG
@@ -33,7 +33,8 @@ typedef struct {
 }* ciphertext_t;
 
 typedef struct {
-  unsigned long S;
+  unsigned long Sn;
+  unsigned long *S;
   element_t **k;
 #ifdef DEBUG
   int *y;
