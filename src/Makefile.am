@@ -1,5 +1,5 @@
 # what flags you want to pass to the C compiler & linker
-#CFLAGS = -g0 -O2
+CFLAGS = -g0 -O2
 #CFLAGS = --pedantic -Wall -ggdb
 #CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS =

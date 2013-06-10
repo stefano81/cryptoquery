@@ -207,6 +207,7 @@ void test_EandD(const char *path, int l) {
 
   Y=malloc(l*sizeof(int));
   X=malloc(l*sizeof(int));
+
   for (int i=0;i<l;i++){
         Y[i]=i+1; X[i]=i+1;
   }
@@ -237,7 +238,63 @@ void test_EandD(const char *path, int l) {
 
   int r = element_cmp(m, *dm);
   fprintf(stderr, "%d: %s\n",r,!r ? "OK!" : "No!");
+}
 
+void test_EandD2(const char *path, int l) {
+  fprintf(stderr, "testing EandD %d\n", l);
+
+  struct timeval tvb, tve;
+
+  element_t m;
+  int *X,**Y;
+  pairing_t * pairing = load_pairing(path);
+
+  Y=malloc(sizeof(int *) * (l - 1));
+  X=malloc(l*sizeof(int));
+  dkey_t *keys = malloc(sizeof(dkey_t) * l);
+
+  for (int i=0;i<l;i++){
+        X[i]=i+1;
+	printf(" %d", X[i]);
+  }
+  printf("\n");
+
+  for (int j = 0; j < l; ++j) {
+    Y[j] = malloc(sizeof(int) * l);
+    for (int i = 0; i < l; ++i)
+      Y[j][i] = i <= j ? X[i] : -1;
+  }
+
+
+  gettimeofday(&tvb, NULL);
+  setup_t out=setup(pairing,l);
+  gettimeofday(&tve, NULL);
+
+  printf("%d setup %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+
+  gettimeofday(&tvb, NULL);
+  ciphertext_t ct = encrypt(pairing, out->public, X, &m);
+  gettimeofday(&tve, NULL);
+
+  printf("%d encrypt %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+
+  for (int i = 0; i < l; ++i) {
+    gettimeofday(&tvb, NULL);
+    keys[i] = keygen(pairing, out->private,Y[i]);
+    gettimeofday(&tve, NULL);
+
+    printf("%d keygen[%d] %lu\n", l, i, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+
+
+    gettimeofday(&tvb, NULL);
+    element_t *dm = decrypt(pairing,ct,keys[i]);
+    gettimeofday(&tve, NULL);
+
+    printf("%d decrypt [%d] %lu\n", l, i, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+
+    int r = element_cmp(m, *dm);
+    fprintf(stderr, "%d: %s\n",r,!r ? "OK!" : "No!");
+  }
 }
 
 int main(int argc, char ** argv) {
@@ -247,7 +304,7 @@ int main(int argc, char ** argv) {
   /*   else if (4 == argc) */
   /*     test_variable(argv[1], atoi(argv[2]), atoi(argv[3])); */
   else if (3 == argc)
-    test_EandD(argv[1], atoi(argv[2]));
+    test_EandD2(argv[1], atoi(argv[2]));
   else
     printf("error testing");
 

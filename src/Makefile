@@ -185,9 +185,7 @@ CC = gcc -std=gnu99
 CCDEPMODE = depmode=gcc3
 
 # what flags you want to pass to the C compiler & linker
-#CFLAGS = -g0 -O2
-#CFLAGS = --pedantic -Wall -ggdb
-CFLAGS = --pedantic -Wall -ggdb -DDEBUG
+CFLAGS = -g0 -O2
 CPP = gcc -std=gnu99 -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -204,6 +202,8 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
+#CFLAGS = --pedantic -Wall -ggdb
+#CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS = 
 LIBOBJS = 
 LIBS = -lreadline -lsqlite3 -lpbc -lgmp -lm 
