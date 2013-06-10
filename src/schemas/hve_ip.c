@@ -516,7 +516,7 @@ int serialize_ct(unsigned char ** buffer, ciphertext_t ct) {
   int size = sizeof(unsigned int) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
   unsigned char * tbuf, * buff = tbuf = *buffer = malloc(size);
   unsigned int l1 = htonl(ct->l);
-  memcpy(buff, &(l1), sizeof(unsigned int));
+  memcpy(buff, &l1, sizeof(unsigned int));
   tbuf += sizeof(unsigned int);
 
   tbuf += element_to_bytes(tbuf, ct->c);
@@ -553,7 +553,7 @@ int serialize_mpk(unsigned char ** buffer, mpk_t public) {
   unsigned char *tbuff = *buffer = malloc(size);
 
   unsigned short l1 = htons(public->l);
-  memcpy(tbuff, l1, sizeof(unsigned short));
+  memcpy(tbuff, &l1, sizeof(unsigned short));
   tbuff += sizeof(unsigned short);
   for (int t = 0; t <= public->l; ++t)
     for (int i = 0; i < 3; ++i)
@@ -568,7 +568,7 @@ mpk_t deserialize_mpk(unsigned char * buffer) {
   mpk_t public = malloc(sizeof(*public));
   
   unsigned short l1;
-  memcpy(&li, l1, sizeof(unsigned short));
+  memcpy(&l1, buffer, sizeof(unsigned short));
   buffer += sizeof(unsigned short);
 
   public->l = ntohs(l1);
@@ -587,16 +587,16 @@ mpk_t deserialize_mpk(unsigned char * buffer) {
 }
 
 int serialize_msk(unsigned char ** buffer, msk_t private) {
-  int size = sizeof(unsigned short) + ((private->l + 1) * 3 * 3 * element_length_in_bytes(private->C[0][0][0])));
+  int size = sizeof(unsigned short) + ((private->l + 1) * 3 * 3 * element_length_in_bytes(private->C[0][0][0]));
   unsigned char *tbuff = *buffer = malloc(size);
 
   unsigned short l1 = htons(private->l);
-  memcpy(tbuff, l1, sizeof(unsigned short));
+  memcpy(tbuff, &l1, sizeof(unsigned short));
   tbuff += sizeof(unsigned short);
   for (int t = 0; t <= private->l; ++t)
     for (int i = 0; i < 3; ++i)
       for (int j = 0; j < 3; ++j)
-	tbuff += element_to_bytes(tbuff, public->C[t][i][j]);
+	tbuff += element_to_bytes(tbuff, private->C[t][i][j]);
 
   return size;
 }
@@ -617,12 +617,14 @@ msk_t deserialize_msk(unsigned char * buffer) {
       private->C[t][i] = malloc(sizeof(element_t) * 3);
       for (int j = 0; j < 3; ++j)
 	buffer += element_from_bytes(private->C[t][i][j], buffer);
+    }
+  }
 
   return private;
 }
 
-int serialize_key(unsigned char ** buffer, dkey_t k) {
-  int size = sizeof(unsigned long) + sizeof(unsigned short) + (element_length_in_bytes(k[0][0]) * (key->l + 1));
+int serialize_key(unsigned char ** buffer, dkey_t key) {
+  int size = sizeof(unsigned long) + sizeof(unsigned short) + (element_length_in_bytes(key->k[0][0]) * (key->l + 1));
   unsigned char *tbuff  = *buffer = malloc(size);
 
 
