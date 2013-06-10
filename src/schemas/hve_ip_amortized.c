@@ -1,4 +1,4 @@
-#include "hve_ip.h"
+#include "hve_ip_amortized.h"
 #include "utils.h"
 
 #include <stdio.h>
@@ -7,7 +7,7 @@
 #include <string.h>
 #include <math.h>
 
-setup_t setup(pairing_t *pairing, int l) {
+setup_t setup_amortized(pairing_t *pairing, int l) {
   element_t ***BB, ***CC;
   element_t g1,g2,psi,**A1, **A2, **B, **C, **X, **Xs;
   element_t tmp1,tmp2;
@@ -15,6 +15,8 @@ setup_t setup(pairing_t *pairing, int l) {
   element_t t,gT;
   element_t t1,t2,t3;
   element_t delta;
+
+  unsigned pairs_number = l + 2;
   
   element_init_Zr(delta,*pairing); 
   element_init_Zr(t1,*pairing);
@@ -75,8 +77,8 @@ setup_t setup(pairing_t *pairing, int l) {
     }
   }
 
-  BB=(element_t ***)malloc(sizeof(element_t **)*(l+1));
-  CC=(element_t ***)malloc(sizeof(element_t **)*(l+1));
+  BB=(element_t ***)malloc(sizeof(element_t **)*(pairs_number));
+  CC=(element_t ***)malloc(sizeof(element_t **)*(pairs_number));
 
   setup_t setup = malloc(sizeof(setup_t));
 
@@ -85,16 +87,12 @@ setup_t setup(pairing_t *pairing, int l) {
   msk_t private = setup->private = malloc(sizeof(*private));
   element_init_GT(public->gT,*pairing);
   element_set(public->gT, gT);
-  /*  element_init_G1(public->g1, *pairing);
-      element_set(public->g1, g1);
-      element_init_G2(setup->public->g2,*pairing);
-      element_set(public->g2, g2);*/
   setup->private->l = setup->public->l = l;
   setup->public->B = BB;
   setup->private->C = CC;
 
-
-  for(int zz=0;zz<l+1;zz++){
+  // generates l + 2 pairs (B, C) instead of l + 1 
+  for(int zz=0;zz < pairs_number; ++zz){
     BB[zz]=malloc(sizeof(element_t *)*3); CC[zz]=malloc(sizeof(element_t *)*3);
     BB[zz][0]=malloc(sizeof(element_t)*3); CC[zz][0]=malloc(sizeof(element_t)*3);
     BB[zz][1]=malloc(sizeof(element_t)*3); CC[zz][1]=malloc(sizeof(element_t)*3);
@@ -254,7 +252,7 @@ setup_t setup(pairing_t *pairing, int l) {
   return setup;
 }
 
-ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
+ciphertext_t encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
   ciphertext_t ct = malloc(sizeof(*ct));
   element_t xt, v[3], z, wt, w0;
 
@@ -337,7 +335,7 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
   return ct;
 }
 
-dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
+dkey_t keygen_amortized(pairing_t* pairing, msk_t private, int y[]) {
   dkey_t k = malloc(sizeof(*k));
   element_t yt, dt, st, s0, v[3];
 
@@ -437,7 +435,7 @@ int MYHVE(int *x, int *y, int n) {
 }
 #endif
 
-element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
+element_t * decrypt_amortized(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
   element_t * m = malloc(sizeof(element_t));
   element_t t1, t2;
 
