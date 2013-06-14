@@ -7,9 +7,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* Define to 1 if you have the `crypto' library (-lcrypto). */
-#define HAVE_LIBCRYPTO 1
-
 /* Define to 1 if you have the `gmp' library (-lgmp). */
 #define HAVE_LIBGMP 1
 
@@ -18,12 +15,6 @@
 
 /* Define to 1 if you have the `pbc' library (-lpbc). */
 #define HAVE_LIBPBC 1
-
-/* Define to 1 if you have the `readline' library (-lreadline). */
-#define HAVE_LIBREADLINE 1
-
-/* Define to 1 if you have the `sqlite3' library (-lsqlite3). */
-#define HAVE_LIBSQLITE3 1
 
 /* Define to 1 if your system has a GNU libc compatible `malloc' function, and
    to 0 otherwise. */
