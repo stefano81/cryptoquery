@@ -6,6 +6,7 @@
 
 #include "../schemas/hve_ip.h"
 #include "../schemas/utils.h"
+#include "../schemas/aes.h"
 
 // usage: generatehve database_file, param_file, column_number, data_row_number
 // assumes column numerical
@@ -86,7 +87,7 @@ int main(int argc, char *argv[]) {
 
     return 1;
   }
-  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS param (key integer, val blob); DELETE FROM param;", NULL, NULL, NULL)) {
+  if (SQLITE_OK !=  sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS params (key integer, val blob); DELETE FROM params;", NULL, NULL, NULL)) {
     fprintf(stderr, "Error creating table param\n");
 
     return 1;
@@ -96,9 +97,9 @@ int main(int argc, char *argv[]) {
   pairing_t * pairing = load_pairing(argv[2]);
 
   // init HVE
-  setup_t mks = setup(pairing, ncolumn);
+  setup_t out = setup(pairing, ncolumn);
 
-  unsigned int * vals = malloc(sizeof(unsigned int) * ncolumn);
+  int * vals = malloc(sizeof(unsigned int) * ncolumn);
   char insert_query[4096];
   element_t m;
   element_init_GT(m, *pairing);
@@ -129,7 +130,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
-    ciphertext_t ct = encrypt(pairing, mks->public, vals, &m);
+    ciphertext_t ct = encrypt(pairing, out->public, vals, &m);
 
     void * ser_ct;
     int size = serialize_ct(&ser_ct, ct);
@@ -137,7 +138,7 @@ int main(int argc, char *argv[]) {
     sqlite3_bind_int(c_stmt, 1, i);
     sqlite3_bind_blob(c_stmt, 2, ser_ct, size, NULL);
     if (SQLITE_OK != sqlite3_step(c_stmt)) {
-      fprintf(stderr, "Error inserting the %d id in ct: \n", i, sqlite3_errmsg(db));
+      fprintf(stderr, "Error inserting the %d id in ct: %s\n", i, sqlite3_errmsg(db));
 
       return 1;
     }

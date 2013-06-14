@@ -54,10 +54,11 @@ AC_CHECK_LIB( [pbc], [pbc_set_msg_to_stderr], [], [AC_MSG_ERROR([PBC is required
 AC_CHECK_HEADERS([stdio.h])
 AC_CHECK_HEADERS([stdlib.h])
 AC_CHECK_HEADERS([string.h])
-#AC_CHECK_HEADERS([unistd.h])
-#AC_CHECK_HEADERS([readline/readline.h])
-#AC_CHECK_HEADERS([readline/history.h])
+AC_CHECK_HEADERS([unistd.h])
+AC_CHECK_HEADERS([readline/readline.h])
+AC_CHECK_HEADERS([readline/history.h])
 AC_CHECK_HEADERS([arpa/inet.h])
+AC_CHECK_HEADERS([openssl/aes.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T

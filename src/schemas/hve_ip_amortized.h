@@ -1,5 +1,5 @@
-#ifndef HVE_IP_H
-#define HVE_IP_H
+#ifndef HVE_IP_AMM_H
+#define HVE_IP_AMM_H
 
 #include <pbc/pbc.h>
 
@@ -45,10 +45,10 @@ typedef struct {
 #endif
 }* dkey_t;
 
-setup_t setup(pairing_t* pairing, int l);
-ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m);
-dkey_t keygen(pairing_t* pairing, msk_t private, int y[]);
-element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key);
+setup_t setup_amortized(pairing_t* pairing, int l);
+ciphertext_t encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], element_t *m);
+dkey_t keygen_amortized(pairing_t* pairing, msk_t private, int y[]);
+element_t * decrypt_amortized(pairing_t* pairing, ciphertext_t ct, dkey_t key);
 
 int serialize_ct(unsigned char ** buffer, ciphertext_t ct);
 int serialize_mpk(unsigned char ** buffer, mpk_t public);
