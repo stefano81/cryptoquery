@@ -271,30 +271,33 @@ void test_EandD2(const char *path, int l) {
   setup_t out=setup(pairing,l);
   gettimeofday(&tve, NULL);
 
-  printf("%d setup %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+  printf("%d setup %lu\n", l, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
 
   gettimeofday(&tvb, NULL);
   ciphertext_t ct = encrypt(pairing, out->public, X, &m);
   gettimeofday(&tve, NULL);
 
-  printf("%d encrypt %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+  printf("%d encrypt %lu\n", l, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
 
   for (int i = 0; i < l; ++i) {
     gettimeofday(&tvb, NULL);
     keys[i] = keygen(pairing, out->private,Y[i]);
     gettimeofday(&tve, NULL);
 
-    printf("%d keygen[%d] %lu\n", l, i, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+    printf("%d keygen %d %lu\n", l, i, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
 
+    for (int j = 0; j < 10; ++j) {
+      gettimeofday(&tvb, NULL);
+      element_t *dm = decrypt(pairing,ct,keys[i]);
+      gettimeofday(&tve, NULL);
 
-    gettimeofday(&tvb, NULL);
-    element_t *dm = decrypt(pairing,ct,keys[i]);
-    gettimeofday(&tve, NULL);
+      printf("%d decrypt %d %d %lu\n", l, i, j, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
 
-    printf("%d decrypt [%d] %lu\n", l, i, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
+      int r = element_cmp(m, *dm);
+      fprintf(stderr, "%d: %s\n",r,!r ? "OK!" : "No!");
+      element_free(*dm);
+    }
 
-    int r = element_cmp(m, *dm);
-    fprintf(stderr, "%d: %s\n",r,!r ? "OK!" : "No!");
   }
 }
 
