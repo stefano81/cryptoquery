@@ -252,85 +252,69 @@ setup_t setup_amortized(pairing_t *pairing, int l) {
   return setup;
 }
 
-ciphertext_t encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
-  ciphertext_t ct = malloc(sizeof(*ct));
-  element_t xt, v[3], z, wt, w0;
+ciphertext_t* encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], element_t **m, unsigned n) {
+  ciphertext_t ct = malloc(sizeof(ct) * n);
+  element_t xt, v[3], z, wt, w0, zj;
 
-  element_init_GT(*m, *pairing);
-  element_random(*m);
+  // initialize common part
 
-#ifdef DEBUG
-  element_t * w = ct->w = malloc(sizeof(element_t) * (public->l + 1));
-  ct->x = malloc(sizeof(int) * public->l);
-  element_init_same_as(ct->gT, public->gT);
-  element_set(ct->gT, public->gT);
-#endif
+  for (unsigned in = 0; in < n; ++in) {
+    ct[in] = malloc(sizeof(*ct));
 
-  ct->l = public->l;
+    element_init_GT(*m[in], *pairing);
+    element_random(*m[in]);
 
-  element_init_Zr(xt, *pairing);
+    ct[in]->l = public->l;
 
-  ct->ci = malloc(sizeof(element_t) * (ct->l + 1));
+    element_init_Zr(xt, *pairing);
 
-  element_init_Zr(z, *pairing);
-  element_init_Zr(wt, *pairing);
-  element_init_Zr(w0, *pairing);
-  element_random(z);
+    ct[in]->ci = malloc(sizeof(element_t) * (ct->l + 1));
 
-#ifdef DEBUG
-  element_init_same_as(ct->z, z);
-  element_set(ct->z, z);
-#endif
+    element_init_Zr(z, *pairing);
+    element_init_Zr(wt, *pairing);
+    element_init_Zr(w0, *pairing);
+    element_random(z);
 
-  element_init_GT(ct->c, *pairing);
-  element_pow_zn(ct->c, public->gT, z);
-  element_mul(ct->c, ct->c, *m); // c = g_T ^ z * m
+    element_init_GT(ct->c, *pairing);
+    element_pow_zn(ct->c, public->gT, z);
+    element_mul(ct->c, ct->c, *m); // c = g_T ^ z * m
 
-  element_init_Zr(v[0], *pairing);
-  element_init_Zr(v[1], *pairing);
-  element_init_Zr(v[2], *pairing);
+    element_init_Zr(v[0], *pairing);
+    element_init_Zr(v[1], *pairing);
+    element_init_Zr(v[2], *pairing);
 
-  element_random(w0); // w_0
+    element_random(w0); // w_0
 
-#ifdef DEBUG
-  element_init_same_as(w[0], w0);
-  element_set(w[0], w0);
-#endif
+    element_set(v[0], w0);
+    element_set(v[1], z);
+    element_set0(v[2]); // (w_0, z, 0)
 
-  element_set(v[0], w0);
-  element_set(v[1], z);
-  element_set0(v[2]); // (w_0, z, 0)
+    ct->ci[0] = vector_times_matrix(pairing, v, public->B[0], 3);
 
-  ct->ci[0] = vector_times_matrix(pairing, v, public->B[0], 3);
+    element_set(v[2], wt); // set w0 to the third element of all the vectors
 
-  //  element_set(v[2], wt); // set w0 to the third element of all the vectors
+    for (int t = 1; t <= ct->l; ++t) {
+      element_random(wt); // wt <- F_q
 
-  for (int t = 1; t <= ct->l; ++t) {
-    element_random(wt); // wt <- F_q
+      element_set(v[0], wt);
+      element_set_si(xt, x[t - 1]);
 
-#ifdef DEBUG
-    element_init_same_as(w[t], wt);
-    element_set(w[t], wt);
-    ct->x[t - 1] = x[t - 1];
-#endif
+      element_set(v[0], wt);
+      element_mul(v[1], wt, xt);
+      //element_set(v[2], w0); // (w_t, w_t x_t, w_0)
 
-    element_set(v[0], wt);
-    element_set_si(xt, x[t - 1]);
+      ct->ci[t]  = vector_times_matrix(pairing, v, public->B[t], 3);
+    }
 
-    element_set(v[0], wt);
-    element_mul(v[1], wt, xt);
-    element_set(v[2], w0); // (w_t, w_t x_t, w_0)
+    element_clear(v[0]);
+    element_clear(v[1]);
+    element_clear(v[2]);
+    element_clear(wt);
+    element_clear(xt);
+    element_clear(z);
+    element_clear(w0);
 
-    ct->ci[t]  = vector_times_matrix(pairing, v, public->B[t], 3);
   }
-
-  element_clear(v[0]);
-  element_clear(v[1]);
-  element_clear(v[2]);
-  element_clear(wt);
-  element_clear(xt);
-  element_clear(z);
-  element_clear(w0);
 
   return ct;
 }

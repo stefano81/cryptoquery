@@ -46,7 +46,7 @@ typedef struct {
 }* dkey_t;
 
 setup_t setup_amortized(pairing_t* pairing, int l);
-ciphertext_t encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], element_t *m);
+ciphertext_t* encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], element_t **m, unsigned n);
 dkey_t keygen_amortized(pairing_t* pairing, msk_t private, int y[]);
 element_t * decrypt_amortized(pairing_t* pairing, ciphertext_t ct, dkey_t key);
 
