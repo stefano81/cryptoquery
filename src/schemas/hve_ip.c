@@ -55,7 +55,7 @@ setup_t setup(pairing_t *pairing, int l) {
 #endif
 
   /* constructing the canonical bases: A1 for G1 and A2 for G2 */
-  A1=malloc(sizeof(element_t *)*3);  A1[0]=malloc(sizeof(element_t)*3); 
+  A1=malloc(sizeof(element_t *)*3);  A1[0]=malloc(sizeof(element_t)*3);
   A1[1]=malloc(sizeof(element_t)*3); A1[2]=malloc(sizeof(element_t)*3); 
 
   A2=malloc(sizeof(element_t *)*3);  A2[0]=malloc(sizeof(element_t)*3); 
