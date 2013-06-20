@@ -313,7 +313,6 @@ ciphertext_t* encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], eleme
     element_clear(xt);
     element_clear(z);
     element_clear(w0);
-
   }
 
   return ct;
