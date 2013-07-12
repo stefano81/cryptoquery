@@ -1,7 +1,7 @@
 #include "utils.h"
 
 pairing_t * load_pairing(const char *params_path) {
-  char param[1024];
+  char param[1024 * 8];
   pairing_t *pairing = malloc(sizeof(pairing_t));
 
   FILE * file = fopen(params_path, "r");

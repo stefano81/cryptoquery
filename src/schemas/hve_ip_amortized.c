@@ -7,7 +7,7 @@
 #include <string.h>
 #include <math.h>
 
-setup_t setup_amortized(pairing_t *pairing, int l) {
+setup_t* setup_amortized(pairing_t *pairing, int l) {
   element_t ***BB, ***CC;
   element_t g1,g2,psi,**A1, **A2, **B, **C, **X, **Xs;
   element_t tmp1,tmp2;
@@ -80,11 +80,11 @@ setup_t setup_amortized(pairing_t *pairing, int l) {
   BB=(element_t ***)malloc(sizeof(element_t **)*(pairs_number));
   CC=(element_t ***)malloc(sizeof(element_t **)*(pairs_number));
 
-  setup_t setup = malloc(sizeof(setup_t));
+  setup_t* setup = malloc(sizeof(setup_t));
 
   /* qui ho fatto un qualche errore con i puntatori */
-  mpk_t public = setup->public = malloc(sizeof(*public));
-  msk_t private = setup->private = malloc(sizeof(*private));
+  mpk_t* public = setup->public = malloc(sizeof(*public));
+  msk_t* private = setup->private = malloc(sizeof(*private));
   element_init_GT(public->gT,*pairing);
   element_set(public->gT, gT);
   setup->private->l = setup->public->l = l;
@@ -93,7 +93,7 @@ setup_t setup_amortized(pairing_t *pairing, int l) {
 
   // generates l + 2 pairs (B, C) instead of l + 1 
   for(int zz=0;zz < pairs_number; ++zz){
-    BB[zz]=malloc(sizeof(element_t *)*3); CC[zz]=malloc(sizeof(element_t *)*3);
+    BB[zz]=malloc(sizeof(element_t*)*3); CC[zz]=malloc(sizeof(element_t *)*3);
     BB[zz][0]=malloc(sizeof(element_t)*3); CC[zz][0]=malloc(sizeof(element_t)*3);
     BB[zz][1]=malloc(sizeof(element_t)*3); CC[zz][1]=malloc(sizeof(element_t)*3);
     BB[zz][2]=malloc(sizeof(element_t)*3); CC[zz][2]=malloc(sizeof(element_t)*3);
@@ -252,8 +252,8 @@ setup_t setup_amortized(pairing_t *pairing, int l) {
   return setup;
 }
 
-ciphertext_t encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
-  ciphertext_t ct = malloc(sizeof(*ct));
+ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], element_t *m, ciphertext_common_t * cm) {
+  ciphertext_t* ct = malloc(sizeof(*ct));
   element_t xt, v[3], z, wt, w0;
 
   element_init_GT(*m, *pairing);
@@ -335,8 +335,8 @@ ciphertext_t encrypt_amortized(pairing_t* pairing, mpk_t public, int x[], elemen
   return ct;
 }
 
-dkey_t keygen_amortized(pairing_t* pairing, msk_t private, int y[]) {
-  dkey_t k = malloc(sizeof(*k));
+dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
+  dkey_t* k = malloc(sizeof(*k));
   element_t yt, dt, st, s0, v[3];
 
   k->l = private->l;
@@ -435,7 +435,7 @@ int MYHVE(int *x, int *y, int n) {
 }
 #endif
 
-element_t * decrypt_amortized(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
+element_t * decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key) {
   element_t * m = malloc(sizeof(element_t));
   element_t t1, t2;
 
@@ -510,7 +510,7 @@ element_t * decrypt_amortized(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
 }
 
 
-int serialize_ct(unsigned char ** buffer, ciphertext_t ct) {
+int serialize_ct(unsigned char ** buffer, ciphertext_t* ct) {
   int size = sizeof(unsigned int) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
   unsigned char * tbuf, * buff = tbuf = *buffer = malloc(size);
   unsigned int l1 = htonl(ct->l);
@@ -526,8 +526,8 @@ int serialize_ct(unsigned char ** buffer, ciphertext_t ct) {
   return size;
 }
 
-ciphertext_t deserialize_ct(unsigned char *buffer) {
-  ciphertext_t ct = malloc(sizeof(*ct));
+ciphertext_t* deserialize_ct(unsigned char *buffer) {
+  ciphertext_t* ct = malloc(sizeof(*ct));
 
   unsigned int l1;
   memcpy(&l1, buffer, sizeof(unsigned int));
@@ -562,8 +562,8 @@ int serialize_mpk(unsigned char ** buffer, mpk_t public) {
   return size;
 }
 
-mpk_t deserialize_mpk(unsigned char * buffer) {
-  mpk_t public = malloc(sizeof(*public));
+mpk_t* deserialize_mpk(unsigned char * buffer) {
+  mpk_t* public = malloc(sizeof(*public));
   
   unsigned short l1;
   memcpy(&l1, buffer, sizeof(unsigned short));
@@ -584,7 +584,7 @@ mpk_t deserialize_mpk(unsigned char * buffer) {
   return public;
 }
 
-int serialize_msk(unsigned char ** buffer, msk_t private) {
+int serialize_msk(unsigned char ** buffer, msk_t* private) {
   int size = sizeof(unsigned short) + ((private->l + 1) * 3 * 3 * element_length_in_bytes(private->C[0][0][0]));
   unsigned char *tbuff = *buffer = malloc(size);
 
@@ -599,8 +599,8 @@ int serialize_msk(unsigned char ** buffer, msk_t private) {
   return size;
 }
 
-msk_t deserialize_msk(unsigned char * buffer) {
-  msk_t private = malloc(sizeof(*private));
+msk_t* deserialize_msk(unsigned char * buffer) {
+  msk_t* private = malloc(sizeof(*private));
 
   unsigned short l1;
   memcpy(&l1, buffer, sizeof(unsigned short));
@@ -621,7 +621,7 @@ msk_t deserialize_msk(unsigned char * buffer) {
   return private;
 }
 
-int serialize_key(unsigned char ** buffer, dkey_t key) {
+int serialize_key(unsigned char ** buffer, dkey_t* key) {
   int size = sizeof(unsigned long) + sizeof(unsigned short) + (element_length_in_bytes(key->k[0][0]) * (key->l + 1));
   unsigned char *tbuff  = *buffer = malloc(size);
 
@@ -630,6 +630,6 @@ int serialize_key(unsigned char ** buffer, dkey_t key) {
   return size;
 }
 
-dkey_t deserialize_key(unsigned char * buffer) {
+dkey_t* deserialize_key(unsigned char * buffer) {
   // TODO!!!
 }
