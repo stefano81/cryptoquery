@@ -21,21 +21,11 @@ typedef struct {
 } setup_t;
 
 typedef struct {
-  unsigned l;
-  element_t **ci;
-} ciphertext_common_t;
-
-typedef struct {
   unsigned int l;
-  element_t c;
-  element_t *cip1;
-  ciphertext_common_t *ci;
-#ifdef DEBUG
-  element_t gT;
-  element_t z;
-  element_t *w;
-  int *x;
-#endif
+  unsigned int n;
+  element_t *c;
+  element_t **ci;
+  element_t ***cj;
 } ciphertext_t;
 
 typedef struct {
