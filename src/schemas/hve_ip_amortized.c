@@ -217,7 +217,7 @@ setup_t* setup_amortized(pairing_t *pairing, int l) {
   return setup;
 }
 
-cumulative_ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], unsigned int n, int * xj, element_t **m) {
+ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], unsigned int n, int * xj, element_t **m) {
   ciphertext_t* ct = malloc(sizeof(ciphertext_t));
   element_t xt, v[3], z, wt, w0;
 
@@ -238,9 +238,11 @@ cumulative_ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, i
   element_init_Zr(w0, *pairing);
   element_random(z);
 
-  element_init_GT(ct->c, *pairing);
-  element_pow_zn(ct->c, public->gT, z);
-  element_mul(ct->c, ct->c, *m); // c = g_T ^ z * m
+  /*
+    element_init_GT(ct->c, *pairing);
+    element_pow_zn(ct->c, public->gT, z); 
+    element_mul(ct->c, ct->c, *m); // c = g_T ^ z * m
+  */
 
   element_init_Zr(v[0], *pairing);
   element_init_Zr(v[1], *pairing);
@@ -282,25 +284,26 @@ cumulative_ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, i
     element_random(zj);
     element_random(wt);
     
-    ct->cj = malloc(sizeof(element_t*) * 2);
+    ct->cj[t] = malloc(sizeof(element_t*) * 2);
 
     element_set(v[0], w0);
     element_set(v[1], zj);
     element_set0(v[2]);
 
-    ct->cj[0] = vector_times_matrix(v, public->B[0]);
+    ct->cj[t][0] = vector_times_matrix(pairing, v, public->B[0], 3);
 
     element_set(v[0], wt);
-    element_mul(v[1], wt, xj[t]);
+    element_set_si(xt, xj[t]);
+    element_mul(v[1], wt, xt);
     element_set(v[2], w0);
 
-    ct->cj[1] = vector_times_matrix(v, public->B[public->l+1]);
+    ct->cj[t][1] = vector_times_matrix(pairing, v, public->B[public->l+1], 3);
 
     element_init_GT(ct->c[t], *pairing);
     element_pow_zn(ct->c[t], gtz, zj);
-    element_init_GT(m[t], *pairing);
-    element_random(m[t]);
-    element_mul(ct->c[t], ct->c[t], m[t]);
+    element_init_GT(*m[t], *pairing);
+    element_random(*m[t]);
+    element_mul(ct->c[t], ct->c[t], *m[t]);
   }
 
   element_clear(v[0]);
@@ -328,7 +331,7 @@ dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
   }
   k->S = malloc(sizeof(unsigned long) * k->Sn);
   
-  k->k = malloc(sizeof(element_t) * (private->l + 1));
+  k->k = malloc(sizeof(element_t) * (private->l + 3));
 
   element_init_Zr(v[0], *pairing);
   element_init_Zr(v[1], *pairing);
@@ -370,6 +373,19 @@ dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
   element_random(v[2]); // (s_0, 1, eta)
 
   k->k[0] = vector_times_matrix(pairing, v, private->C[0], 3);
+
+  element_random(v[0]);
+  element_random(v[2]);
+
+  k->k[private->l + 1] = vector_times_matrix(pairing, v, private->C[0], 3);
+
+  element_random(dt);
+  element_set_si(yt, y[private->l + 1]);
+  element_neg(v[2], v[0]);
+  element_mul(v[0], dt, yt);
+  element_neg(v[1], dt);
+
+  k->k[private->l + 2] = vector_times_matrix(pairing, v, private->C[private->l+1], 3);
 
   element_clear(v[0]);
   element_clear(v[1]);
@@ -467,126 +483,126 @@ element_t * decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key)
 }
 
 
-int serialize_ct(unsigned char ** buffer, ciphertext_t* ct) {
-  int size = sizeof(unsigned int) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
-  unsigned char * tbuf, * buff = tbuf = *buffer = malloc(size);
-  unsigned int l1 = htonl(ct->l);
-  memcpy(buff, &l1, sizeof(unsigned int));
-  tbuf += sizeof(unsigned int);
+/* int serialize_ct(unsigned char ** buffer, ciphertext_t* ct) { */
+/*   int size = sizeof(unsigned int) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0])); */
+/*   unsigned char * tbuf, * buff = tbuf = *buffer = malloc(size); */
+/*   unsigned int l1 = htonl(ct->l); */
+/*   memcpy(buff, &l1, sizeof(unsigned int)); */
+/*   tbuf += sizeof(unsigned int); */
 
-  tbuf += element_to_bytes(tbuf, ct->c);
+/*   tbuf += element_to_bytes(tbuf, ct->c); */
 
-  for (int i = 0; i <= ct->l; ++i)
-    for (int j = 0; j < 3; ++j)
-      tbuf += element_to_bytes(tbuf, ct->ci[i][j]);
+/*   for (int i = 0; i <= ct->l; ++i) */
+/*     for (int j = 0; j < 3; ++j) */
+/*       tbuf += element_to_bytes(tbuf, ct->ci[i][j]); */
 
-  return size;
-}
+/*   return size; */
+/* } */
 
-ciphertext_t* deserialize_ct(unsigned char *buffer) {
-  ciphertext_t* ct = malloc(sizeof(*ct));
+/* ciphertext_t* deserialize_ct(unsigned char *buffer) { */
+/*   ciphertext_t* ct = malloc(sizeof(*ct)); */
 
-  unsigned int l1;
-  memcpy(&l1, buffer, sizeof(unsigned int));
-  ct->l = ntohl(l1);
+/*   unsigned int l1; */
+/*   memcpy(&l1, buffer, sizeof(unsigned int)); */
+/*   ct->l = ntohl(l1); */
 
-  buffer += sizeof(unsigned int);
+/*   buffer += sizeof(unsigned int); */
 
-  buffer += element_from_bytes(ct->c, buffer);
-  ct->ci = malloc(sizeof(element_t *) * ct->l);
-  for (int i = 0; i <= ct->l; ++i) {
-    ct->ci[i] = malloc(sizeof(element_t) * 3);
-    for (int j = 0; j < 3; ++j)
-      buffer += element_from_bytes(ct->ci[i][j], buffer);
-  }
+/*   buffer += element_from_bytes(ct->c, buffer); */
+/*   ct->ci = malloc(sizeof(element_t *) * ct->l); */
+/*   for (int i = 0; i <= ct->l; ++i) { */
+/*     ct->ci[i] = malloc(sizeof(element_t) * 3); */
+/*     for (int j = 0; j < 3; ++j) */
+/*       buffer += element_from_bytes(ct->ci[i][j], buffer); */
+/*   } */
 
-  return ct;
-}
+/*   return ct; */
+/* } */
 
-int serialize_mpk(unsigned char ** buffer, mpk_t public) {
-  int size = sizeof(unsigned short) + ((public->l + 1) * 3 * 3 * element_length_in_bytes(public->B[0][0][0])) + element_length_in_bytes(public->gT);
-  unsigned char *tbuff = *buffer = malloc(size);
+/* int serialize_mpk(unsigned char ** buffer, mpk_t public) { */
+/*   int size = sizeof(unsigned short) + ((public->l + 1) * 3 * 3 * element_length_in_bytes(public->B[0][0][0])) + element_length_in_bytes(public->gT); */
+/*   unsigned char *tbuff = *buffer = malloc(size); */
 
-  unsigned short l1 = htons(public->l);
-  memcpy(tbuff, &l1, sizeof(unsigned short));
-  tbuff += sizeof(unsigned short);
-  for (int t = 0; t <= public->l; ++t)
-    for (int i = 0; i < 3; ++i)
-      for (int j = 0; j < 3; ++j)
-	tbuff += element_to_bytes(tbuff, public->B[t][i][j]);
-  element_to_bytes(tbuff, public->gT);
+/*   unsigned short l1 = htons(public->l); */
+/*   memcpy(tbuff, &l1, sizeof(unsigned short)); */
+/*   tbuff += sizeof(unsigned short); */
+/*   for (int t = 0; t <= public->l; ++t) */
+/*     for (int i = 0; i < 3; ++i) */
+/*       for (int j = 0; j < 3; ++j) */
+/* 	tbuff += element_to_bytes(tbuff, public->B[t][i][j]); */
+/*   element_to_bytes(tbuff, public->gT); */
 
-  return size;
-}
+/*   return size; */
+/* } */
 
-mpk_t* deserialize_mpk(unsigned char * buffer) {
-  mpk_t* public = malloc(sizeof(mpk_t));
+/* mpk_t* deserialize_mpk(unsigned char * buffer) { */
+/*   mpk_t* public = malloc(sizeof(mpk_t)); */
   
-  unsigned short l1;
-  memcpy(&l1, buffer, sizeof(unsigned short));
-  buffer += sizeof(unsigned short);
+/*   unsigned short l1; */
+/*   memcpy(&l1, buffer, sizeof(unsigned short)); */
+/*   buffer += sizeof(unsigned short); */
 
-  public->l = ntohs(l1);
-  public->B = malloc(sizeof(element_t **) * (public->l + 1));
-  for (int t = 0; t <= public->l; ++t) {
-    public->B[t] = malloc(sizeof(element_t *) * 3);
-    for (int i = 0; i < 3; ++i) {
-      public->B[t][i] = malloc(sizeof(element_t) * 3);
-      for (int j = 0; j < 3; ++j)
-	buffer += element_from_bytes(public->B[t][i][j], buffer);
-    }
-  }
-  element_from_bytes(public->gT, buffer);
+/*   public->l = ntohs(l1); */
+/*   public->B = malloc(sizeof(element_t **) * (public->l + 1)); */
+/*   for (int t = 0; t <= public->l; ++t) { */
+/*     public->B[t] = malloc(sizeof(element_t *) * 3); */
+/*     for (int i = 0; i < 3; ++i) { */
+/*       public->B[t][i] = malloc(sizeof(element_t) * 3); */
+/*       for (int j = 0; j < 3; ++j) */
+/* 	buffer += element_from_bytes(public->B[t][i][j], buffer); */
+/*     } */
+/*   } */
+/*   element_from_bytes(public->gT, buffer); */
 
-  return public;
-}
+/*   return public; */
+/* } */
 
-int serialize_msk(unsigned char ** buffer, msk_t* private) {
-  int size = sizeof(unsigned short) + ((private->l + 1) * 3 * 3 * element_length_in_bytes(private->C[0][0][0]));
-  unsigned char *tbuff = *buffer = malloc(size);
+/* int serialize_msk(unsigned char ** buffer, msk_t* private) { */
+/*   int size = sizeof(unsigned short) + ((private->l + 1) * 3 * 3 * element_length_in_bytes(private->C[0][0][0])); */
+/*   unsigned char *tbuff = *buffer = malloc(size); */
 
-  unsigned short l1 = htons(private->l);
-  memcpy(tbuff, &l1, sizeof(unsigned short));
-  tbuff += sizeof(unsigned short);
-  for (int t = 0; t <= private->l; ++t)
-    for (int i = 0; i < 3; ++i)
-      for (int j = 0; j < 3; ++j)
-	tbuff += element_to_bytes(tbuff, private->C[t][i][j]);
+/*   unsigned short l1 = htons(private->l); */
+/*   memcpy(tbuff, &l1, sizeof(unsigned short)); */
+/*   tbuff += sizeof(unsigned short); */
+/*   for (int t = 0; t <= private->l; ++t) */
+/*     for (int i = 0; i < 3; ++i) */
+/*       for (int j = 0; j < 3; ++j) */
+/* 	tbuff += element_to_bytes(tbuff, private->C[t][i][j]); */
 
-  return size;
-}
+/*   return size; */
+/* } */
 
-msk_t* deserialize_msk(unsigned char * buffer) {
-  msk_t* private = malloc(sizeof(*private));
+/* msk_t* deserialize_msk(unsigned char * buffer) { */
+/*   msk_t* private = malloc(sizeof(*private)); */
 
-  unsigned short l1;
-  memcpy(&l1, buffer, sizeof(unsigned short));
-  buffer += sizeof(unsigned short);
+/*   unsigned short l1; */
+/*   memcpy(&l1, buffer, sizeof(unsigned short)); */
+/*   buffer += sizeof(unsigned short); */
 
-  private->l = ntohs(l1);
-  private->C = malloc(sizeof(element_t **) * (private->l + 1));
+/*   private->l = ntohs(l1); */
+/*   private->C = malloc(sizeof(element_t **) * (private->l + 1)); */
 
-  for (int t = 0; t <= private->l; ++t) {
-    private->C[t] = malloc(sizeof(element_t *) * 3);
-    for (int i = 0; i < 3; ++i) {
-      private->C[t][i] = malloc(sizeof(element_t) * 3);
-      for (int j = 0; j < 3; ++j)
-	buffer += element_from_bytes(private->C[t][i][j], buffer);
-    }
-  }
+/*   for (int t = 0; t <= private->l; ++t) { */
+/*     private->C[t] = malloc(sizeof(element_t *) * 3); */
+/*     for (int i = 0; i < 3; ++i) { */
+/*       private->C[t][i] = malloc(sizeof(element_t) * 3); */
+/*       for (int j = 0; j < 3; ++j) */
+/* 	buffer += element_from_bytes(private->C[t][i][j], buffer); */
+/*     } */
+/*   } */
 
-  return private;
-}
+/*   return private; */
+/* } */
 
-int serialize_key(unsigned char ** buffer, dkey_t* key) {
-  int size = sizeof(unsigned long) + sizeof(unsigned short) + (element_length_in_bytes(key->k[0][0]) * (key->l + 1));
-  unsigned char *tbuff  = *buffer = malloc(size);
+/* int serialize_key(unsigned char ** buffer, dkey_t* key) { */
+/*   int size = sizeof(unsigned long) + sizeof(unsigned short) + (element_length_in_bytes(key->k[0][0]) * (key->l + 1)); */
+/*   unsigned char *tbuff  = *buffer = malloc(size); */
 
-  // TODO!!!
+/*   // TODO!!! */
 
-  return size;
-}
+/*   return size; */
+/* } */
 
-dkey_t* deserialize_key(unsigned char * buffer) {
-  // TODO!!!
-}
+/* dkey_t* deserialize_key(unsigned char * buffer) { */
+/*   // TODO!!! */
+/* } */

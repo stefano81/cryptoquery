@@ -200,15 +200,20 @@ void test_EandD(const char *path, int l, int n) {
 
   struct timeval tvb, tve;
 
-  element_t m;
-  int *X,*Y;
+  element_t *m = malloc(sizeof(element_t) * n);
+  int *X,*Y, *X1;
   pairing_t * pairing = load_pairing(path);
 
-  Y=malloc(l*sizeof(int));
+  Y=malloc(l*sizeof(int) + 1);
   X=malloc(l*sizeof(int));
+  X1 = malloc(sizeof(int) * n);
+
   for (int i=0;i<l;i++){
-        Y[i]=i+1; X[i]=i+1;
+    Y[i]=i+1; X[i]=i+1;
   }
+
+  for (int i = 0; i < n; ++i)
+    X1[i] = i;
 
   gettimeofday(&tvb, NULL);
   setup_t* out=setup_amortized(pairing,l);
@@ -218,7 +223,7 @@ void test_EandD(const char *path, int l, int n) {
 
   gettimeofday(&tvb, NULL);
 
-  ciphertext_t* ct=encrypt_amortized(pairing, out->public, X, &m, m_body);
+  ciphertext_t* ct=encrypt_amortized(pairing, out->public, X, n, X1, &m);
   gettimeofday(&tve, NULL);
 
   printf("%d encrypt %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
