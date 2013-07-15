@@ -257,6 +257,7 @@ void test_EandD2(const char *path, int l) {
         X[i]=i+1;
 	printf(" %d", X[i]);
   }
+
   printf("\n");
 
   for (int j = 0; j < l; ++j) {

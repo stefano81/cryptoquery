@@ -32,11 +32,12 @@ typedef struct {
   unsigned long Sn;
   unsigned long *S;
   element_t **k;
+  element_t **ks;
   unsigned short l;
 } dkey_t;
 
 setup_t* setup_amortized(pairing_t* pairing, int l);
-ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], unsigned int n, int * xj, element_t **m);
+ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], unsigned int n, int * xj, element_t *m);
 dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]);
 element_t* decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key);
 

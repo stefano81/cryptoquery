@@ -222,7 +222,7 @@ void test_EandD(const char *path, int l, int n) {
 
   gettimeofday(&tvb, NULL);
 
-  ciphertext_t* ct=encrypt_amortized(pairing, out->public, X, n, X1, &m);
+  ciphertext_t* ct=encrypt_amortized(pairing, out->public, X, n, X1, m);
   gettimeofday(&tve, NULL);
 
   printf("%d encrypt %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
@@ -239,9 +239,10 @@ void test_EandD(const char *path, int l, int n) {
 
   printf("%d decrypt %lu\n", l, ((tve.tv_sec + (1000*1000 * tve.tv_usec)) - (tvb.tv_sec + (1000*1000 * tvb.tv_usec))));
 
-  int r = element_cmp(m, *dm);
-  fprintf(stderr, "%d: %s\n",r,!r ? "OK!" : "No!");
-
+  for (int i = 0; i < n; ++i) {
+    int r = element_cmp(m[i], dm[i]);
+    fprintf(stderr, "%d - %d: %s\n", i, r, !r ? "OK!" : "No!");
+  }
 }
 
 int main(int argc, char ** argv) {
