@@ -440,6 +440,10 @@ int MYHVE(int *x, int *y, int n) {
 element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
   element_t * m = malloc(sizeof(element_t));
   element_t t1, t2;
+#ifdef TESTING
+  element_t tp;
+  element_init_GT(tp, *pairing);
+#endif
 
 #ifdef DEBUG
   fprintf(stderr, "HVE(X, Y) = %d\n", MYHVE(ct->x, key->y, ct->l));
@@ -459,7 +463,15 @@ element_t * decrypt(pairing_t* pairing, ciphertext_t ct, dkey_t key) {
     if (t - 1 == key->S[sc]) {
       ++sc;
       // i \in S
+#ifndef TESTING
       element_prod_pairing(t1, key->k[t], ct->ci[t], 3); // p_t =e(k_t, c_t)
+#else
+      element_pairing(t1, key->k[t][0], ct->ci[t][0]);
+      element_pairing(tp, key->k[t][1], ct->ci[t][1]);
+      element_mul(t1, t1, tp);
+      element_pairing(tp, key->k[t][2], ct->ci[t][2]);
+      element_mul(t1, t1, tp);
+#endif
 #ifdef DEBUG
       element_t temp1, temp2, temp3, xt, yt;
       element_init_Zr(temp1, *pairing);

@@ -1,11 +1,13 @@
 #include "utils.h"
 
+#define BUF_SIZE (1024 * 8)
+
 pairing_t * load_pairing(const char *params_path) {
-  char param[1024 * 8];
+  char param[BUF_SIZE];
   pairing_t *pairing = malloc(sizeof(pairing_t));
 
   FILE * file = fopen(params_path, "r");
-  size_t read = fread(param, 1, 1024, file);
+  size_t read = fread(param, 1, BUF_SIZE, file);
   fclose(file);
 
   if (!read) pbc_die("Error reading the parameter file");
