@@ -90,7 +90,6 @@ void test_fixed2(const char *path) {
 
   element_init_GT(p, *pairing);
 
-
   element_init_Zr(eta, *pairing);
   element_init_Zr(z, *pairing);
   element_init_Zr(s0, *pairing);
