@@ -279,26 +279,28 @@ void test_EandD2(const char *path, int l) {
 
   printf("%d encrypt %lu\n", l, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
 
-  for (int i = 0; i < l; ++i) {
     gettimeofday(&tvb, NULL);
-    keys[i] = keygen(pairing, out->private,Y[i]);
+    keys[0] = keygen(pairing, out->private,X);
     gettimeofday(&tve, NULL);
 
-    printf("%d keygen %d %lu\n", l, i, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
+    printf("%d keygen %d %lu\n", l, 0, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
+
+
+    //  for (int i = 0; i < 10; ++i) {
 
     for (int j = 0; j < 10; ++j) {
       gettimeofday(&tvb, NULL);
-      element_t *dm = decrypt(pairing,ct,keys[i]);
+      element_t *dm = decrypt(pairing,ct,keys[0]);
       gettimeofday(&tve, NULL);
 
-      printf("%d decrypt %d %d %lu\n", l, i, j, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
+      printf("%d decrypt %d %d %lu\n", l, 0, j, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
 
       int r = element_cmp(m, *dm);
       fprintf(stderr, "%d: %s\n",r,!r ? "OK!" : "No!");
       element_free(*dm);
     }
 
-  }
+    //  }
 }
 
 int main(int argc, char ** argv) {
