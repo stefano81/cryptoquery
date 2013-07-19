@@ -9,34 +9,35 @@
 
 #include "schemas/hve_ip_amortized.h"
 
-/* /\* void test_fixed(const char *path) { *\/ */
-/* /\*   pairing_t * pairing = load_pairing(path); *\/ */
+void test_fixed(const char *path) {
+  pairing_t * pairing = load_pairing(path);
 
-/* /\*   int x[] = {1, 2, 3, 4, 5}; *\/ */
-/* /\*   int y1[] = {1, 2, 3, 4, 5}; *\/ */
-/* /\*   int y2[] = {-1, -1, 3, 4, 5}; *\/ */
-/* /\*   int y3[] = {2, 3, 4, 5, 6}; *\/ */
+  int x[] = {1, 2, 3, 4, 5};
+  int x1[] = {1, 2};
+  int y1[] = {1, 2, 3, 4, 5, 1};
+  int y2[] = {-1, -1, 3, 4, 5, 2};
+  int y3[] = {2, 3, 4, 5, 6, 9};
 
-/* /\*   setup_t* out = setup_amortized(pairing, 5); *\/ */
-/* /\*   element_t m, *dm; *\/ */
+  setup_t* out = setup_amortized(pairing, 5);
+  element_t m[2], dm[2];
 
-/* /\*   ciphertext_t* ct = encrypt_amortized(pairing, out->public, x, &m); *\/ */
+  ciphertext_t* ct = encrypt_amortized(pairing, out->public, x, 2, x1, m);
 
-/* /\*   dkey_t* key1 = keygen_amortized(pairing, out->private, y1); *\/ */
-/* /\*   dm = decrypt_amortized(pairing, ct, key1); *\/ */
-/* /\*   int r = element_cmp(m, *dm); *\/ */
-/* /\*   printf("1: %s\n", !r ? "OK!" : "No!"); *\/ */
+  dkey_t* key1 = keygen_amortized(pairing, out->private, y1);
+  dm = decrypt_amortized(pairing, ct, key1);
+  int r = element_cmp(m, *dm);
+  printf("1: %s\n", !r ? "OK!" : "No!");
 
-/* /\*   dkey_t* key2 = keygen_amortized(pairing, out->private, y2); *\/ */
-/* /\*   dm = decrypt_amortized(pairing, ct, key2); *\/ */
-/* /\*   r = element_cmp(m, *dm); *\/ */
-/* /\*   printf("2: %s\n", !r ? "OK!" : "No!"); *\/ */
+  dkey_t* key2 = keygen_amortized(pairing, out->private, y2);
+  dm = decrypt_amortized(pairing, ct, key2);
+  r = element_cmp(m, *dm);
+  printf("2: %s\n", !r ? "OK!" : "No!");
 
-/* /\*   dkey_t* key3 = keygen_amortized(pairing, out->private, y3); *\/ */
-/* /\*   dm = decrypt_amortized(pairing, ct, key3); *\/ */
-/* /\*   r = element_cmp(m, *dm); *\/ */
-/* /\*   printf("3: %s\n", !r ? "OK!" : "No!"); *\/ */
-/* /\* } *\/ */
+  dkey_t* key3 = keygen_amortized(pairing, out->private, y3);
+  dm = decrypt_amortized(pairing, ct, key3);
+  r = element_cmp(m, *dm);
+  printf("3: %s\n", !r ? "OK!" : "No!");
+}
 
 /* void test_fixed2(const char *path) { */
 /*   pairing_t * pairing = load_pairing(path); */
@@ -251,7 +252,9 @@ int main(int argc, char ** argv) {
       else if (4 == argc)
       test_variable(argv[1], atoi(argv[2]), atoi(argv[3]));
       else*/
-  if (4 == argc)
+  if (3 == argc) {
+    test_fixed(argv[1]);
+  } else if (4 == argc)
     test_EandD(argv[1], atoi(argv[2]), atoi(argv[3]));
   else
     printf("error testing");

@@ -266,7 +266,6 @@ void test_EandD2(const char *path, int l) {
       Y[j][i] = i <= j ? X[i] : -1;
   }
 
-
   gettimeofday(&tvb, NULL);
   setup_t out=setup(pairing,l);
   gettimeofday(&tve, NULL);
