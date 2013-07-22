@@ -1,0 +1,85 @@
+
+testingA.c,69
+void test_fixed(12,175
+void test_EandD(198,5074
+int main(249,6579
+
+config.h.in,788
+#undef HAVE_ARPA_INET_H4,130
+#undef HAVE_INTTYPES_H7,215
+#undef HAVE_LIBGMP10,296
+#undef HAVE_LIBM13,369
+#undef HAVE_LIBPBC16,444
+#undef HAVE_MALLOC20,565
+#undef HAVE_MEMORY_H23,643
+#undef HAVE_OPENSSL_AES_H26,728
+#undef HAVE_READLINE_HISTORY_H29,823
+#undef HAVE_READLINE_READLINE_H32,924
+#undef HAVE_STDINT_H35,1015
+#undef HAVE_STDIO_H38,1094
+#undef HAVE_STDLIB_H41,1173
+#undef HAVE_STRINGS_H44,1254
+#undef HAVE_STRING_H47,1335
+#undef HAVE_SYS_STAT_H50,1417
+#undef HAVE_SYS_TYPES_H53,1502
+#undef HAVE_UNISTD_H56,1585
+#undef PACKAGE_BUGREPORT59,1686
+#undef PACKAGE_NAME62,1759
+#undef PACKAGE_STRING65,1839
+#undef PACKAGE_TARNAME68,1921
+#undef PACKAGE_URL71,1993
+#undef PACKAGE_VERSION74,2058
+#undef STDC_HEADERS77,2137
+#undef malloc80,2229
+#undef size_t83,2309
+
+schemas/hve_ip.c,383
+setup_t setup(10,141
+ciphertext_t encrypt(257,7756
+dkey_t keygen(340,9667
+int MYHVE(431,11726
+element_t * decrypt(440,11866
+int serialize_ct(527,14155
+ciphertext_t deserialize_ct(544,14689
+int serialize_mpk(564,15195
+mpk_t deserialize_mpk(580,15792
+int serialize_msk(602,16425
+msk_t deserialize_msk(617,16951
+int serialize_key(639,17551
+dkey_t deserialize_key(648,17809
+
+schemas/hve_ip_amortized.c,152
+setup_t* setup_amortized(10,151
+ciphertext_t * encrypt_amortized(220,6675
+dkey_t* keygen_amortized(322,9160
+element_t * decrypt_amortized(403,11047
+
+testing.c,121
+void test_fixed(12,165
+void test_fixed2(42,995
+void test_EandD(198,4520
+void test_EandD2(243,5793
+int main(305,7443
+
+schemas/hve_ip.h,117
+#define HVE_IP_H2,17
+}* mpk_t;10,126
+}* msk_t;15,190
+}* setup_t;21,266
+}* ciphertext_t;33,424
+}* dkey_t;46,615
+
+schemas/utils.c,147
+#define BUF_SIZE 3,20
+pairing_t * load_pairing(5,49
+element_t * vector_times_matrix(20,411
+void minorX(85,2334
+element_t ** transpose(98,2613
+
+schemas/hve_ip_amortized.h,116
+#define HVE_IP_AMM_H2,21
+} mpk_t;10,134
+} msk_t;15,197
+} setup_t;21,274
+} ciphertext_t;29,392
+} dkey_t;37,521
