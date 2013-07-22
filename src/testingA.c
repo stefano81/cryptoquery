@@ -25,18 +25,18 @@ void test_fixed(const char *path) {
 
   dkey_t* key1 = keygen_amortized(pairing, out->private, y1);
   dm = decrypt_amortized(pairing, ct, key1);
-  int r = element_cmp(m, *dm);
-  printf("1: %s\n", !r ? "OK!" : "No!");
+  //int r = element_cmp(m, *dm);
+  //printf("1: %s\n", !r ? "OK!" : "No!");
 
   dkey_t* key2 = keygen_amortized(pairing, out->private, y2);
   dm = decrypt_amortized(pairing, ct, key2);
-  r = element_cmp(m, *dm);
-  printf("2: %s\n", !r ? "OK!" : "No!");
+  //  r = element_cmp(m, *dm);
+  //  printf("2: %s\n", !r ? "OK!" : "No!");
 
   dkey_t* key3 = keygen_amortized(pairing, out->private, y3);
   dm = decrypt_amortized(pairing, ct, key3);
-  r = element_cmp(m, *dm);
-  printf("3: %s\n", !r ? "OK!" : "No!");
+  //  r = element_cmp(m, *dm);
+  //  printf("3: %s\n", !r ? "OK!" : "No!");
 }
 
 /* void test_fixed2(const char *path) { */
