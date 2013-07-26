@@ -19,7 +19,7 @@ void test_fixed(const char *path) {
   int y3[] = {2, 3, 4, 5, 6, 9};
 
   setup_t* out = setup_amortized(pairing, 5);
-  element_t m[2], dm[2];
+  element_t m[2], *dm;
 
   ciphertext_t* ct = encrypt_amortized(pairing, out->public, x, 2, x1, m);
 
@@ -252,12 +252,12 @@ int main(int argc, char ** argv) {
       else if (4 == argc)
       test_variable(argv[1], atoi(argv[2]), atoi(argv[3]));
       else*/
-  if (3 == argc) {
+  //  if (3 == argc) {
     test_fixed(argv[1]);
-  } else if (4 == argc)
-    test_EandD(argv[1], atoi(argv[2]), atoi(argv[3]));
-  else
-    printf("error testing");
+    //  } else if (4 == argc)
+    //    test_EandD(argv[1], atoi(argv[2]), atoi(argv[3]));
+    //  else
+    //    printf("error testing");
 
   return 0;
 }
