@@ -261,6 +261,8 @@ ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], uns
   ct->l = public->l;
   ct->n = n;
 
+  fprintf(stderr, "%d %d\n", n, ct->n);
+
   ct->ci  = malloc(sizeof(element_t *) * (ct->l + 1)); // standard
 
   ct->c = malloc(sizeof(element_t) * n);
@@ -275,6 +277,7 @@ ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], uns
   element_init_Zr(v[1], *pairing);
   element_init_Zr(v[2], *pairing);
 
+  element_init_Zr(zj, *pairing);
   element_init_Zr(zzj, *pairing);
   element_init_GT(gtzzj, *pairing);
 
@@ -336,6 +339,8 @@ ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], uns
   element_clear(v[0]);
   element_clear(v[1]);
   element_clear(v[2]);
+
+  return ct;
 }
 
 dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
@@ -418,7 +423,9 @@ dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
 element_t* decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key) {
   element_t *m, den, t1, t2;
 
-  m = malloc(sizeof(element_t) * ct->n);
+  fprintf(stderr, "%d\n", ct->n);
+
+  m = malloc(sizeof(element_t) * (ct->n));
   element_init_GT(den, *pairing);
   element_init_GT(t1, *pairing);
   element_init_GT(t2, *pairing);

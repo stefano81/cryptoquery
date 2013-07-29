@@ -19,19 +19,25 @@ void test_fixed(const char *path) {
   int y3[] = {2, 3, 4, 5, 6, 9};*/
 
   int x[] = {1};
-  int x1[] = {1, 2};
+  int x1[] = {1, 1};
   int y1[] = {1, 1};
 
   setup_t* out = setup_amortized(pairing, 1);
   element_t *m, *dm;
   m = malloc(sizeof(element_t) * 10);
 
-  ciphertext_t* ct = encrypt_amortized(pairing, out->public, x, 1, x1, m);
+  ciphertext_t* ct = encrypt_amortized(pairing, out->public, x, 2, x1, m);
+
+  fprintf(stderr, "test_fixed: ct->n = %d\n", ct->n);
 
   dkey_t* key1 = keygen_amortized(pairing, out->private, y1);
   dm = decrypt_amortized(pairing, ct, key1);
-  int r = element_cmp(*m, *dm);
-  printf("1: %s\n", !r ? "OK!" : "No!");
+  for (int i = 0; i < 2; ++i) {
+    int r = element_cmp(m[i], dm[i]);
+    printf("1: %d %s\n", i, !r ? "OK!" : "No!");
+  }
+
+
 
   /*  dkey_t* key2 = keygen_amortized(pairing, out->private, y2);
       dm = decrypt_amortized(pairing, ct, key2);*/
@@ -258,11 +264,13 @@ int main(int argc, char ** argv) {
       test_variable(argv[1], atoi(argv[2]), atoi(argv[3]));
       else*/
   //  if (3 == argc) {
-    test_fixed(argv[1]);
+  //    test_fixed(argv[1]);
     //  } else if (4 == argc)
     //    test_EandD(argv[1], atoi(argv[2]), atoi(argv[3]));
     //  else
     //    printf("error testing");
+
+  test_EandD(argv[1], atoi(argv[2]), 1);
 
   return 0;
 }
