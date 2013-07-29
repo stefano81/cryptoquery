@@ -41,18 +41,6 @@ setup_t* setup_amortized(pairing_t* pairing, int l) {
   element_init_G1(tmp1,*pairing);
   element_init_G2(tmp2,*pairing);
 
-  /* if you want to see psi, g1, g2, gT */
-#ifdef DEBUG
-  printf("psi=\n");
-  element_printf("%B\n",psi);  
-  printf("g1=\n");
-  element_printf("%B\n",g1);  
-  printf("g2=\n");
-  element_printf("%B\n",g2);  
-  printf("gT=\n");
-  element_printf("%B\n",gT);  
-#endif
-
   /* constructing the canonical bases: A1 for G1 and A2 for G2 */
   A1=malloc(sizeof(element_t *)*3);  A1[0]=malloc(sizeof(element_t)*3);
   A1[1]=malloc(sizeof(element_t)*3); A1[2]=malloc(sizeof(element_t)*3); 
@@ -87,10 +75,9 @@ setup_t* setup_amortized(pairing_t* pairing, int l) {
       element_set(public->g1, g1);
       element_init_G2(setup->public->g2,*pairing);
       element_set(public->g2, g2);*/
-  setup->private->l = setup->public->l = l - 2;
+  setup->private->l = setup->public->l = l - 1;
   setup->public->B = BB;
   setup->private->C = CC;
-
 
   for(int zz=0; zz < l+1; zz++){
     BB[zz]=malloc(sizeof(element_t *)*3); CC[zz]=malloc(sizeof(element_t *)*3);
@@ -161,21 +148,6 @@ setup_t* setup_amortized(pairing_t* pairing, int l) {
     }
     /* now X * Xs = psi * I */
   
-    /* if you want to check X and Xs */
-#ifdef DEBUG
-    for(int i=0; i<3; ++i){
-      for(int j=0; j<3; ++j){
-	printf("(%d %d)\n", i, j);
-        element_mul(t1,X[i][0],Xs[0][j]);
-        element_mul(t2,X[i][1],Xs[1][j]);
-        element_mul(t3,X[i][2],Xs[2][j]);
-        element_add(t1,t1,t2);
-        element_add(t1,t1,t3);
-        element_printf("(X*Xs)[i][j] %B\n",t1);
-      }
-    }
-#endif
-
     /* now we compute B=X x A1 and C=Xs x A2 */
     for(int i=0;i<3;i++){
       for(int j=0;j<3;j++){
@@ -206,25 +178,6 @@ setup_t* setup_amortized(pairing_t* pairing, int l) {
 
   } /* for zz */
 
-#ifdef DEBUG
-  element_t check, oneT;
-  element_init_GT(check, *pairing);
-  element_init_GT(oneT, *pairing);
-  element_set1(oneT);
-  for (int k = 0; k < l + 1; ++k) {
-    for (int i = 0; i < 3; ++i) {
-      for (int j = 0; j < 3; ++j) {
-	element_prod_pairing(check, BB[k][i], CC[k][j], 3);
-	if (i == j)
-	  fprintf(stderr, "[%d] %d == %d -> gT: %s\n", k, i, j, 0 == element_cmp(gT, check) ? "true" : "false");
-	else
-	  fprintf(stderr, "[%d] %d != %d -> 1T: %s\n", k, i, j, 0 == element_cmp(oneT, check) ? "true" : "false");
-      }
-    }
-  }
-  element_clear(oneT);
-  element_clear(check);
-#endif
   element_clear(tmp1);
   element_clear(tmp2);
   element_clear(delta); 
@@ -258,10 +211,22 @@ ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], uns
   ciphertext_t *ct = malloc(sizeof(ciphertext_t));
   element_t xt, v[3], z, wt, w0, zj, zzj, gtzzj;
 
+#ifdef DEBUG
+  fprintf(stderr, "x[");
+  for (int i = 0; i < public->l; ++i) {
+    fprintf(stderr, " %d", x[i]);
+  }
+  fprintf(stderr, "]\n");
+
+  fprintf(stderr, "xj[");
+  for (int i = 0; i < n; ++i) {
+    fprintf(stderr, " %d", xj[i]);
+  }
+  fprintf(stderr, "]\n");
+#endif
+
   ct->l = public->l;
   ct->n = n;
-
-  fprintf(stderr, "%d %d\n", n, ct->n);
 
   ct->ci  = malloc(sizeof(element_t *) * (ct->l + 1)); // standard
 
@@ -350,10 +315,23 @@ dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
   key->l = private->l;
   key->Sn = 0;
 
+#ifdef DEBUG
+  fprintf(stderr, "y[");
+#endif
+
   for (int i = 0; i < key->l; ++i) {
+#ifdef DEBUG
+    fprintf(stderr, " %d", y[i]);
+#endif
+
     if (-1 != y[i])
       ++(key->Sn);
   }
+
+#ifdef DEBUG
+  fprintf(stderr, "]\n");
+#endif
+
   key->S = malloc(sizeof(unsigned long) * key->Sn);
   key->k = malloc(sizeof(element_t *) * (key->l + 1));
 
@@ -373,7 +351,7 @@ dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
       continue; // skip *
     }
     
-    key->S[++sc] = t - 1;
+    key->S[sc++] = t - 1;
 
     element_random(dt);
     element_random(st);
@@ -434,6 +412,8 @@ element_t* decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key) 
 
   for (int i = 0; i < key->Sn; ++i) {
     int t = key->S[i] + 1;
+
+    fprintf(stderr, "i: %d t: %d\n", i, t);
 
     element_prod_pairing(t1, key->k[t], ct->ci[t], 3);
     element_mul(den, den, t1);

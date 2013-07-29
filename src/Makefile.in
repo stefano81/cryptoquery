@@ -171,7 +171,7 @@ CCDEPMODE = @CCDEPMODE@
 # what flags you want to pass to the C compiler & linker
 #CFLAGS = -g0 -O2
 #CFLAGS = -ggdb -DTESTING
-CFLAGS = -ggdb
+CFLAGS = -ggdb -DDEBUG
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
