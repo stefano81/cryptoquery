@@ -202,7 +202,9 @@ setup_t* setup_amortized(pairing_t* pairing, int l) {
   free(A1);
   free(A2);
 
+#ifdef DEBUG
   fprintf(stderr, "Creating %d matrixes with l = %d\n", l, public->l);
+#endif
 
   return setup;
 }
@@ -401,7 +403,9 @@ dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
 element_t* decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key) {
   element_t *m, den, t1, t2;
 
+#ifdef DEBUG
   fprintf(stderr, "%d\n", ct->n);
+#endif
 
   m = malloc(sizeof(element_t) * (ct->n));
   element_init_GT(den, *pairing);
@@ -412,8 +416,9 @@ element_t* decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key) 
 
   for (int i = 0; i < key->Sn; ++i) {
     int t = key->S[i] + 1;
-
+#ifdef DEBUG
     fprintf(stderr, "i: %d t: %d\n", i, t);
+#endif
 
     element_prod_pairing(t1, key->k[t], ct->ci[t], 3);
     element_mul(den, den, t1);
