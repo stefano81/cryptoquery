@@ -316,7 +316,6 @@ ciphertext_t encrypt(pairing_t* pairing, mpk_t public, int x[], element_t *m) {
     ct->x[t - 1] = x[t - 1];
 #endif
 
-    element_set(v[0], wt);
     element_set_si(xt, x[t - 1]);
 
     element_set(v[0], wt);
@@ -349,7 +348,7 @@ dkey_t keygen(pairing_t* pairing, msk_t private, int y[]) {
   }
   k->S = malloc(sizeof(unsigned long) * k->Sn);
   
-  k->k = malloc(sizeof(element_t) * (private->l + 1));
+  k->k = malloc(sizeof(element_t *) * (private->l + 1));
 
 #ifdef DEBUG
   element_t *s = k->s = malloc(sizeof(element_t) * (private->l + 1));

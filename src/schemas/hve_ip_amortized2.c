@@ -3,20 +3,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <math.h>
 
-setup_t* setup_amortized(pairing_t *pairing, int l) {
+setup_t* setup_amortized(pairing_t* pairing, int l) {
   element_t ***BB, ***CC;
-  element_t g1,g2,psi,**A1, **A2, **B, **C, **X, **Xs;
-  element_t tmp1,tmp2;
+  element_t g1, g2, psi, **A1, **A2, **B, **C, **X, **Xs;
+  element_t tmp1, tmp2;
+
+  l += 1; // because amortized -> we need 1 more
+
   element_t ptmp;
   element_t t,gT;
   element_t t1,t2,t3;
   element_t delta;
-
-  unsigned pairs_number = l + 2;
   
   element_init_Zr(delta,*pairing); 
   element_init_Zr(t1,*pairing);
@@ -43,7 +41,6 @@ setup_t* setup_amortized(pairing_t *pairing, int l) {
   element_init_G1(tmp1,*pairing);
   element_init_G2(tmp2,*pairing);
 
-
   /* if you want to see psi, g1, g2, gT */
 #ifdef DEBUG
   printf("psi=\n");
@@ -57,7 +54,7 @@ setup_t* setup_amortized(pairing_t *pairing, int l) {
 #endif
 
   /* constructing the canonical bases: A1 for G1 and A2 for G2 */
-  A1=malloc(sizeof(element_t *)*3);  A1[0]=malloc(sizeof(element_t)*3); 
+  A1=malloc(sizeof(element_t *)*3);  A1[0]=malloc(sizeof(element_t)*3);
   A1[1]=malloc(sizeof(element_t)*3); A1[2]=malloc(sizeof(element_t)*3); 
 
   A2=malloc(sizeof(element_t *)*3);  A2[0]=malloc(sizeof(element_t)*3); 
@@ -69,32 +66,34 @@ setup_t* setup_amortized(pairing_t *pairing, int l) {
       if (i==j){
 	element_set(A1[i][j],g1);  /* element_set(dest,source) */
 	element_set(A2[i][j],g2);  /* element_set(dest,source) */
-      }
-      else{
+      } else {
 	element_set0(A1[i][j]);
 	element_set0(A2[i][j]);
       }
     }
   }
 
-  BB = malloc(sizeof(element_t **)*(pairs_number));
-  CC = malloc(sizeof(element_t **)*(pairs_number));
+  BB=(element_t ***)malloc(sizeof(element_t **)*(l+1));
+  CC=(element_t ***)malloc(sizeof(element_t **)*(l+1));
 
-  setup_t* setup = malloc(sizeof(setup_t));
+  setup_t *setup = malloc(sizeof(setup_t));
 
-  mpk_t* public = setup->public = malloc(sizeof(mpk_t));
-  msk_t* private = setup->private = malloc(sizeof(msk_t));
+  /* qui ho fatto un qualche errore con i puntatori */
+  mpk_t *public = setup->public = malloc(sizeof(mpk_t));
+  msk_t *private = setup->private = malloc(sizeof(msk_t));
   element_init_GT(public->gT,*pairing);
   element_set(public->gT, gT);
-  setup->private->l = setup->public->l = l;
+  /*  element_init_G1(public->g1, *pairing);
+      element_set(public->g1, g1);
+      element_init_G2(setup->public->g2,*pairing);
+      element_set(public->g2, g2);*/
+  setup->private->l = setup->public->l = l - 2;
   setup->public->B = BB;
   setup->private->C = CC;
 
-  fprintf(stderr, "setup for %d + 1 (%d) attributes\n", l, pairs_number);
 
-  // generates l + 2 pairs (B, C) instead of l + 1 
-  for(int zz=0;zz < pairs_number; ++zz){
-    BB[zz]=malloc(sizeof(element_t*)*3); CC[zz]=malloc(sizeof(element_t *)*3);
+  for(int zz=0; zz < l+1; zz++){
+    BB[zz]=malloc(sizeof(element_t *)*3); CC[zz]=malloc(sizeof(element_t *)*3);
     BB[zz][0]=malloc(sizeof(element_t)*3); CC[zz][0]=malloc(sizeof(element_t)*3);
     BB[zz][1]=malloc(sizeof(element_t)*3); CC[zz][1]=malloc(sizeof(element_t)*3);
     BB[zz][2]=malloc(sizeof(element_t)*3); CC[zz][2]=malloc(sizeof(element_t)*3);
@@ -162,6 +161,21 @@ setup_t* setup_amortized(pairing_t *pairing, int l) {
     }
     /* now X * Xs = psi * I */
   
+    /* if you want to check X and Xs */
+#ifdef DEBUG
+    for(int i=0; i<3; ++i){
+      for(int j=0; j<3; ++j){
+	printf("(%d %d)\n", i, j);
+        element_mul(t1,X[i][0],Xs[0][j]);
+        element_mul(t2,X[i][1],Xs[1][j]);
+        element_mul(t3,X[i][2],Xs[2][j]);
+        element_add(t1,t1,t2);
+        element_add(t1,t1,t3);
+        element_printf("(X*Xs)[i][j] %B\n",t1);
+      }
+    }
+#endif
+
     /* now we compute B=X x A1 and C=Xs x A2 */
     for(int i=0;i<3;i++){
       for(int j=0;j<3;j++){
@@ -192,6 +206,25 @@ setup_t* setup_amortized(pairing_t *pairing, int l) {
 
   } /* for zz */
 
+#ifdef DEBUG
+  element_t check, oneT;
+  element_init_GT(check, *pairing);
+  element_init_GT(oneT, *pairing);
+  element_set1(oneT);
+  for (int k = 0; k < l + 1; ++k) {
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+	element_prod_pairing(check, BB[k][i], CC[k][j], 3);
+	if (i == j)
+	  fprintf(stderr, "[%d] %d == %d -> gT: %s\n", k, i, j, 0 == element_cmp(gT, check) ? "true" : "false");
+	else
+	  fprintf(stderr, "[%d] %d != %d -> 1T: %s\n", k, i, j, 0 == element_cmp(oneT, check) ? "true" : "false");
+      }
+    }
+  }
+  element_clear(oneT);
+  element_clear(check);
+#endif
   element_clear(tmp1);
   element_clear(tmp2);
   element_clear(delta); 
@@ -216,43 +249,37 @@ setup_t* setup_amortized(pairing_t *pairing, int l) {
   free(A1);
   free(A2);
 
+  fprintf(stderr, "Creating %d matrixes with l = %d\n", l, public->l);
+
   return setup;
 }
 
 ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], unsigned int n, int * xj, element_t *m) {
-  ciphertext_t* ct = malloc(sizeof(ciphertext_t));
-  element_t xt, v[3], z, wt, w0, zj, gtz;
-
-  fprintf(stderr, "encrypting for %d elements %d attributes\n", n, public->l);
-
-  for (int i = 0; i < n; ++i) {
-    element_init_GT(m[i], *pairing);
-    element_random(m[i]);
-  }
+  ciphertext_t *ct = malloc(sizeof(ciphertext_t));
+  element_t xt, v[3], z, wt, w0, zj, zzj, gtzzj;
 
   ct->l = public->l;
   ct->n = n;
 
+  ct->ci  = malloc(sizeof(element_t *) * (ct->l + 1)); // standard
+
+  ct->c = malloc(sizeof(element_t) * n);
+  ct->cj = malloc(sizeof(element_t **) * n);
+
   element_init_Zr(xt, *pairing);
-
-  ct->ci = malloc(sizeof(element_t) * (ct->l + 1));
-
   element_init_Zr(z, *pairing);
   element_init_Zr(wt, *pairing);
   element_init_Zr(w0, *pairing);
-  element_random(z);
-
-  /*
-    element_init_GT(ct->c, *pairing);
-    element_pow_zn(ct->c, public->gT, z); 
-    element_mul(ct->c, ct->c, m); // c = g_T ^ z * m
-  */
 
   element_init_Zr(v[0], *pairing);
   element_init_Zr(v[1], *pairing);
   element_init_Zr(v[2], *pairing);
 
-  element_random(w0); // w_0
+  element_init_Zr(zzj, *pairing);
+  element_init_GT(gtzzj, *pairing);
+
+  element_random(z);
+  element_random(w0);
 
   element_set(v[0], w0);
   element_set(v[1], z);
@@ -260,207 +287,162 @@ ciphertext_t * encrypt_amortized(pairing_t* pairing, mpk_t* public, int x[], uns
 
   ct->ci[0] = vector_times_matrix(pairing, v, public->B[0], 3);
 
-  //  element_set(v[2], wt); // set w0 to the third element of all the vectors
+  element_set(v[2], v[0]); // set the third element to w_0
+
   for (int t = 1; t <= ct->l; ++t) {
-    element_random(wt); // wt <- F_q
-
-    element_set(v[0], wt);
-    element_set_si(xt, x[t - 1]);
-
-    fprintf(stderr, "x[%d] = %d\n", t-1, x[t-1]);
-
-    element_set(v[0], wt);
-    element_mul(v[1], wt, xt);
-    element_set(v[2], w0); // (w_t, w_t x_t, w_0)
-
-    ct->ci[t]  = vector_times_matrix(pairing, v, public->B[t], 3);
+    element_random(v[0]); // w_t
+    element_set_si(xt, x[t-1]);
+    element_mul(v[1], v[0], xt); // (w_t, w_t * x_t, w_0)
+    
+    ct->ci[t] = vector_times_matrix(pairing, v, public->B[t], 3);
   }
 
-  element_t zzj;
+  for (int j = 0; j < n; ++j) {
+    ct->cj[j] = malloc(sizeof(element_t*) * 2);
 
-  element_init_Zr(zzj, *pairing);
-
-  element_init_Zr(zj, *pairing);
-  element_init_GT(gtz, *pairing);
-
-  //element_pow_zn(gtz, public->gT, z);
-
-  ct->cj = malloc(sizeof(element_t**) * n);
-  ct->c = malloc(sizeof(element_t) * n);
-
-  for (int i = 0; i < n; ++i) {
-    fprintf(stderr, "enc %d\n", i);
     element_random(zj);
-    element_random(wt);
-    
-    ct->cj[i] = malloc(sizeof(element_t*) * 2);
 
     element_set(v[0], w0);
     element_set(v[1], zj);
     element_set0(v[2]);
 
-    ct->cj[i][0] = vector_times_matrix(pairing, v, public->B[0], 3);
+    ct->cj[j][0] = vector_times_matrix(pairing, v, public->B[0], 3);
 
-    element_set(v[0], wt);
-    element_set_si(xt, xj[i]);
-    element_mul(v[1], wt, xt);
+    element_set_si(xt, xj[j]);
+
+    element_random(v[0]);
+    element_mul(v[1], v[0], xt);
     element_set(v[2], w0);
 
-    //ct->cj[t][1] = vector_times_matrix(pairing, v, public->B[public->l+1], 3);
-    ct->cj[i][1] = vector_times_matrix(pairing, v, public->B[0], 3);
+    ct->cj[j][1] = vector_times_matrix(pairing, v, public->B[ct->l + 1], 3);
 
-    element_init_GT(ct->c[i], *pairing);
-    //element_pow_zn(ct->c[i], gtz, zj);
-    element_mul(zzj, zzj, z);
+    element_init_GT(m[j], *pairing);
+    element_random(m[j]);
 
-    element_pow_zn(ct->c[i], public->gT, zzj);
+    element_add(zzj, z, zj);
+    element_pow_zn(gtzzj, public->gT, zzj);
 
-    element_init_GT(m[i], *pairing);
-    element_random(m[i]);
-    element_mul(ct->c[i], ct->c[i], m[i]);
+    element_init_GT(ct->c[j], *pairing);
+    element_mul(ct->c[j], gtzzj, m[j]);
   }
 
+  element_clear(zj);
   element_clear(zzj);
-  element_clear(v[0]);
-  element_clear(v[1]);
-  element_clear(v[2]);
+  element_clear(gtzzj);
+  element_clear(w0);
   element_clear(wt);
   element_clear(xt);
   element_clear(z);
-  element_clear(w0);
-  element_clear(zj);
-  element_clear(gtz);
-
-  return ct;
-}
-
-dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
-  dkey_t* k = malloc(sizeof(dkey_t));
-  element_t yt, dt, st, s0, v[3];
-
-  k->l = private->l;
-  k->Sn = 0;
-  for (int i = 0; i < private->l; ++i) {
-    if (-1 != y[i])
-      ++(k->Sn);
-  }
-  k->S = malloc(sizeof(unsigned long) * k->Sn);
-  
-  k->k = malloc(sizeof(element_t) * (private->l + 1));
-
-  k->ks = malloc(sizeof(element_t) * 2);
-
-  element_init_Zr(v[0], *pairing);
-  element_init_Zr(v[1], *pairing);
-  element_init_Zr(v[2], *pairing);
-  element_init_Zr(dt, *pairing);
-  element_init_Zr(yt, *pairing);
-  element_init_Zr(s0, *pairing);
-  element_init_Zr(st, *pairing);
-
-  element_set0(s0);
-
-  //unsigned long mask = 0x01;
-  for (int t = 1, sc = 0; t <= private->l; ++t) {
-    if (-1 == y[t - 1]) {
-      k->k[t] = NULL;
-
-      continue;
-    }
-
-    //k->S |= mask;
-    k->S[sc++] = t - 1;
-
-    element_random(dt);
-    element_random(st);
-    element_add(s0, s0, st); // sum st
-
-    element_set_si(yt, y[t - 1]);
-    element_mul(v[0], dt, yt);
-    element_neg(v[1], dt);
-    element_set(v[2], st); // (d_t \times y_t, -d_t, s_t)
-
-    k->k[t] = vector_times_matrix(pairing, v, private->C[t], 3);
-  }
-
-  element_neg(s0, s0); // s0 = -(\sum_{t \in S} s_t)
-
-  element_set(v[0], s0);
-  element_set1(v[1]);
-  element_random(v[2]); // (s_0, 1, eta)
-
-  k->k[0] = vector_times_matrix(pairing, v, private->C[0], 3);
-
-  element_random(v[0]);
-  element_random(v[2]);
-
-  k->ks[0] = vector_times_matrix(pairing, v, private->C[0], 3);
-
-  element_random(dt);
-  element_set_si(yt, y[private->l + 1]);
-  element_neg(v[2], v[0]);
-  element_mul(v[0], dt, yt);
-  element_neg(v[1], dt);
-
-  //k->ks[1] = vector_times_matrix(pairing, v, private->C[private->l+1], 3);
-  k->ks[1] = vector_times_matrix(pairing, v, private->C[0], 3);
-
   element_clear(v[0]);
   element_clear(v[1]);
   element_clear(v[2]);
-  element_clear(dt);
-  element_clear(st);
-  element_clear(yt);
-  element_clear(s0);
-
-  return k;
 }
 
-element_t * decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key) {
-  element_t * m = malloc(sizeof(element_t));
-  element_t t1, t2, t3;
+dkey_t* keygen_amortized(pairing_t* pairing, msk_t* private, int y[]) {
+  element_t v[3], s0, yt, dt, st;
 
-  //  element_init_GT(*m, *pairing);
+  dkey_t * key = malloc(sizeof(dkey_t));
+  key->l = private->l;
+  key->Sn = 0;
+
+  for (int i = 0; i < key->l; ++i) {
+    if (-1 != y[i])
+      ++(key->Sn);
+  }
+  key->S = malloc(sizeof(unsigned long) * key->Sn);
+  key->k = malloc(sizeof(element_t *) * (key->l + 1));
+
+  element_init_Zr(yt, *pairing);
+  element_init_Zr(dt, *pairing);
+  element_init_Zr(st, *pairing);
+  element_init_Zr(s0, *pairing);
+  element_init_Zr(v[0], *pairing);
+  element_init_Zr(v[1], *pairing);
+  element_init_Zr(v[2], *pairing);
+
+  element_set0(s0);
+
+  for (int t = 1, sc = 0; t <= key->l; ++t) {
+    if (-1 == y[t - 1]) {
+      key->k[t] = NULL;
+      continue; // skip *
+    }
+    
+    key->S[++sc] = t - 1;
+
+    element_random(dt);
+    element_random(st);
+    element_add(s0, s0, st);
+
+    element_set_si(yt, y[t - 1]);
+
+    element_mul(v[0], dt, yt);
+    element_neg(v[1], dt);
+    element_set(v[2], st);
+
+    key->k[t] = vector_times_matrix(pairing, v, private->C[t], 3);
+  }
+
+  element_neg(v[0], s0);
+  element_set1(v[1]);
+  element_random(v[2]); // eta
+
+  key->k[0] = vector_times_matrix(pairing, v, private->C[0], 3);
+
+  element_random(v[0]); // s_0^*
+  element_set1(v[1]);
+  element_random(v[2]); // eta^*
+
+  key->kzs = vector_times_matrix(pairing, v, private->C[0], 3);
+
+  element_random(dt);
+  element_set_si(yt, y[key->l]);
+
+  element_neg(v[2], v[0]); // -s_0^*
+  element_mul(v[0], dt, yt);
+  element_neg(v[1], dt);
+
+  key->ks = vector_times_matrix(pairing, v, private->C[key->l + 1], 3);
+
+  element_clear(yt);
+  element_clear(dt);
+  element_clear(st);
+  element_clear(s0);
+  element_clear(v[0]);
+  element_clear(v[1]);
+  element_clear(v[2]);
+  
+  return key;
+}
+
+element_t* decrypt_amortized(pairing_t* pairing, ciphertext_t* ct, dkey_t* key) {
+  element_t *m, den, t1, t2;
+
+  m = malloc(sizeof(element_t) * ct->n);
+  element_init_GT(den, *pairing);
   element_init_GT(t1, *pairing);
   element_init_GT(t2, *pairing);
-  element_init_GT(t3, *pairing);
-
-  element_set1(t2);
   
-  //unsigned long mask = 0x01;
-  for (int sc = 0; sc < key->Sn; ++sc) {
-    int t = key->S[sc] + 1;
-    //++sc;
-    // i \in S
-    element_prod_pairing(t1, key->k[t], ct->ci[t], 3); // p_t =e(k_t, c_t)
+  element_prod_pairing(den, key->k[0], ct->ci[0], 3);
 
-    element_mul(t2, t2, t1); // den = p_0 \times \Pi_{t \in S} p_t
+  for (int i = 0; i < key->Sn; ++i) {
+    int t = key->S[i] + 1;
+
+    element_prod_pairing(t1, key->k[t], ct->ci[t], 3);
+    element_mul(den, den, t1);
   }
 
-  element_prod_pairing(t1, key->k[0], ct->ci[0], 3); // p_0 = e(k_0, c_0)
+  for (int j = 0; j < ct->n; ++j) {
+    element_prod_pairing(t1, key->kzs, ct->cj[j][0], 3);
+    element_mul(t2, den, t1);
 
-  element_mul(t2, t2, t1);
+    element_prod_pairing(t1, key->ks, ct->cj[j][1], 3);
+    element_mul(t2, t2, t1);
 
-  for (int i = 0; i < ct->n; ++i) {
-    fprintf(stderr, "%d\n", i);
-    fprintf(stderr, "init\n");
-    element_init_GT(m[i], *pairing);
+    element_init_GT(m[j], *pairing);
 
-    fprintf(stderr, "prod pairing 0\n");
-    element_prod_pairing(t1, key->ks[0], ct->cj[i][0], 3);
-    element_mul(t3, t2, t1);
-
-    fprintf(stderr, "prod pairing 1\n");
-    element_prod_pairing(t1, key->ks[1], ct->cj[i][1], 3);
-    element_mul(t3, t3, t1);
-
-    fprintf(stderr, "div \n");
-    element_div(m[i], ct->c[i], t3); // c^j / den
+    element_div(m[j], ct->c[j], t2);
   }
-
-  element_clear(t1);
-  element_clear(t2);
-  element_clear(t3);
 
   return m;
 }

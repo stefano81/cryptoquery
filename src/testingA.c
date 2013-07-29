@@ -12,21 +12,26 @@
 void test_fixed(const char *path) {
   pairing_t * pairing = load_pairing(path);
 
-  int x[] = {1, 2, 3, 4, 5};
-  int x1[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+  /*  int x[] = {1, 2, 3, 4, 5};
+  int x1[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
   int y1[] = {1, 2, 3, 4, 5, 1};
   int y2[] = {-1, -1, 3, 4, 5, 2};
-  int y3[] = {2, 3, 4, 5, 6, 9};
+  int y3[] = {2, 3, 4, 5, 6, 9};*/
 
-  setup_t* out = setup_amortized(pairing, 5);
-  element_t m[2], *dm;
+  int x[] = {1};
+  int x1[] = {1, 2};
+  int y1[] = {1, 1};
 
-  ciphertext_t* ct = encrypt_amortized(pairing, out->public, x, 10, x1, m);
+  setup_t* out = setup_amortized(pairing, 1);
+  element_t *m, *dm;
+  m = malloc(sizeof(element_t) * 10);
+
+  ciphertext_t* ct = encrypt_amortized(pairing, out->public, x, 1, x1, m);
 
   dkey_t* key1 = keygen_amortized(pairing, out->private, y1);
   dm = decrypt_amortized(pairing, ct, key1);
-  //int r = element_cmp(m, *dm);
-  //printf("1: %s\n", !r ? "OK!" : "No!");
+  int r = element_cmp(*m, *dm);
+  printf("1: %s\n", !r ? "OK!" : "No!");
 
   /*  dkey_t* key2 = keygen_amortized(pairing, out->private, y2);
       dm = decrypt_amortized(pairing, ct, key2);*/

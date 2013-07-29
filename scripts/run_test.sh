@@ -7,6 +7,9 @@ if [ -z "$1" ]; then
 	for x in $(jot 30 2); do
 	    echo $x
 	    ./src/testing $curve $x > $file.$x.out #2> $file.$x.err
+	    if [ ! $? ]; then
+		break;
+	    fi
 	done
     done
 else
@@ -14,6 +17,9 @@ else
 	for x in $(jot 30 2); do
 	    echo $x
 	    ./src/testing $1 $x > data/$(date "+%Y-%m-%d").$(basename $1 | cut -f1 -d.).$x.out
+	    if [ ! $? ]; then
+		break;
+	    fi
 	done
     else
 	echo $2

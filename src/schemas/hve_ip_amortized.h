@@ -32,7 +32,8 @@ typedef struct {
   unsigned long Sn;
   unsigned long *S;
   element_t **k;
-  element_t **ks;
+  element_t *ks;
+  element_t *kzs;
   unsigned short l;
 } dkey_t;
 
