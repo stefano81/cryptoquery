@@ -46,9 +46,9 @@ AC_CHECK_LIB(gmp, __gmpz_mul_si, ,
        [AC_MSG_ERROR([GNU MP not found, or not 3.1 or up, see http://gmplib.org/])])
 AC_CHECK_LIB( [pbc], [pbc_set_msg_to_stderr], [], [AC_MSG_ERROR([PBC is required!])])
 
-#AC_CHECK_LIB([sqlite3], [sqlite3_open], [], [AC_MSG_ERROR([SQLite is required!])])
-#AC_CHECK_LIB([readline], [readline], [], [AC_MSG_ERROR([readline is required!])])
-#AC_CHECK_LIB([crypto], [AES_encrypt], [],[AC_MSG_ERROR([openssl/crypto (AES) is required!])])
+AC_CHECK_LIB([sqlite3], [sqlite3_open], [], [AC_MSG_ERROR([SQLite is required!])])
+AC_CHECK_LIB([readline], [readline], [], [AC_MSG_ERROR([readline is required!])])
+AC_CHECK_LIB([crypto], [AES_encrypt], [],[AC_MSG_ERROR([openssl/crypto (AES) is required!])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdio.h])
