@@ -40,7 +40,7 @@ void test_fixed(const char *path) {
   dm = decrypt_amortized(pairing, ct, key1);
   for (int i = 0; i < n; ++i) {
     int r = element_cmp(m[i], dm[i]);
-    printf("1: %d %s\n", i, !r ? "OK!" : "No!");
+    //printf("1: %d %s\n", i, !r ? "OK!" : "No!");
   }
 }
 
@@ -101,7 +101,7 @@ void test_EandD(const char *path, int l, int n) {
 }
 
 int main(int argc, char ** argv) {
-  printf("%s %s %s\n", argv[0], argv[1], argv[2]);
+  //printf("%s %s %s\n", argv[0], argv[1], argv[2]);
   if (2 == argc)
     test_fixed(argv[1]);
   else if (3 == argc)
