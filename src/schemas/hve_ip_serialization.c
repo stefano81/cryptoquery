@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <pbc/pbc.h>
 
+
 int serialize_ct(unsigned char ** buffer, ciphertext_t * ct) {
   int size = sizeof(unsigned int) + element_length_in_bytes(ct->c) + (ct->l * element_length_in_bytes(ct->ci[0][0]));
   unsigned char * tbuf, * buff = tbuf = *buffer = malloc(size);
