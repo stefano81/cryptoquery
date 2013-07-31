@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-    for curve in examples/param/*.param; do
+    for curve in examples/param/{a,a1,e}.param; do
 	file=data/$(date "+%Y-%m-%d")-$(basename $curve | cut -f1 -d.)
 	echo $curve
 	for x in $(jot 30 2); do
