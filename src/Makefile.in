@@ -99,7 +99,7 @@ am_testingA_OBJECTS = testingA.$(OBJEXT) utils.$(OBJEXT) \
 testingA_OBJECTS = $(am_testingA_OBJECTS)
 testingA_LDADD = $(LDADD)
 am_testsize_OBJECTS = testsize.$(OBJEXT) utils.$(OBJEXT) \
-	hve_ip.$(OBJEXT)
+	hve_ip.$(OBJEXT) hve_ip_serialization.$(OBJEXT)
 testsize_OBJECTS = $(am_testsize_OBJECTS)
 testsize_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -174,7 +174,9 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 
 # what flags you want to pass to the C compiler & linker
-CFLAGS = -g0 -O2
+#CFLAGS = -g0 -O2
+#CFLAGS = -ggdb -DTESTING
+CFLAGS = -ggdb -DDEBUG
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -191,8 +193,6 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-#CFLAGS = -ggdb -DTESTING
-#CFLAGS = -ggdb -DDEBUG
 #CFLAGS = --pedantic -Wall -ggdb -DTESTING
 #CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS = 
@@ -261,7 +261,7 @@ benchmarkhve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/benchmark_hve.c sc
 generatehve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/generate_hve.c schemas/utils.h schemas/utils.c schemas/aes.h schemas/aes.c
 testing_SOURCES = testing.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c
 testingA_SOURCES = testingA.c schemas/utils.c schemas/hve_ip_amortized.h schemas/hve_ip_amortized2.c
-testsize_SOURCES = test/testsize.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c
+testsize_SOURCES = test/testsize.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c schemas/hve_ip_serialization.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -375,6 +375,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip_amortized2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip_serialization.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testingA.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testsize.Po@am__quote@
@@ -449,6 +450,20 @@ testsize.obj: test/testsize.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/testsize.c' object='testsize.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testsize.obj `if test -f 'test/testsize.c'; then $(CYGPATH_W) 'test/testsize.c'; else $(CYGPATH_W) '$(srcdir)/test/testsize.c'; fi`
+
+hve_ip_serialization.o: schemas/hve_ip_serialization.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip_serialization.o -MD -MP -MF $(DEPDIR)/hve_ip_serialization.Tpo -c -o hve_ip_serialization.o `test -f 'schemas/hve_ip_serialization.c' || echo '$(srcdir)/'`schemas/hve_ip_serialization.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip_serialization.Tpo $(DEPDIR)/hve_ip_serialization.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/hve_ip_serialization.c' object='hve_ip_serialization.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip_serialization.o `test -f 'schemas/hve_ip_serialization.c' || echo '$(srcdir)/'`schemas/hve_ip_serialization.c
+
+hve_ip_serialization.obj: schemas/hve_ip_serialization.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip_serialization.obj -MD -MP -MF $(DEPDIR)/hve_ip_serialization.Tpo -c -o hve_ip_serialization.obj `if test -f 'schemas/hve_ip_serialization.c'; then $(CYGPATH_W) 'schemas/hve_ip_serialization.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip_serialization.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip_serialization.Tpo $(DEPDIR)/hve_ip_serialization.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/hve_ip_serialization.c' object='hve_ip_serialization.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip_serialization.obj `if test -f 'schemas/hve_ip_serialization.c'; then $(CYGPATH_W) 'schemas/hve_ip_serialization.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip_serialization.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

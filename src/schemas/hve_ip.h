@@ -50,13 +50,11 @@ ciphertext_t* encrypt(pairing_t* pairing, mpk_t* public, int x[], element_t *m);
 dkey_t* keygen(pairing_t* pairing, msk_t* private, int y[]);
 element_t * decrypt(pairing_t* pairing, ciphertext_t* ct, dkey_t* key);
 
-int serialize_setup(unsigned char ** buffer, setup_t* setup);
 int serialize_ct(unsigned char ** buffer, ciphertext_t* ct);
 int serialize_mpk(unsigned char ** buffer, mpk_t* public);
 int serialize_msk(unsigned char ** buffer, msk_t* private);
 int serialize_key(unsigned char ** buffer, dkey_t* k);
 
-setup_t * deserialize_setup(unsigned char *buffer);
 ciphertext_t* deserialize_ct(unsigned char * buffer);
 mpk_t* deserialize_mpk(unsigned char * buffer);
 msk_t* deserialize_msk(unsigned char * buffer);

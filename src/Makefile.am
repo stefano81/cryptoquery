@@ -1,7 +1,7 @@
 # what flags you want to pass to the C compiler & linker
-CFLAGS = -g0 -O2
+#CFLAGS = -g0 -O2
 #CFLAGS = -ggdb -DTESTING
-#CFLAGS = -ggdb -DDEBUG
+CFLAGS = -ggdb -DDEBUG
 #CFLAGS = --pedantic -Wall -ggdb -DTESTING
 #CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS =
@@ -15,4 +15,4 @@ benchmarkhve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/benchmark_hve.c sc
 generatehve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/generate_hve.c schemas/utils.h schemas/utils.c schemas/aes.h schemas/aes.c
 testing_SOURCES = testing.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c
 testingA_SOURCES = testingA.c schemas/utils.c schemas/hve_ip_amortized.h schemas/hve_ip_amortized2.c
-testsize_SOURCES = test/testsize.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c
+testsize_SOURCES = test/testsize.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c schemas/hve_ip_serialization.c
