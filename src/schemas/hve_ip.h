@@ -55,9 +55,9 @@ int serialize_mpk(unsigned char ** buffer, mpk_t* public);
 int serialize_msk(unsigned char ** buffer, msk_t* private);
 int serialize_key(unsigned char ** buffer, dkey_t* k);
 
-ciphertext_t* deserialize_ct(unsigned char * buffer);
-mpk_t* deserialize_mpk(unsigned char * buffer);
-msk_t* deserialize_msk(unsigned char * buffer);
-dkey_t* deserialize_key(unsigned char * buffer);
+ciphertext_t* deserialize_ct(unsigned char * buffer, pairing_t *pairing);
+mpk_t* deserialize_mpk(unsigned char * buffer, pairing_t *pairing);
+msk_t* deserialize_msk(unsigned char * buffer, pairing_t *pairing);
+dkey_t* deserialize_key(unsigned char * buffer, pairing_t *pairing);
 
 #endif
