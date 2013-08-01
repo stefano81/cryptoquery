@@ -98,7 +98,7 @@ int serialize_msk(unsigned char ** buffer, msk_t *private) {
       for (int j = 0; j < 3; ++j)
 	size += element_to_bytes(buff + size, private->C[t][i][j]);
 
-  *buffer = mallo(sizeof(unsigned char) * size);
+  *buffer = malloc(sizeof(unsigned char) * size);
   memcpy(*buffer, buff, size);
 
   return size;
