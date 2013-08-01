@@ -7,7 +7,7 @@
 #include <sqlite3.h>
 
 #include <pbc/pbc.h>
-#include "schemas/utils.h"
+#include "../schemas/utils.h"
 
 #include "../schemas/hve_ip.h"
 

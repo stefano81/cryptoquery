@@ -77,7 +77,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = testing$(EXEEXT) testingA$(EXEEXT) testsize$(EXEEXT) \
-	test_serialization_hve$(EXEEXT)
+	test_serialization_hve$(EXEEXT) test_encrypt$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/depcomp
@@ -91,6 +91,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am_test_encrypt_OBJECTS = test_encrypt.$(OBJEXT) utils.$(OBJEXT)
+test_encrypt_OBJECTS = $(am_test_encrypt_OBJECTS)
+test_encrypt_LDADD = $(LDADD)
 am_test_serialization_hve_OBJECTS = test_serialization_hve.$(OBJEXT) \
 	utils.$(OBJEXT) hve_ip.$(OBJEXT) \
 	hve_ip_serialization.$(OBJEXT)
@@ -140,9 +143,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(test_serialization_hve_SOURCES) $(testing_SOURCES) \
-	$(testingA_SOURCES) $(testsize_SOURCES)
-DIST_SOURCES = $(test_serialization_hve_SOURCES) $(testing_SOURCES) \
+SOURCES = $(test_encrypt_SOURCES) $(test_serialization_hve_SOURCES) \
+	$(testing_SOURCES) $(testingA_SOURCES) $(testsize_SOURCES)
+DIST_SOURCES = $(test_encrypt_SOURCES) \
+	$(test_serialization_hve_SOURCES) $(testing_SOURCES) \
 	$(testingA_SOURCES) $(testsize_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -181,7 +185,9 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 
 # what flags you want to pass to the C compiler & linker
-CFLAGS = -g0 -O2
+#CFLAGS = -g0 -O2
+#CFLAGS = -ggdb -DTESTING
+CFLAGS = -ggdb -DDEBUG
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -198,8 +204,6 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-#CFLAGS = -ggdb -DTESTING
-#CFLAGS = -ggdb #-DDEBUG
 #CFLAGS = --pedantic -Wall -ggdb -DTESTING
 #CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS = 
@@ -263,13 +267,38 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-cryptoquery_SOURCES = common.h config.h configuration.c configuration.h cryptoquery.c cryptoquery.h database/sqlite.h database.c database.h encryption.c encryption.h schemas/hve.h schemas/hve.c schemas/lostw.c schemas/lostw.h schemas/hve_ip.c schemas/hve_ip.h schemas/utils.c schemas/utils.h schemas/aes.h schemas/aes.c
-benchmarkhve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/benchmark_hve.c schemas/utils.h schemas/utils.c schemas/aes.h schemas/aes.c
-generatehve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h test/generate_hve.c schemas/utils.h schemas/utils.c schemas/aes.h schemas/aes.c
-testing_SOURCES = testing.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c
-testingA_SOURCES = testingA.c schemas/utils.c schemas/hve_ip_amortized.h schemas/hve_ip_amortized2.c
-testsize_SOURCES = test/testsize.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c schemas/hve_ip_serialization.c
-test_serialization_hve_SOURCES = test/test_serialization_hve.c schemas/utils.c schemas/hve_ip.h schemas/hve_ip.c schemas/hve_ip_serialization.c
+cryptoquery_SOURCES = common.h config.h configuration.c			\
+		configuration.h cryptoquery.c cryptoquery.h		\
+		database/sqlite.h database.c database.h encryption.c	\
+		encryption.h schemas/hve.h schemas/hve.c		\
+		schemas/lostw.c schemas/lostw.h schemas/hve_ip.c	\
+		schemas/hve_ip.h schemas/utils.c schemas/utils.h	\
+		schemas/aes.h schemas/aes.c
+
+benchmarkhve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h		\
+		test/benchmark_hve.c schemas/utils.h schemas/utils.c	\
+		schemas/aes.h schemas/aes.c
+
+generatehve_SOURCES = schemas/hve_ip.c schemas/hve_ip.h			\
+		test/generate_hve.c schemas/utils.h schemas/utils.c	\
+		schemas/aes.h schemas/aes.c
+
+testing_SOURCES = testing.c schemas/utils.c schemas/hve_ip.h	\
+		schemas/hve_ip.c
+
+testingA_SOURCES = testingA.c schemas/utils.c				\
+		schemas/hve_ip_amortized.h schemas/hve_ip_amortized2.c
+
+testsize_SOURCES = test/testsize.c schemas/utils.c schemas/hve_ip.h	\
+		schemas/hve_ip.c schemas/hve_ip_serialization.c
+
+test_serialization_hve_SOURCES = test/test_serialization_hve.c		\
+		schemas/utils.h schemas/utils.c schemas/hve_ip.h	\
+		schemas/hve_ip.c schemas/hve_ip_serialization.c
+
+test_encrypt_SOURCES = test/test_encrypt.c schemas/utils.c	\
+		schemas/utils.h
+
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -363,6 +392,10 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
+test_encrypt$(EXEEXT): $(test_encrypt_OBJECTS) $(test_encrypt_DEPENDENCIES) $(EXTRA_test_encrypt_DEPENDENCIES) 
+	@rm -f test_encrypt$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_encrypt_OBJECTS) $(test_encrypt_LDADD) $(LIBS)
+
 test_serialization_hve$(EXEEXT): $(test_serialization_hve_OBJECTS) $(test_serialization_hve_DEPENDENCIES) $(EXTRA_test_serialization_hve_DEPENDENCIES) 
 	@rm -f test_serialization_hve$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_serialization_hve_OBJECTS) $(test_serialization_hve_LDADD) $(LIBS)
@@ -388,6 +421,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip_amortized2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip_serialization.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_encrypt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_serialization_hve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testingA.Po@am__quote@
@@ -408,19 +442,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-test_serialization_hve.o: test/test_serialization_hve.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_serialization_hve.o -MD -MP -MF $(DEPDIR)/test_serialization_hve.Tpo -c -o test_serialization_hve.o `test -f 'test/test_serialization_hve.c' || echo '$(srcdir)/'`test/test_serialization_hve.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_serialization_hve.Tpo $(DEPDIR)/test_serialization_hve.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_serialization_hve.c' object='test_serialization_hve.o' libtool=no @AMDEPBACKSLASH@
+test_encrypt.o: test/test_encrypt.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_encrypt.o -MD -MP -MF $(DEPDIR)/test_encrypt.Tpo -c -o test_encrypt.o `test -f 'test/test_encrypt.c' || echo '$(srcdir)/'`test/test_encrypt.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_encrypt.Tpo $(DEPDIR)/test_encrypt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_encrypt.c' object='test_encrypt.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_serialization_hve.o `test -f 'test/test_serialization_hve.c' || echo '$(srcdir)/'`test/test_serialization_hve.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_encrypt.o `test -f 'test/test_encrypt.c' || echo '$(srcdir)/'`test/test_encrypt.c
 
-test_serialization_hve.obj: test/test_serialization_hve.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_serialization_hve.obj -MD -MP -MF $(DEPDIR)/test_serialization_hve.Tpo -c -o test_serialization_hve.obj `if test -f 'test/test_serialization_hve.c'; then $(CYGPATH_W) 'test/test_serialization_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/test_serialization_hve.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_serialization_hve.Tpo $(DEPDIR)/test_serialization_hve.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_serialization_hve.c' object='test_serialization_hve.obj' libtool=no @AMDEPBACKSLASH@
+test_encrypt.obj: test/test_encrypt.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_encrypt.obj -MD -MP -MF $(DEPDIR)/test_encrypt.Tpo -c -o test_encrypt.obj `if test -f 'test/test_encrypt.c'; then $(CYGPATH_W) 'test/test_encrypt.c'; else $(CYGPATH_W) '$(srcdir)/test/test_encrypt.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_encrypt.Tpo $(DEPDIR)/test_encrypt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_encrypt.c' object='test_encrypt.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_serialization_hve.obj `if test -f 'test/test_serialization_hve.c'; then $(CYGPATH_W) 'test/test_serialization_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/test_serialization_hve.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_encrypt.obj `if test -f 'test/test_encrypt.c'; then $(CYGPATH_W) 'test/test_encrypt.c'; else $(CYGPATH_W) '$(srcdir)/test/test_encrypt.c'; fi`
 
 utils.o: schemas/utils.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT utils.o -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.o `test -f 'schemas/utils.c' || echo '$(srcdir)/'`schemas/utils.c
@@ -435,6 +469,20 @@ utils.obj: schemas/utils.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/utils.c' object='utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utils.obj `if test -f 'schemas/utils.c'; then $(CYGPATH_W) 'schemas/utils.c'; else $(CYGPATH_W) '$(srcdir)/schemas/utils.c'; fi`
+
+test_serialization_hve.o: test/test_serialization_hve.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_serialization_hve.o -MD -MP -MF $(DEPDIR)/test_serialization_hve.Tpo -c -o test_serialization_hve.o `test -f 'test/test_serialization_hve.c' || echo '$(srcdir)/'`test/test_serialization_hve.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_serialization_hve.Tpo $(DEPDIR)/test_serialization_hve.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_serialization_hve.c' object='test_serialization_hve.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_serialization_hve.o `test -f 'test/test_serialization_hve.c' || echo '$(srcdir)/'`test/test_serialization_hve.c
+
+test_serialization_hve.obj: test/test_serialization_hve.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_serialization_hve.obj -MD -MP -MF $(DEPDIR)/test_serialization_hve.Tpo -c -o test_serialization_hve.obj `if test -f 'test/test_serialization_hve.c'; then $(CYGPATH_W) 'test/test_serialization_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/test_serialization_hve.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_serialization_hve.Tpo $(DEPDIR)/test_serialization_hve.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_serialization_hve.c' object='test_serialization_hve.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_serialization_hve.obj `if test -f 'test/test_serialization_hve.c'; then $(CYGPATH_W) 'test/test_serialization_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/test_serialization_hve.c'; fi`
 
 hve_ip.o: schemas/hve_ip.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.o -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
