@@ -3,6 +3,7 @@
 
 #include <pbc/pbc.h>
 
-int encrypt_AES(unsigned char *buffer, element_t k, int *val, int size);
+unsigned char * encrypt_AES(element_t k, int *val, int size);
+int * decrypt_AES(element_t k, unsigned char *buffer, int size);
 
 #endif

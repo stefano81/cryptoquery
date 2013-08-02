@@ -91,7 +91,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_test_encrypt_OBJECTS = test_encrypt.$(OBJEXT) utils.$(OBJEXT)
+am_test_encrypt_OBJECTS = test_encrypt.$(OBJEXT) utils.$(OBJEXT) \
+	aes.$(OBJEXT)
 test_encrypt_OBJECTS = $(am_test_encrypt_OBJECTS)
 test_encrypt_LDADD = $(LDADD)
 am_test_serialization_hve_OBJECTS = test_serialization_hve.$(OBJEXT) \
@@ -297,7 +298,7 @@ test_serialization_hve_SOURCES = test/test_serialization_hve.c		\
 		schemas/hve_ip.c schemas/hve_ip_serialization.c
 
 test_encrypt_SOURCES = test/test_encrypt.c schemas/utils.c	\
-		schemas/utils.h
+		schemas/utils.h schemas/aes.c schemas/aes.h
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -418,6 +419,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip_amortized2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip_serialization.Po@am__quote@
@@ -469,6 +471,20 @@ utils.obj: schemas/utils.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/utils.c' object='utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o utils.obj `if test -f 'schemas/utils.c'; then $(CYGPATH_W) 'schemas/utils.c'; else $(CYGPATH_W) '$(srcdir)/schemas/utils.c'; fi`
+
+aes.o: schemas/aes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT aes.o -MD -MP -MF $(DEPDIR)/aes.Tpo -c -o aes.o `test -f 'schemas/aes.c' || echo '$(srcdir)/'`schemas/aes.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/aes.Tpo $(DEPDIR)/aes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/aes.c' object='aes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o aes.o `test -f 'schemas/aes.c' || echo '$(srcdir)/'`schemas/aes.c
+
+aes.obj: schemas/aes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT aes.obj -MD -MP -MF $(DEPDIR)/aes.Tpo -c -o aes.obj `if test -f 'schemas/aes.c'; then $(CYGPATH_W) 'schemas/aes.c'; else $(CYGPATH_W) '$(srcdir)/schemas/aes.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/aes.Tpo $(DEPDIR)/aes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/aes.c' object='aes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o aes.obj `if test -f 'schemas/aes.c'; then $(CYGPATH_W) 'schemas/aes.c'; else $(CYGPATH_W) '$(srcdir)/schemas/aes.c'; fi`
 
 test_serialization_hve.o: test/test_serialization_hve.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_serialization_hve.o -MD -MP -MF $(DEPDIR)/test_serialization_hve.Tpo -c -o test_serialization_hve.o `test -f 'test/test_serialization_hve.c' || echo '$(srcdir)/'`test/test_serialization_hve.c

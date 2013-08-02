@@ -7,8 +7,11 @@
 #include <gmp.h>
 #include <pbc/pbc.h>
 #include "../schemas/utils.h"
+#include "../schemas/aes.h"
 
 #include <openssl/aes.h>
+
+#include <assert.h>
 
 int main(int argc, char **argv) {
   pairing_t * pairing = load_pairing(argv[1]);
@@ -33,6 +36,30 @@ int main(int argc, char **argv) {
 	 mpz_fits_sint_p(n),
 	 mpz_fits_ushort_p(n),
 	 mpz_fits_sshort_p(n));
+
+  int x[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+  unsigned char *in = "TESTSTRING", buff[BLOCKSIZE * 10], out[BLOCKSIZE * 10];
+  unsigned char pwd[16] = {"1","2","3","4","5","6","7","8","9","0"};
+
+  AES_KEY ek, dk;
+
+  AES_set_encrypt_key(pwd, 128, &ek);
+  AES_set_decrypt_key(pwd, 128, &dk);
+
+  unsigned char eIV[BLOCKSIZE] = {0}, dIV[BLOCKSIZE] = {0};
+
+  AES_cbc_encrypt(in, buff, sizeof(in), &ek, eIV, AES_ENCRYPT);
+
+  AES_cbc_encrypt(buff, out, sizeof(buff), &dk, dIV, AES_DECRYPT);
+
+  /*unsigned char *out = encrypt_AES(m, x, 10);
+
+  int *y = decrypt_AES(m, out, 10);
+
+  for (int i = 0; i < 10; ++i) {
+    assert(x[i] == y[i]);
+    }*/
 
   return 0;
 }

@@ -34,4 +34,4 @@ test_serialization_hve_SOURCES = test/test_serialization_hve.c		\
 		schemas/utils.h schemas/utils.c schemas/hve_ip.h	\
 		schemas/hve_ip.c schemas/hve_ip_serialization.c
 test_encrypt_SOURCES = test/test_encrypt.c schemas/utils.c	\
-		schemas/utils.h
+		schemas/utils.h schemas/aes.c schemas/aes.h
