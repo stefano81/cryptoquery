@@ -39,19 +39,26 @@ int main(int argc, char **argv) {
 
   int x[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-  unsigned char *in = "TESTSTRING", buff[BLOCKSIZE * 10], out[BLOCKSIZE * 10];
-  unsigned char pwd[16] = {"1","2","3","4","5","6","7","8","9","0"};
+  unsigned char *in = "TESTSTRING", buff[AES_BLOCK_SIZE * 10], out[AES_BLOCK_SIZE * 10];
+  unsigned char pwd[AES_BLOCK_SIZE];
+  for (int i = 0; i < AES_BLOCK_SIZE; ++i)
+    pwd[i] = '1';
+
+  memcpy(buff, 0, AES_BLOCK_SIZE * 10);
+  memcpy(out, 0, AES_BLOCK_SIZE * 10);
 
   AES_KEY ek, dk;
 
   AES_set_encrypt_key(pwd, 128, &ek);
   AES_set_decrypt_key(pwd, 128, &dk);
 
-  unsigned char eIV[BLOCKSIZE] = {0}, dIV[BLOCKSIZE] = {0};
+  unsigned char eIV[AES_BLOCK_SIZE] = {0}, dIV[AES_BLOCK_SIZE] = {0};
 
   AES_cbc_encrypt(in, buff, sizeof(in), &ek, eIV, AES_ENCRYPT);
 
   AES_cbc_encrypt(buff, out, sizeof(buff), &dk, dIV, AES_DECRYPT);
+
+  //assert(strlen(in) == strlen(out));
 
   /*unsigned char *out = encrypt_AES(m, x, 10);
 

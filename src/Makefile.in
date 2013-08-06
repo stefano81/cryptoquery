@@ -77,7 +77,8 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = testing$(EXEEXT) testingA$(EXEEXT) testsize$(EXEEXT) \
-	test_serialization_hve$(EXEEXT) test_encrypt$(EXEEXT)
+	test_serialization_hve$(EXEEXT) test_encrypt$(EXEEXT) \
+	testsize2$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/depcomp
@@ -112,6 +113,10 @@ am_testsize_OBJECTS = testsize.$(OBJEXT) utils.$(OBJEXT) \
 	hve_ip.$(OBJEXT) hve_ip_serialization.$(OBJEXT)
 testsize_OBJECTS = $(am_testsize_OBJECTS)
 testsize_LDADD = $(LDADD)
+am_testsize2_OBJECTS = testsize2.$(OBJEXT) utils.$(OBJEXT) \
+	hve_ip.$(OBJEXT) hve_ip_serialization.$(OBJEXT)
+testsize2_OBJECTS = $(am_testsize2_OBJECTS)
+testsize2_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -145,10 +150,11 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(test_encrypt_SOURCES) $(test_serialization_hve_SOURCES) \
-	$(testing_SOURCES) $(testingA_SOURCES) $(testsize_SOURCES)
+	$(testing_SOURCES) $(testingA_SOURCES) $(testsize_SOURCES) \
+	$(testsize2_SOURCES)
 DIST_SOURCES = $(test_encrypt_SOURCES) \
 	$(test_serialization_hve_SOURCES) $(testing_SOURCES) \
-	$(testingA_SOURCES) $(testsize_SOURCES)
+	$(testingA_SOURCES) $(testsize_SOURCES) $(testsize2_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -186,9 +192,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 
 # what flags you want to pass to the C compiler & linker
-#CFLAGS = -g0 -O2
-#CFLAGS = -ggdb -DTESTING
-CFLAGS = -ggdb -DDEBUG
+CFLAGS = -g0 -O2
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -205,6 +209,8 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+#CFLAGS = -ggdb -DTESTING
+#CFLAGS = -ggdb -DDEBUG
 #CFLAGS = --pedantic -Wall -ggdb -DTESTING
 #CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS = 
@@ -291,6 +297,9 @@ testingA_SOURCES = testingA.c schemas/utils.c				\
 		schemas/hve_ip_amortized.h schemas/hve_ip_amortized2.c
 
 testsize_SOURCES = test/testsize.c schemas/utils.c schemas/hve_ip.h	\
+		schemas/hve_ip.c schemas/hve_ip_serialization.c
+
+testsize2_SOURCES = test/testsize2.c schemas/utils.c schemas/hve_ip.h	\
 		schemas/hve_ip.c schemas/hve_ip_serialization.c
 
 test_serialization_hve_SOURCES = test/test_serialization_hve.c		\
@@ -413,6 +422,10 @@ testsize$(EXEEXT): $(testsize_OBJECTS) $(testsize_DEPENDENCIES) $(EXTRA_testsize
 	@rm -f testsize$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(testsize_OBJECTS) $(testsize_LDADD) $(LIBS)
 
+testsize2$(EXEEXT): $(testsize2_OBJECTS) $(testsize2_DEPENDENCIES) $(EXTRA_testsize2_DEPENDENCIES) 
+	@rm -f testsize2$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(testsize2_OBJECTS) $(testsize2_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -428,6 +441,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testingA.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testsize.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testsize2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Po@am__quote@
 
 .c.o:
@@ -555,6 +569,20 @@ testsize.obj: test/testsize.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/testsize.c' object='testsize.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testsize.obj `if test -f 'test/testsize.c'; then $(CYGPATH_W) 'test/testsize.c'; else $(CYGPATH_W) '$(srcdir)/test/testsize.c'; fi`
+
+testsize2.o: test/testsize2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testsize2.o -MD -MP -MF $(DEPDIR)/testsize2.Tpo -c -o testsize2.o `test -f 'test/testsize2.c' || echo '$(srcdir)/'`test/testsize2.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testsize2.Tpo $(DEPDIR)/testsize2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/testsize2.c' object='testsize2.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testsize2.o `test -f 'test/testsize2.c' || echo '$(srcdir)/'`test/testsize2.c
+
+testsize2.obj: test/testsize2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testsize2.obj -MD -MP -MF $(DEPDIR)/testsize2.Tpo -c -o testsize2.obj `if test -f 'test/testsize2.c'; then $(CYGPATH_W) 'test/testsize2.c'; else $(CYGPATH_W) '$(srcdir)/test/testsize2.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testsize2.Tpo $(DEPDIR)/testsize2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/testsize2.c' object='testsize2.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testsize2.obj `if test -f 'test/testsize2.c'; then $(CYGPATH_W) 'test/testsize2.c'; else $(CYGPATH_W) '$(srcdir)/test/testsize2.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

@@ -152,7 +152,9 @@ int serialize_key(unsigned char ** buffer, dkey_t *key) {
   size += sizeof(unsigned long);
 
   for (int i = 0; i < key->Sn; ++i) {
-    printf("key->S[%d] := %d\n", i, key->S[i]);
+#ifdef DEBUG
+    fprintf(stderr, "key->S[%d] := %d\n", i, key->S[i]);
+#endif
     S1 = htonl(key->S[i]);
     memcpy(buff + size, &S1, sizeof(unsigned long));
     size += sizeof(unsigned long);

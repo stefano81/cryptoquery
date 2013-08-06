@@ -1,7 +1,7 @@
 # what flags you want to pass to the C compiler & linker
-#CFLAGS = -g0 -O2
+CFLAGS = -g0 -O2
 #CFLAGS = -ggdb -DTESTING
-CFLAGS = -ggdb -DDEBUG
+#CFLAGS = -ggdb -DDEBUG
 #CFLAGS = --pedantic -Wall -ggdb -DTESTING
 #CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS =
@@ -10,7 +10,7 @@ LDFLAGS =
 # the previous manual Makefile
 #bin_PROGRAMS = cryptoquery benchmarkhve generatehve testing testingA
 bin_PROGRAMS = testing testingA testsize test_serialization_hve	\
-		test_encrypt
+		test_encrypt testsize2
 cryptoquery_SOURCES = common.h config.h configuration.c			\
 		configuration.h cryptoquery.c cryptoquery.h		\
 		database/sqlite.h database.c database.h encryption.c	\
@@ -29,6 +29,8 @@ testing_SOURCES = testing.c schemas/utils.c schemas/hve_ip.h	\
 testingA_SOURCES = testingA.c schemas/utils.c				\
 		schemas/hve_ip_amortized.h schemas/hve_ip_amortized2.c
 testsize_SOURCES = test/testsize.c schemas/utils.c schemas/hve_ip.h	\
+		schemas/hve_ip.c schemas/hve_ip_serialization.c
+testsize2_SOURCES = test/testsize2.c schemas/utils.c schemas/hve_ip.h	\
 		schemas/hve_ip.c schemas/hve_ip_serialization.c
 test_serialization_hve_SOURCES = test/test_serialization_hve.c		\
 		schemas/utils.h schemas/utils.c schemas/hve_ip.h	\
