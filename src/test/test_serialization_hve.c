@@ -49,7 +49,6 @@ void verify_mpk(mpk_t *orig, mpk_t *new) {
   }
 }
 
-
 void verify_key(dkey_t *orig, dkey_t *new) {
   assert(orig->Sn == new->Sn);
   assert(orig->l == new->l);
@@ -64,6 +63,33 @@ void verify_key(dkey_t *orig, dkey_t *new) {
       assert(0 == element_cmp(orig->k[i][j], new->k[i][j]));
     }
   }
+}
+
+void test_save_and_recover(setup_t *hve, pairing_t *pairing) {
+  element_t m;
+  int X[10] = {1,2,3,4,5,6,7,8,9,10};
+  int Y[10] = {1,2,3,4,5,6,7,8,9,10};
+
+  unsigned char *publicB, *privateB, *ctB;
+
+  serialize_mpk(&publicB, hve->public);
+  serialize_msk(&privateB, hve->public);
+
+  mpk_t *public = deserialize_mpk(publicB, pairing);
+
+  verify_mpk(public, hve->public);
+
+  ciphertext_t *ct1 = encrypt(pairing, public, X, &m);
+
+  serialize_ct(&ctB, ct1);
+
+  ciphertext_t *ct2 = deserialize_ct(ctB, pairing);
+
+  verify_mpk(ct2, ct1);
+
+  element_t dm;
+  
+  //  assert(0 == element_cmp
 }
 
 int main(int argc, char ** argv) {
@@ -84,7 +110,6 @@ int main(int argc, char ** argv) {
   sqlite3_open(argv[1], &db);
   sqlite3_prepare_v2(db, "select rowid, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 from plain_data", -1, &get_plain_data, NULL);
 
-
   element_init_G1(t1, *pairing);
   element_random(t1);
 
@@ -102,6 +127,8 @@ int main(int argc, char ** argv) {
   assert(!element_cmp(t1, t2));
 
   setup_t * hve = setup(pairing, 10);
+
+  test_save_and_recover(hve, pairing);
 
   int dim = serialize_mpk(&buff, hve->public);
   mpk_t *public2 = deserialize_mpk(buff, pairing);
