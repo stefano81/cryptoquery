@@ -42,8 +42,8 @@ void test_fixed(const char *path) {
 void test_fixed2(const char *path) {
   pairing_t * pairing = load_pairing(path);
 
-  int x[] = {1, 2, 3, 4, 5};
-  int y[] = {1, 2, 3, 4, 5};
+  /*  int x[] = {1, 2, 3, 4, 5};
+      int y[] = {1, 2, 3, 4, 5};*/
 
   setup_t* out = setup(pairing, 5);
 

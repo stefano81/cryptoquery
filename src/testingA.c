@@ -28,7 +28,7 @@ void test_fixed(const char *path) {
   int l = 10;
 
   setup_t* out = setup_amortized(pairing, l);
-  element_t *m, *dm;
+  element_t *m;//, *dm;
 
   m = malloc(sizeof(element_t) * 10);
 
@@ -37,9 +37,9 @@ void test_fixed(const char *path) {
   fprintf(stderr, "test_fixed: ct->n = %d\n", ct->n);
 
   dkey_t* key1 = keygen_amortized(pairing, out->private, y1);
-  dm = decrypt_amortized(pairing, ct, key1);
+  /*dm = */decrypt_amortized(pairing, ct, key1);
   for (int i = 0; i < n; ++i) {
-    int r = element_cmp(m[i], dm[i]);
+    //int r = element_cmp(m[i], dm[i]);
     //printf("1: %d %s\n", i, !r ? "OK!" : "No!");
   }
 }

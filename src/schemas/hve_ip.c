@@ -89,9 +89,9 @@ setup_t * setup(pairing_t *pairing, int l) {
       element_set(public->g1, g1);
       element_init_G2(setup->public->g2,*pairing);
       element_set(public->g2, g2);*/
-  setup->private->l = setup->public->l = l;
-  setup->public->B = BB;
-  setup->private->C = CC;
+  private->l = setup->public->l = l;
+  public->B = BB;
+  private->C = CC;
 
 
   for(int zz=0;zz<l+1;zz++){

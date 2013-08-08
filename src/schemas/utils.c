@@ -55,7 +55,7 @@ element_t * vector_times_matrix(pairing_t *pairing, element_t *v, element_t **m,
   element_t t, one;
 
   element_init_same_as(t, m[0][0]);
-  element_init_same_as(t, m[0][0]);//*pairing);
+  element_init_same_as(t, m[0][0]);// *pairing);
   element_init_same_as(one, m[0][0]);// *pairing);
   element_set1(one);
 

@@ -22,7 +22,7 @@ CREATE TABLE plain_data(
 );
 CREATE TABLE encrypted_data(
 	id int,
-        c1t blob
+        ct blob
 );
 CREATE TABLE test_data(
 	id int,

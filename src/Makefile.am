@@ -1,7 +1,7 @@
 # what flags you want to pass to the C compiler & linker
-CFLAGS = -g0 -O2
+#CFLAGS = -g0 -O2 -Werror
 #CFLAGS = -ggdb -DTESTING
-#CFLAGS = -ggdb -DDEBUG
+CFLAGS = -ggdb -DDEBUG -Werror
 #CFLAGS = --pedantic -Wall -ggdb -DTESTING
 #CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS =

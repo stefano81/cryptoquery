@@ -5,6 +5,24 @@
 
 const unsigned int BUFSIZE = 1024 * 1024;
 
+void free_ct(ciphertext_t *ct) {
+  for (int i = 0; i <= ct->l; ++i) {
+#ifdef DEBUG
+    fprintf(stderr, "ct->ci[%d]\n", i);
+#endif
+
+    for (int j = 0; j < 3; ++j) {
+      element_free(ct->ci[i][j]);
+    }
+    free(ct->ci[i]);
+  }
+  free(ct->ci);
+
+  element_free(ct->c);
+
+  free(ct);
+}
+
 int serialize_ct(unsigned char ** buffer, ciphertext_t * ct) {
   unsigned char buff[BUFSIZE];
   size_t size = 0;

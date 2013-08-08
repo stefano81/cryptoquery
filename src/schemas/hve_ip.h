@@ -60,4 +60,6 @@ mpk_t* deserialize_mpk(unsigned char * buffer, pairing_t *pairing);
 msk_t* deserialize_msk(unsigned char * buffer, pairing_t *pairing);
 dkey_t* deserialize_key(unsigned char * buffer, pairing_t *pairing);
 
+void free_ct(ciphertext_t *ct);
+
 #endif

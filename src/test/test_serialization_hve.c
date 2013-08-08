@@ -73,7 +73,7 @@ void test_save_and_recover(setup_t *hve, pairing_t *pairing) {
   unsigned char *publicB, *privateB, *ctB;
 
   serialize_mpk(&publicB, hve->public);
-  serialize_msk(&privateB, hve->public);
+  serialize_msk(&privateB, hve->private);
 
   mpk_t *public = deserialize_mpk(publicB, pairing);
 
@@ -85,7 +85,7 @@ void test_save_and_recover(setup_t *hve, pairing_t *pairing) {
 
   ciphertext_t *ct2 = deserialize_ct(ctB, pairing);
 
-  verify_mpk(ct2, ct1);
+  verify_ct(ct2, ct1);
 
   element_t dm;
   
