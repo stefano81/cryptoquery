@@ -32,23 +32,29 @@ void compute_sizes(pairing_t *pairing) {
   }
 }
 
+int die(sqlite3 *db) {
+  fprintf(stderr, "ERROR: %d %s\n", sqlite3_errcode(db), sqlite3_errmsg(db));
+
+  exit(1);
+}
+
 setup_t * load_or_create(sqlite3 *db, pairing_t *pairing, int l) {
   sqlite3_stmt *public = NULL, *private = NULL, *g = NULL, *insert = NULL;
   setup_t * out;
 
-  sqlite3_prepare_v2(db, "select param from params where name = 'public'", -1, &public, NULL);
+  SQLITE_OK == sqlite3_prepare_v2(db, "select param from params where name = 'public'", -1, &public, NULL) || die(db);
 
   if (SQLITE_ROW == sqlite3_step(public)) {
     out = malloc(sizeof(setup_t));
 
     out->public = deserialize_mpk((unsigned char *) sqlite3_column_blob(public, 1), pairing);
 
-    sqlite3_prepare_v2(db, "select param from params where name = 'private'", -1, &private, NULL);
+    SQLITE_OK == sqlite3_prepare_v2(db, "select param from params where name = 'private'", -1, &private, NULL) || die(db);
 
     if (SQLITE_ROW == sqlite3_step(private)) {
       out->private = deserialize_msk((unsigned char *) sqlite3_column_blob(private, 1), pairing);
 
-      sqlite3_prepare_v2(db, "select param from params where name = 'g'", -1, &g, NULL);
+      SQLITE_OK == sqlite3_prepare_v2(db, "select param from params where name = 'g'", -1, &g, NULL) || die(db);
 
       if (SQLITE_ROW == sqlite3_step(g)) {
 	element_init_GT(out->g, *pairing);
@@ -61,7 +67,7 @@ setup_t * load_or_create(sqlite3 *db, pairing_t *pairing, int l) {
 
     unsigned char *buff, buff2[1024];
 
-    sqlite3_prepare_v2(db, "insert into param (name, param) values (:name, :param)", -1, &insert, NULL);
+    SQLITE_OK == sqlite3_prepare_v2(db, "insert into params (name, param) values (:name, :param)", -1, &insert, NULL) || die(db);
 
     int dim = serialize_mpk(&buff, out->public);
     sqlite3_bind_text(insert, sqlite3_bind_parameter_index(insert, ":name"), "public", -1, NULL);
@@ -92,6 +98,8 @@ setup_t * load_or_create(sqlite3 *db, pairing_t *pairing, int l) {
 }
 
 void compute_sizes_given_attributen(pairing_t * pairing, char *dbname, int nattribute, int step) {
+
+  fprintf(stderr,"called for %d attributes and %d tuples\n", nattribute, step);
   sqlite3 *db;
 
   sqlite3_open_v2(dbname, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
@@ -105,26 +113,30 @@ void compute_sizes_given_attributen(pairing_t * pairing, char *dbname, int nattr
   unsigned char buffer[1024], *buff;
 
   
-  sqlite3_prepare_v2(db, "insert into plain_data (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) values :c0, :c1, :c2, :c3, :c4, :c5, :c6, :c7, :c8, :c9, :c10, :c11, :c12, :c13, :c14, :c15, :c16, :c17, :c18, :c19)", -1, &insert_plain, NULL);
+  SQLITE_OK == sqlite3_prepare_v2(db, "insert into plain_data (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) values (:c0, :c1, :c2, :c3, :c4, :c5, :c6, :c7, :c8, :c9, :c10, :c11, :c12, :c13, :c14, :c15, :c16, :c17, :c18, :c19)", -1, &insert_plain, NULL) || die(db);
   sqlite3_prepare_v2(db, "insert into encrypted_data (id, ct) values (:id, :ct)", -1, &insert_enc, NULL);
   sqlite3_prepare_v2(db, "insert into test_data(id, m) values (:id, :m)", -1, &insert_test, NULL);
 
   for (int i = 0; i < step; ++i) {
+    fprintf(stderr,"%d\n", i);
     // create X
-    sqlite3_reset(insert_plain);
-    for (int i = 0; i < nattribute; ++i) {
-      X[i] = random();
-      sqlite3_bind_int(insert_plain, i+1, X[i]);
+    SQLITE_OK == sqlite3_reset(insert_plain) || die(db);
+    for (int j = 0; j < nattribute; ++j) {
+      X[j] = random();
+      fprintf(stderr, "X[%d] = %u\n", j, X[j]);
+      SQLITE_OK == sqlite3_bind_int(insert_plain, j+1, X[j]) || die(db);
     }
-    sqlite3_step(insert_plain);
+    fprintf(stderr,"insert\n");
+    SQLITE_DONE == sqlite3_step(insert_plain) || die(db);
     
     sqlite3_int64 id = sqlite3_last_insert_rowid(db);
     ciphertext_t *ct = encrypt(pairing, hve->public, X, &m);
     int size = serialize_ct(&buff, ct);
-    sqlite3_reset(insert_enc);
+    SQLITE_OK == sqlite3_reset(insert_enc) || die(db);
     sqlite3_bind_int64(insert_enc, sqlite3_bind_parameter_index(insert_enc, ":id"), id);
     sqlite3_bind_blob(insert_enc, sqlite3_bind_parameter_index(insert_enc, ":ct"), buff, size, SQLITE_TRANSIENT);
-    sqlite3_step(insert_enc);
+    fprintf(stderr,"insert\n");
+    SQLITE_DONE == sqlite3_step(insert_enc) || die(db);
 
     free(buff);
 
@@ -132,8 +144,10 @@ void compute_sizes_given_attributen(pairing_t * pairing, char *dbname, int nattr
     sqlite3_reset(insert_test);
     sqlite3_bind_int64(insert_test, sqlite3_bind_parameter_index(insert_test, ":id"), id);
     sqlite3_bind_blob(insert_test, sqlite3_bind_parameter_index(insert_test, ":m"), buffer, size, SQLITE_TRANSIENT);
+    fprintf(stderr,"insert\n");
+    SQLITE_DONE == sqlite3_step(insert_test) || die(db);
 
-    free_ct(ct);
+    //free_ct(ct);
   }
 }
 

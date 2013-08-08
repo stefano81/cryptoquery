@@ -192,9 +192,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 
 # what flags you want to pass to the C compiler & linker
-#CFLAGS = -g0 -O2 -Werror
-#CFLAGS = -ggdb -DTESTING
-CFLAGS = -ggdb -DDEBUG -Werror
+CFLAGS = -g0 -O2 -Werror
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -211,6 +209,8 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+#CFLAGS = -ggdb -DTESTING
+#CFLAGS = -ggdb -DDEBUG -Werror
 #CFLAGS = --pedantic -Wall -ggdb -DTESTING
 #CFLAGS = --pedantic -Wall -ggdb -DDEBUG
 LDFLAGS = 
