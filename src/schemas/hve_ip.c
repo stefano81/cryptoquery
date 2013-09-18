@@ -41,7 +41,6 @@ setup_t * setup(pairing_t *pairing, int l) {
   element_init_G1(tmp1,*pairing);
   element_init_G2(tmp2,*pairing);
 
-
   /* if you want to see psi, g1, g2, gT */
 #ifdef DEBUG
   printf("psi=\n");
