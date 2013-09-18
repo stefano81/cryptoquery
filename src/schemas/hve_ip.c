@@ -183,6 +183,7 @@ setup_t * setup(pairing_t *pairing, int l) {
       for(int j=0;j<3;j++){
         element_init_G1(B[i][j],*pairing);
         element_init_G2(C[i][j],*pairing);
+	element_set0(B[i][j]); element_set0(B[i][j]);
         //element_set0(tmp1); element_set0(tmp2);
         for(int k=0;k<3;k++){
 	  element_mul_zn(tmp1,A1[k][j],X[i][k]);
