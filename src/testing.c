@@ -240,8 +240,8 @@ void test_EandD(const char *path, int l) {
 
 }
 
-void test_EandD2(const char *path, int l) {
-  fprintf(stderr, "testing EandD %d\n", l);
+void test_EandD2(char *path, int l) {
+  fprintf(stderr, "testing EandD %d, %s\n", l, path);
 
   struct timeval tvb, tve;
 
@@ -285,8 +285,6 @@ void test_EandD2(const char *path, int l) {
     printf("%d keygen %d %lu\n", l, 0, ((tve.tv_sec *1000*1000 + tve.tv_usec) - (tvb.tv_sec *1000*1000 + tvb.tv_usec)));
 
 
-    //  for (int i = 0; i < 10; ++i) {
-
     for (int j = 0; j < 10; ++j) {
       gettimeofday(&tvb, NULL);
       element_t *dm = decrypt(pairing,ct,keys[0]);
@@ -298,8 +296,6 @@ void test_EandD2(const char *path, int l) {
       fprintf(stderr, "%d: %s\n",r,!r ? "OK!" : "No!");
       element_free(*dm);
     }
-
-    //  }
 }
 
 int main(int argc, char ** argv) {
@@ -310,9 +306,12 @@ int main(int argc, char ** argv) {
     test_fixed(argv[1]);
   /*   else if (4 == argc) */
   /*     test_variable(argv[1], atoi(argv[2]), atoi(argv[3])); */
-  else if (3 == argc)
+  else if (3 == argc) {
+#ifdef DEBUG
+    fprintf(stderr, "# DEBUG: %s %s\n", argv[1], argv[2]);
+#endif
     test_EandD2(argv[1], atoi(argv[2]));
-  else
+  } else
     printf("error testing");
 
   return 0;

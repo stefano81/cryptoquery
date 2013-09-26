@@ -1,6 +1,6 @@
 #include "utils.h"
 
-#define BUF_SIZE (1024 * 1024 * 8)
+#define BUF_SIZE (1024 * 8)
 
 pairing_t * load_pairing(const char *params_path) {
   char param[BUF_SIZE];
