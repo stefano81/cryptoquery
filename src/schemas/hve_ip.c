@@ -91,7 +91,6 @@ setup_t * setup(pairing_t *pairing, int l) {
   public->B = BB;
   private->C = CC;
 
-
   for(int zz=0;zz<l+1;zz++){
     BB[zz]=malloc(sizeof(element_t *)*3); CC[zz]=malloc(sizeof(element_t *)*3);
     BB[zz][0]=malloc(sizeof(element_t)*3); CC[zz][0]=malloc(sizeof(element_t)*3);
@@ -180,13 +179,15 @@ setup_t * setup(pairing_t *pairing, int l) {
     for(int i=0;i<3;i++){
       for(int j=0;j<3;j++){
         element_init_G1(B[i][j],*pairing);
+	element_set0(B[i][j]);
         element_init_G2(C[i][j],*pairing);
-	element_set0(B[i][j]); element_set0(B[i][j]);
-        //element_set0(tmp1); element_set0(tmp2);
+	element_set0(B[i][j]);
+
         for(int k=0;k<3;k++){
 	  element_mul_zn(tmp1,A1[k][j],X[i][k]);
-	  element_mul_zn(tmp2,A2[k][j],Xs[i][k]);
 	  element_add(B[i][j],B[i][j],tmp1);
+
+	  element_mul_zn(tmp2,A2[k][j],Xs[i][k]);
 	  element_add(C[i][j],C[i][j],tmp2);
         }
       }
@@ -194,6 +195,7 @@ setup_t * setup(pairing_t *pairing, int l) {
 
     C = transpose(C, 3);
 
+    // clean up
     for (int i = 0; i < 3; ++i) {
       for (int j = 0; j < 3; ++j) {
 	element_clear(X[i][j]);
@@ -226,6 +228,7 @@ setup_t * setup(pairing_t *pairing, int l) {
   element_clear(oneT);
   element_clear(check);
 #endif
+
   element_clear(tmp1);
   element_clear(tmp2);
   element_clear(delta); 

@@ -17,9 +17,40 @@ pairing_t * load_pairing(const char *params_path) {
   return pairing;
 }
 
+static pbc_param_t * generateA(const char **argv) {
+  pbc_param_t * params = malloc(sizeof(pbc_param_t));
+
+  pbc_param_init_a_gen(*params, atoi(argv[0]) // rbits
+		       , atoi(argv[1]) // qbits
+		       );
+
+  return params;
+}
+
+
+static pbc_param_t * generateA1(const char **argv) {
+  pbc_param_t *params = malloc(sizeof(pbc_param_t));
+  mpz_t n;
+
+  mpz_init_set_si(&n, atoi(argv[0]));
+
+  pbc_param_init_a1_gen(*params, n);
+
+  return params;
+}
+
 pairing_t * create_pairing_type(const char **argv) {
   pairing_t *pairing = malloc(sizeof(pairing_t));
-  pbc_param_t params;
+  pbc_param_t *params;
+
+  if (0 == strcmp("A", argv[0])) {
+    params = generateA(argv + 1);
+  } else if (0 == strcmp("A1", argv[0])) {
+    params = generateA1(argv + 1);
+  } else if (0 == strcmp("E", argv[0])) {
+  } else if (0 == strcmp("F", argv[0])) {
+  } else if (0 == strcmp("D", argv[0])) {
+  }
 
   return pairing;
 }
