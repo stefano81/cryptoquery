@@ -17,6 +17,13 @@ pairing_t * load_pairing(const char *params_path) {
   return pairing;
 }
 
+pairing_t * create_pairing_type(const char **argv) {
+  pairing_t *pairing = malloc(sizeof(pairing_t));
+  pbc_param_t params;
+
+  return pairing;
+}
+
 element_t * vector_times_matrix(pairing_t *pairing, element_t *v, element_t **m, int n) {
   element_t *result = malloc(sizeof(element_t) * 3);
   element_t t;

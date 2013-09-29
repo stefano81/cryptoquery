@@ -20,7 +20,6 @@ setup_t * setup(pairing_t *pairing, int l) {
   element_init_Zr(t1,*pairing);
   element_init_Zr(t2,*pairing);
   element_init_Zr(t3,*pairing);
-  
 
   /* pick random psi in the field */
   element_init_Zr(psi, *pairing);
