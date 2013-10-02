@@ -12,12 +12,12 @@
 unsigned int verbose;
 char * ec_param;
 
-void usage() {
-  fprintf(stderr, "Usage:");
+static void usage(char *name) {
+  fprintf(stderr, "Usage: %s [-v] -f infile <command>", name);
 }
 
-int parse_options(int argc, char *argv[]) {
-  char * opts = "f:p:v";
+static int parse_options(int argc, char *argv[]) {
+  char * opts = "";
   unsigned int ret = CQ_OK;
   int ch;
   while (-1 != ((ch = getopt(argc, argv, opts)))) {
@@ -32,7 +32,7 @@ int parse_options(int argc, char *argv[]) {
     case '?':
     case 'h':
     default:
-      usage();
+      usage(argv[0]);
       ret = CQ_ERROR;
       break;
     }
@@ -41,7 +41,7 @@ int parse_options(int argc, char *argv[]) {
   return ret;
 }
 
-unsigned int get_command() {
+static unsigned int get_command() {
   char * line = readline("Enter command: ");
   unsigned int command = CQ_UNKOWN;
 
@@ -69,13 +69,13 @@ unsigned int get_command() {
   return command;
 }
 
-void quit() {
+static void quit() {
   save_configuration();
   close_database();
   printf("Bye!\n");
 }
 
-void init_system() {
+static void init_system() {
   
 }
 
