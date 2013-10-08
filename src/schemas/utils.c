@@ -49,9 +49,12 @@ pairing_t * create_pairing_type(const char **argv) {
   } else if (0 == strcmp("A1", argv[0])) {
     params = generateA1(argv + 1);
   } else if (0 == strcmp("E", argv[0])) {
+    
   } else if (0 == strcmp("F", argv[0])) {
   } else if (0 == strcmp("D", argv[0])) {
   }
+
+  pairing = NULL;// something, check the manual
 
   return pairing;
 }
