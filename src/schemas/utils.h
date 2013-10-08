@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <pbc/pbc.h>
+#include <string.h>
 
 pairing_t * load_pairing(const char *params_path);
 

@@ -32,7 +32,8 @@ static pbc_param_t * generateA1(const char **argv) {
   pbc_param_t *params = malloc(sizeof(pbc_param_t));
   mpz_t n;
 
-  mpz_init_set_si(&n, atoi(argv[0]));
+  mpz_init(n);
+  mpz_init_set_si(n, atoi(argv[0]));
 
   pbc_param_init_a1_gen(*params, n);
 
