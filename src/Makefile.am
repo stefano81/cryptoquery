@@ -9,8 +9,8 @@ LDFLAGS =
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
 #bin_PROGRAMS = cryptoquery benchmarkhve generatehve testing testingA
-bin_PROGRAMS = testing testingA testsize test_serialization_hve	\
-		test_encrypt testsize2
+bin_PROGRAMS = cryptoquery testing testingA testsize		\
+		test_serialization_hve test_encrypt testsize2
 cryptoquery_SOURCES = common.h config.h configuration.c			\
 		configuration.h cryptoquery.c cryptoquery.h		\
 		database/sqlite.h database.c database.h encryption.c	\

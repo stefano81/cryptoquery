@@ -13,7 +13,6 @@
 #define CQ_SELECT 0x02
 #define CQ_INIT   0x04
 #define CQ_KEYGEN 0x08
-#define CQ_UNKOWN 0xFF
 
 extern unsigned int verbose;
 

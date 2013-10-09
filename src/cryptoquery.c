@@ -11,23 +11,35 @@
 
 unsigned int verbose;
 char * ec_param;
+char * db_location;
+
+static void print_missing(int command) {
+  fprintf(stderr, "Option -%c requires an argument", (char) command);
+}
 
 static void usage(char *name) {
   fprintf(stderr, "Usage: %s [-v] -f infile <command>", name);
 }
 
 static int parse_options(int argc, char *argv[]) {
-  char * opts = "";
+  char * opts = "p:d:vh";
   unsigned int ret = CQ_OK;
-  int ch;
+  int ch, lch;
+  verbose = 0;
+  ec_param = db_location = NULL;
+
   while (-1 != ((ch = getopt(argc, argv, opts)))) {
     switch (ch) {
     case 'p': // EC configuration
-      ec_param = malloc(sizeof(strlen(optarg) + 1));
-      strncpy(ec_param, optarg, strlen(optarg) + 1);
+      ec_param = optarg;
       break;
+    case 'd': // database location
+      db_location = optarg;
     case 'v': // verbose
       verbose = 1;
+      break;
+    case ':':
+      print_missing(lch);
       break;
     case '?':
     case 'h':
@@ -36,14 +48,18 @@ static int parse_options(int argc, char *argv[]) {
       ret = CQ_ERROR;
       break;
     }
+    lch = ch;
   }
+
+  if (NULL == ec_param || NULL == db_location)
+    ret = CQ_ERROR;
 
   return ret;
 }
 
 static unsigned int get_command() {
   char * line = readline("Enter command: ");
-  unsigned int command = CQ_UNKOWN;
+  unsigned int command = CQ_OK;
 
   if (NULL == line)
     command = CQ_QUIT;
@@ -80,8 +96,10 @@ static void init_system() {
 }
 
 int main(int argc, char *argv[]) {
-  if (CQ_OK != parse_options(argc, argv))
+  if (CQ_OK != parse_options(argc, argv)) {
+    usage(argv[0]);
     return 1;
+  }
 
   int command;
   do {

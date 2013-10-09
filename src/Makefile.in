@@ -76,9 +76,9 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = testing$(EXEEXT) testingA$(EXEEXT) testsize$(EXEEXT) \
-	test_serialization_hve$(EXEEXT) test_encrypt$(EXEEXT) \
-	testsize2$(EXEEXT)
+bin_PROGRAMS = cryptoquery$(EXEEXT) testing$(EXEEXT) testingA$(EXEEXT) \
+	testsize$(EXEEXT) test_serialization_hve$(EXEEXT) \
+	test_encrypt$(EXEEXT) testsize2$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/depcomp
@@ -92,6 +92,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am_cryptoquery_OBJECTS = configuration.$(OBJEXT) cryptoquery.$(OBJEXT) \
+	database.$(OBJEXT) encryption.$(OBJEXT) hve.$(OBJEXT) \
+	lostw.$(OBJEXT) hve_ip.$(OBJEXT) utils.$(OBJEXT) aes.$(OBJEXT)
+cryptoquery_OBJECTS = $(am_cryptoquery_OBJECTS)
+cryptoquery_LDADD = $(LDADD)
 am_test_encrypt_OBJECTS = test_encrypt.$(OBJEXT) utils.$(OBJEXT) \
 	aes.$(OBJEXT)
 test_encrypt_OBJECTS = $(am_test_encrypt_OBJECTS)
@@ -149,10 +154,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(test_encrypt_SOURCES) $(test_serialization_hve_SOURCES) \
-	$(testing_SOURCES) $(testingA_SOURCES) $(testsize_SOURCES) \
-	$(testsize2_SOURCES)
-DIST_SOURCES = $(test_encrypt_SOURCES) \
+SOURCES = $(cryptoquery_SOURCES) $(test_encrypt_SOURCES) \
+	$(test_serialization_hve_SOURCES) $(testing_SOURCES) \
+	$(testingA_SOURCES) $(testsize_SOURCES) $(testsize2_SOURCES)
+DIST_SOURCES = $(cryptoquery_SOURCES) $(test_encrypt_SOURCES) \
 	$(test_serialization_hve_SOURCES) $(testing_SOURCES) \
 	$(testingA_SOURCES) $(testsize_SOURCES) $(testsize2_SOURCES)
 am__can_run_installinfo = \
@@ -402,6 +407,10 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
+cryptoquery$(EXEEXT): $(cryptoquery_OBJECTS) $(cryptoquery_DEPENDENCIES) $(EXTRA_cryptoquery_DEPENDENCIES) 
+	@rm -f cryptoquery$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(cryptoquery_OBJECTS) $(cryptoquery_LDADD) $(LIBS)
+
 test_encrypt$(EXEEXT): $(test_encrypt_OBJECTS) $(test_encrypt_DEPENDENCIES) $(EXTRA_test_encrypt_DEPENDENCIES) 
 	@rm -f test_encrypt$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_encrypt_OBJECTS) $(test_encrypt_LDADD) $(LIBS)
@@ -433,9 +442,15 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/configuration.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cryptoquery.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/database.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/encryption.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip_amortized2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hve_ip_serialization.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lostw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_encrypt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_serialization_hve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testing.Po@am__quote@
@@ -458,19 +473,47 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-test_encrypt.o: test/test_encrypt.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_encrypt.o -MD -MP -MF $(DEPDIR)/test_encrypt.Tpo -c -o test_encrypt.o `test -f 'test/test_encrypt.c' || echo '$(srcdir)/'`test/test_encrypt.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_encrypt.Tpo $(DEPDIR)/test_encrypt.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_encrypt.c' object='test_encrypt.o' libtool=no @AMDEPBACKSLASH@
+hve.o: schemas/hve.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.o -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hve.Tpo $(DEPDIR)/hve.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/hve.c' object='hve.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_encrypt.o `test -f 'test/test_encrypt.c' || echo '$(srcdir)/'`test/test_encrypt.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.o `test -f 'schemas/hve.c' || echo '$(srcdir)/'`schemas/hve.c
 
-test_encrypt.obj: test/test_encrypt.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_encrypt.obj -MD -MP -MF $(DEPDIR)/test_encrypt.Tpo -c -o test_encrypt.obj `if test -f 'test/test_encrypt.c'; then $(CYGPATH_W) 'test/test_encrypt.c'; else $(CYGPATH_W) '$(srcdir)/test/test_encrypt.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_encrypt.Tpo $(DEPDIR)/test_encrypt.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_encrypt.c' object='test_encrypt.obj' libtool=no @AMDEPBACKSLASH@
+hve.obj: schemas/hve.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve.obj -MD -MP -MF $(DEPDIR)/hve.Tpo -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hve.Tpo $(DEPDIR)/hve.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/hve.c' object='hve.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_encrypt.obj `if test -f 'test/test_encrypt.c'; then $(CYGPATH_W) 'test/test_encrypt.c'; else $(CYGPATH_W) '$(srcdir)/test/test_encrypt.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve.obj `if test -f 'schemas/hve.c'; then $(CYGPATH_W) 'schemas/hve.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve.c'; fi`
+
+lostw.o: schemas/lostw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.o -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/lostw.Tpo $(DEPDIR)/lostw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/lostw.c' object='lostw.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.o `test -f 'schemas/lostw.c' || echo '$(srcdir)/'`schemas/lostw.c
+
+lostw.obj: schemas/lostw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lostw.obj -MD -MP -MF $(DEPDIR)/lostw.Tpo -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/lostw.Tpo $(DEPDIR)/lostw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/lostw.c' object='lostw.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lostw.obj `if test -f 'schemas/lostw.c'; then $(CYGPATH_W) 'schemas/lostw.c'; else $(CYGPATH_W) '$(srcdir)/schemas/lostw.c'; fi`
+
+hve_ip.o: schemas/hve_ip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.o -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip.Tpo $(DEPDIR)/hve_ip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/hve_ip.c' object='hve_ip.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
+
+hve_ip.obj: schemas/hve_ip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.obj -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.obj `if test -f 'schemas/hve_ip.c'; then $(CYGPATH_W) 'schemas/hve_ip.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip.Tpo $(DEPDIR)/hve_ip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/hve_ip.c' object='hve_ip.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip.obj `if test -f 'schemas/hve_ip.c'; then $(CYGPATH_W) 'schemas/hve_ip.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip.c'; fi`
 
 utils.o: schemas/utils.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT utils.o -MD -MP -MF $(DEPDIR)/utils.Tpo -c -o utils.o `test -f 'schemas/utils.c' || echo '$(srcdir)/'`schemas/utils.c
@@ -500,6 +543,20 @@ aes.obj: schemas/aes.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o aes.obj `if test -f 'schemas/aes.c'; then $(CYGPATH_W) 'schemas/aes.c'; else $(CYGPATH_W) '$(srcdir)/schemas/aes.c'; fi`
 
+test_encrypt.o: test/test_encrypt.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_encrypt.o -MD -MP -MF $(DEPDIR)/test_encrypt.Tpo -c -o test_encrypt.o `test -f 'test/test_encrypt.c' || echo '$(srcdir)/'`test/test_encrypt.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_encrypt.Tpo $(DEPDIR)/test_encrypt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_encrypt.c' object='test_encrypt.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_encrypt.o `test -f 'test/test_encrypt.c' || echo '$(srcdir)/'`test/test_encrypt.c
+
+test_encrypt.obj: test/test_encrypt.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_encrypt.obj -MD -MP -MF $(DEPDIR)/test_encrypt.Tpo -c -o test_encrypt.obj `if test -f 'test/test_encrypt.c'; then $(CYGPATH_W) 'test/test_encrypt.c'; else $(CYGPATH_W) '$(srcdir)/test/test_encrypt.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_encrypt.Tpo $(DEPDIR)/test_encrypt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_encrypt.c' object='test_encrypt.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_encrypt.obj `if test -f 'test/test_encrypt.c'; then $(CYGPATH_W) 'test/test_encrypt.c'; else $(CYGPATH_W) '$(srcdir)/test/test_encrypt.c'; fi`
+
 test_serialization_hve.o: test/test_serialization_hve.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_serialization_hve.o -MD -MP -MF $(DEPDIR)/test_serialization_hve.Tpo -c -o test_serialization_hve.o `test -f 'test/test_serialization_hve.c' || echo '$(srcdir)/'`test/test_serialization_hve.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_serialization_hve.Tpo $(DEPDIR)/test_serialization_hve.Po
@@ -513,20 +570,6 @@ test_serialization_hve.obj: test/test_serialization_hve.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test/test_serialization_hve.c' object='test_serialization_hve.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_serialization_hve.obj `if test -f 'test/test_serialization_hve.c'; then $(CYGPATH_W) 'test/test_serialization_hve.c'; else $(CYGPATH_W) '$(srcdir)/test/test_serialization_hve.c'; fi`
-
-hve_ip.o: schemas/hve_ip.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.o -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip.Tpo $(DEPDIR)/hve_ip.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/hve_ip.c' object='hve_ip.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip.o `test -f 'schemas/hve_ip.c' || echo '$(srcdir)/'`schemas/hve_ip.c
-
-hve_ip.obj: schemas/hve_ip.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip.obj -MD -MP -MF $(DEPDIR)/hve_ip.Tpo -c -o hve_ip.obj `if test -f 'schemas/hve_ip.c'; then $(CYGPATH_W) 'schemas/hve_ip.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hve_ip.Tpo $(DEPDIR)/hve_ip.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='schemas/hve_ip.c' object='hve_ip.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hve_ip.obj `if test -f 'schemas/hve_ip.c'; then $(CYGPATH_W) 'schemas/hve_ip.c'; else $(CYGPATH_W) '$(srcdir)/schemas/hve_ip.c'; fi`
 
 hve_ip_serialization.o: schemas/hve_ip_serialization.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hve_ip_serialization.o -MD -MP -MF $(DEPDIR)/hve_ip_serialization.Tpo -c -o hve_ip_serialization.o `test -f 'schemas/hve_ip_serialization.c' || echo '$(srcdir)/'`schemas/hve_ip_serialization.c
