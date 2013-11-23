@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <pbc/pbc.h>
+#include <arpa/inet.h>
 
 const unsigned int BUFSIZE = 1024 * 1024;
 
@@ -171,7 +172,7 @@ int serialize_key(unsigned char ** buffer, dkey_t *key) {
 
   for (int i = 0; i < key->Sn; ++i) {
 #ifdef DEBUG
-    fprintf(stderr, "key->S[%d] := %d\n", i, key->S[i]);
+    fprintf(stderr, "key->S[%d] := %lu\n", i, key->S[i]);
 #endif
     S1 = htonl(key->S[i]);
     memcpy(buff + size, &S1, sizeof(unsigned long));

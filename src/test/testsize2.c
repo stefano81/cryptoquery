@@ -14,7 +14,7 @@ void compute_sizes(pairing_t *pairing) {
     }
     unsigned char * buff;
 
-    printf("o %d %d\n", i, ( sizeof(int) * i ));
+    printf("o %d %lu\n", i, ( sizeof(int) * i ));
 
     setup_t *hve = setup(pairing, i);
     dkey_t *key = keygen(pairing, hve->private, X);

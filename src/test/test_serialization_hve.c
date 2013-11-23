@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #include <pbc/pbc.h>
-#include "schemas/utils.h"
+#include "../schemas/utils.h"
 
 #include "../schemas/hve_ip.h"
 
@@ -54,7 +54,7 @@ void verify_key(dkey_t *orig, dkey_t *new) {
   assert(orig->l == new->l);
 
   for (int i = 0; i < orig->Sn; ++i) {
-    printf("%d - %d %d\n", i, orig->S[i], new->S[i]);
+    printf("%d - %lu %lu\n", i, orig->S[i], new->S[i]);
     assert(orig->S[i] == new->S[i]);
   }
 
